@@ -13,6 +13,12 @@ export const FREEZE = (() => {
   return v > 0 ? v : 0
 })()
 
+/** Review helper: ?steps=3|5|10|mix forces a layout without touching the saved setting. */
+export const AGENTS_PARAM: 3 | 5 | 10 | 'mix' | 0 = (() => {
+  const v = new URLSearchParams(window.location.search).get('steps')
+  return v === 'mix' ? 'mix' : v === '3' ? 3 : v === '5' ? 5 : 0
+})()
+
 /** Simulated agent run. Returns elapsed seconds (0..total). Restarts when `runKey` changes. */
 export function useRun(runKey: number, active: boolean, total: number) {
   const [t, setT] = useState(0)
@@ -67,7 +73,7 @@ export function deriveRun(t: number, sc: Scenario): RunState {
   while (idx < sc.steps.length - 1 && t >= sc.t0[idx + 1]) idx++
   const stepStatus = sc.steps.map((s, i) => (done || t >= sc.t0[i] + s.dur ? 'done' : t >= sc.t0[i] ? 'act' : 'pend')) as RunState['stepStatus']
 
-  const agentProgress = sc.agents.map((a) => clamp01((t - sc.gs) / a.dur))
+  const agentProgress = sc.agents.map((a) => clamp01((t - sc.gs - a.start) / a.dur))
   let sources = 0
   let finishedAgents = 0
   sc.agents.forEach((a, k) => {
@@ -76,8 +82,16 @@ export function deriveRun(t: number, sc: Scenario): RunState {
       finishedAgents++
     }
   })
-  // scenarios without agents: their single source counts once the "find" step has finished
-  if (!sc.agents.length && sc.sources > 0 && sc.steps[1] && (done || t >= sc.t0[1] + sc.steps[1].dur)) sources = sc.sources
+  // scenarios without parallel agents: sources count as the stage that finds them finishes
+  if (!sc.agents.length && sc.sources > 0) {
+    let fromCalls = 0
+    sc.steps.forEach((st, i) => {
+      if (st.agent && (done || t >= sc.t0[i] + st.dur)) fromCalls += st.agent.src.length
+    })
+    const ss = sc.sourceStep ?? 1
+    if (fromCalls) sources = fromCalls
+    else if (sc.steps[ss] && (done || t >= sc.t0[ss] + sc.steps[ss].dur)) sources = sc.sources
+  }
 
   let checks = 0
   const vs = sc.validateStep

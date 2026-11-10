@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react'
-import { fmt, type RunState } from '../hooks'
+import { useEffect, useRef, useState } from 'react'
+import { type RunState } from '../hooks'
 import { Icon } from './Icon'
+import { AgentSteps } from './AgentSteps'
 
 /* ------------------------------------------------------------------ */
 /*  Dotted globe.                                                      */
@@ -80,6 +81,8 @@ export function Globe({ run, size, display, complete, labels }: { run: RunState;
   idx.current = run.idx
   const completeRef = useRef(complete)
   completeRef.current = complete
+  const scRef = useRef(run.sc)
+  scRef.current = run.sc
 
   useEffect(() => {
     const cv = ref.current
@@ -138,8 +141,8 @@ export function Globe({ run, size, display, complete, labels }: { run: RunState;
         const amt = k >= 0 ? clamp(lit - k) * fade : 0
         const rad = (1.0 + q.d * 1.1 + amt * 1.5) * dotScale
         if (amt > 0) {
-          ctx.fillStyle = `rgba(245,158,11,${0.35 + 0.65 * amt})`
-          ctx.shadowColor = `rgba(245,158,11,${0.6 * amt})`
+          ctx.fillStyle = `rgba(255,208,89,${0.35 + 0.65 * amt})`
+          ctx.shadowColor = `rgba(255,208,89,${0.6 * amt})`
           ctx.shadowBlur = 7 * amt
         } else {
           ctx.fillStyle = `rgba(70,86,110,${0.18 + q.d * 0.34})`
@@ -170,7 +173,7 @@ export function Globe({ run, size, display, complete, labels }: { run: RunState;
         placed.push({ x0: x - w / 2, x1: x + w / 2, y0: y - 6.5, y1: y + 6.5 })
         ctx.globalAlpha = clamp((amt - 0.2) / 0.8)
         ctx.fillStyle = 'rgba(255,255,255,.9)'
-        ctx.strokeStyle = 'rgba(245,158,11,.6)'
+        ctx.strokeStyle = 'rgba(255,208,89,.6)'
         ctx.lineWidth = 1
         ctx.beginPath()
         ctx.roundRect(x - w / 2, y - 6.5, w, 13, 6.5)
@@ -222,7 +225,10 @@ export function Globe({ run, size, display, complete, labels }: { run: RunState;
         // previous cycle's lit dots and links are discarded here
         if (cycleNo >= 0) baseRot += SPIN
         cycleNo = n
-        setup(n, baseRot + SPIN, 3 + Math.min(3, idx.current), idx.current)
+        const sc = scRef.current
+        // while the agents work, one lit dot per agent (up to seven)
+        const count = idx.current === sc.agentStep && sc.agents.length ? Math.min(7, sc.agents.length) : 3 + Math.min(3, idx.current)
+        setup(n, baseRot + SPIN, count, idx.current)
       }
       let rot = baseRot
       let lit = 0
@@ -267,7 +273,18 @@ export function Globe({ run, size, display, complete, labels }: { run: RunState;
 /* ------------------------------------------------------------------ */
 export function GlobeCard({ run, onDetails }: { run: RunState; onDetails: () => void }) {
   const done = run.done
+  // the per-agent steps share the card; open by default, and open again for every new run
+  const [open, setOpen] = useState(true)
+  const fresh = run.t < 0.3
+  useEffect(() => {
+    if (fresh) setOpen(true)
+  }, [fresh])
+  // when thinking finishes the steps fold away by themselves (they can still be opened again)
+  useEffect(() => {
+    if (run.done) setOpen(false)
+  }, [run.done])
   return (
+    <div className={'gbw' + (open ? ' open' : '')}>
     <div className={'gb' + (done ? ' done' : '')}>
       <div className="gb-left">
         <div className="gb-pane run" aria-hidden={done}>
@@ -277,19 +294,21 @@ export function GlobeCard({ run, onDetails }: { run: RunState; onDetails: () => 
             <Icon n="right" size={16} className="gb-chev" />
           </button>
           <div className="gb-event" key={run.event}>{run.event}</div>
-          <div className="gb-meta"><span>{fmt(run.t)}</span><i /><span>{run.pct}% complete</span></div>
+          <div className="gb-meta gm"><span className="gm-pct"><b>{run.pct}</b>%</span><span className="gm-time">{Math.round(run.t)}s elapsed</span></div>
         </div>
         <div className="gb-pane fin" aria-hidden={!done}>
           <button className="gb-click" onClick={onDetails} aria-label="Open detailed view" tabIndex={done ? 0 : -1}>
-            <span className="gb-done-title">Thinking completed</span>
+            <span className="gb-done-title">Reasoning completed</span>
             <Icon n="right" size={16} className="gb-chev" />
           </button>
           <div className="gb-facts">{run.sc.chips.map((c) => <span key={c}>{c}</span>)}</div>
         </div>
       </div>
       <div className="gb-globe">
-        <Globe run={run} size={112} display={done ? 56 : 112} complete={done} labels={run.sc.steps.map((s) => s.sub)} />
+        <Globe run={run} size={112} display={done ? 78 : 112} complete={done} labels={run.sc.steps.map((s, i) => (i === run.sc.agentStep && run.sc.agents.length ? run.sc.agents.map((a) => a.short) : s.sub))} />
       </div>
+    </div>
+    <AgentSteps run={run} open={open} onToggle={() => setOpen(!open)} onTrace={onDetails} variant="globe" />
     </div>
   )
 }

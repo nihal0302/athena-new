@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Scenario } from '../data/scenario'
-import { FREEZE, SPEED, fmt, type RunState } from '../hooks'
+import { FREEZE, SPEED, type RunState } from '../hooks'
 import { Icon } from './Icon'
+import { AgentSteps } from './AgentSteps'
 
 /* ------------------------------------------------------------------ */
 /*  Building blocks.                                                   */
@@ -34,15 +35,12 @@ const LABEL_DOT: Record<string, string> = {
   'Adding sources': '#5d63e6',
 }
 const DOT_FALLBACK = ['#5b8def', '#e8618c', '#35b6a5', '#f2b544', '#9a7bf2', '#f28b54']
-const AGENT_DOTS = ['#e8618c', '#35b6a5']
-const AGENT_NAMES = ['Buyer profiles', 'Transactions']
-const NCUR = AGENT_NAMES.length
-const AGENT_COLORS = ['#2f245c', '#2f245c']
-const CURSOR_START = [
-  { x: W - 30, y: H - 30 },
-  { x: W - 14, y: H - 16 },
-]
-const RUNS = [3, 3, 3, 2] // sums to COLS
+const AGENT_DOTS = ['#e8618c', '#35b6a5', '#f2b544', '#5b8def', '#9a7bf2', '#f28b54', '#3cc79a']
+const CURSOR_COLOR = '#2f245c'
+const MAX_CHIPS = 3 // with many agents only the most recent few are named, so the grid stays calm
+const cursorStart = (j: number) => ({ x: W - 12 - (j % 3) * 14, y: H - 10 - Math.floor(j / 3) * 12 })
+const RUNS3 = [3, 3, 3, 2] // sums to COLS
+const RUNS7 = [2, 2, 2, 2, 3] // smaller clicks so every one of seven agents gets a turn
 
 const clamp = (v: number) => Math.max(0, Math.min(1, v))
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
@@ -62,7 +60,7 @@ const inverse = (p: number[]) => {
   return inv
 }
 
-type Group = { cells: number[]; cx: number; cy: number }
+type Group = { cells: number[]; cx: number; cy: number; agent: number; t: number }
 type Model = {
   sc: Scenario
   nst: number
@@ -71,13 +69,12 @@ type Model = {
   cells: number // cells per step
   gy: number
   fill: number[][] // absolute second at which each cell of each step is filled
-  groups: Group[] // agents step: click groups, in fill order
-  agFill: number[]
+  groups: Group[] // agents step: click groups, each owned by one agent
 }
 
 function buildModel(sc: Scenario): Model {
   const nst = sc.steps.length
-  const rps = Math.max(2, Math.round(10 / nst))
+  const rps = Math.max(1, Math.round(10 / nst))
   const rows = rps * nst
   const cells = COLS * rps
   const gy = H - rows * PY - 4 // anchored to the bottom, leaving headroom for the chip above the top step
@@ -104,28 +101,38 @@ function buildModel(sc: Scenario): Model {
     return out
   })
 
-  // Agents step: each click fills a run of 2-3 neighbouring blocks at once.
+  // Agents step: each click fills a run of 2-3 neighbouring blocks at once. Every agent owns some of the clicks
+  // and works inside its own window (staggered start, own duration).
   let groups: Group[] = []
-  let agFill: number[] = []
   const ag = sc.steps.findIndex((s) => s.style === 'agents')
   if (ag >= 0) {
+    const na = Math.max(1, sc.agents.length)
+    const runs = na > 3 ? RUNS7 : RUNS3
     const all: Group[] = []
     for (let rl = 0; rl < rps; rl++) {
       let c = 0
-      for (const n of RUNS) {
+      for (const n of runs) {
         const cs = Array.from({ length: n }, (_, i) => rl * COLS + c + i)
         const a = xy(ag, cs[0])
         const b = xy(ag, cs[cs.length - 1])
-        all.push({ cells: cs, cx: (a.x + b.x + SW) / 2, cy: a.y + SH / 2 })
+        all.push({ cells: cs, cx: (a.x + b.x + SW) / 2, cy: a.y + SH / 2, agent: 0, t: 0 })
         c += n
       }
     }
     groups = perm(2, all.length).map((i) => all[i])
-    const win = sc.steps[ag].dur * 0.88
-    agFill = groups.map((_, i) => sc.t0[ag] + TRAVEL + (i / groups.length) * (win - TRAVEL))
-    groups.forEach((g, i) => g.cells.forEach((k, n) => (fill[ag][k] = agFill[i] + n * 0.07)))
+    groups.forEach((g, i) => (g.agent = i % na))
+    for (let j = 0; j < na; j++) {
+      const mine = groups.filter((g) => g.agent === j)
+      const a = sc.agents[j]
+      const t1 = sc.t0[ag] + (a?.start ?? 0)
+      const span = (a?.dur ?? sc.steps[ag].dur) * 0.9
+      mine.forEach((g, m) => {
+        g.t = t1 + TRAVEL + ((m + 1) / (mine.length + 1)) * (span - TRAVEL)
+        g.cells.forEach((k, n) => (fill[ag][k] = g.t + n * 0.07))
+      })
+    }
   }
-  return { sc, nst, rps, rows, cells, gy, fill, groups, agFill }
+  return { sc, nst, rps, rows, cells, gy, fill, groups }
 }
 
 const cellXY = (m: Model, si: number, k: number) => {
@@ -262,40 +269,40 @@ function drawBlocks(ctx: CanvasRenderingContext2D, m: Model, tt: number, now: nu
     pill(ctx, text, GX + 40 + si * 12, yTop - 10, LABEL_DOT[text] ?? DOT_FALLBACK[(si * 2 + li) % DOT_FALLBACK.length], a)
   })
 
-  // agents step: two cursors with name chips click; each click fills 2-3 blocks at once
+  // agents step: one cursor per agent clicks its own blocks; the few most recent cursors carry a name chip
   const ag = sc.agentStep
-  if (ag >= 0) {
+  if (ag >= 0 && sc.agents.length) {
     const base = sc.t0[ag]
-    const d = sc.steps[ag].dur
-    const win = d * 0.88
-    if (tt >= base && tt <= base + d + 0.6) {
+    if (tt >= base && tt <= base + sc.steps[ag].dur + 0.6) {
       const placed: Placed[] = []
       const centre = (g: Group) => ({ x: g.cx, y: g.cy })
-      for (let j = 0; j < NCUR; j++) {
-        // index of the latest group this cursor has started travelling to
+      type Cur = { j: number; pos: { x: number; y: number }; a: number; last: number }
+      const curs: Cur[] = []
+      sc.agents.forEach((ag0, j) => {
+        const t1 = base + ag0.start
+        const a = Math.min(clamp((tt - t1) / 0.3), clamp(1 - (tt - (t1 + ag0.dur)) / 0.5))
+        if (a <= 0) return
+        const mine = m.groups.filter((g) => g.agent === j)
         let cur = -1
-        for (let i = j; i < m.groups.length; i += NCUR) {
-          if (m.agFill[i] - TRAVEL <= tt) cur = i
-          else break
-        }
-        const start = CURSOR_START[j]
+        mine.forEach((g, i) => {
+          if (g.t - TRAVEL <= tt) cur = i
+        })
+        const start = cursorStart(j)
         let pos = start
         if (cur >= 0) {
-          const target = centre(m.groups[cur])
-          const prev = cur - NCUR >= 0 ? centre(m.groups[cur - NCUR]) : start
-          const u = ease(clamp((tt - (m.agFill[cur] - TRAVEL)) / TRAVEL))
+          const target = centre(mine[cur])
+          const prev = cur > 0 ? centre(mine[cur - 1]) : start
+          const u = ease(clamp((tt - (mine[cur].t - TRAVEL)) / TRAVEL))
           pos = { x: prev.x + (target.x - prev.x) * u, y: prev.y + (target.y - prev.y) * u }
         }
-        const a = Math.min(clamp((tt - base) / 0.3), clamp(1 - (tt - (base + win)) / 0.5))
-        if (a <= 0) continue
         // click ripple over the group that was just filled
-        for (let i = j; i < m.groups.length; i += NCUR) {
-          const dt = tt - m.agFill[i]
+        for (const g of mine) {
+          const dt = tt - g.t
           if (dt > 0 && dt < 0.45) {
-            const cc = centre(m.groups[i])
+            const cc = centre(g)
             ctx.save()
             ctx.globalAlpha = (1 - dt / 0.45) * 0.8 * a
-            ctx.strokeStyle = AGENT_COLORS[j]
+            ctx.strokeStyle = CURSOR_COLOR
             ctx.lineWidth = 1
             ctx.beginPath()
             ctx.ellipse(cc.x, cc.y, 4 + (dt / 0.45) * 14, 3 + (dt / 0.45) * 7, 0, 0, Math.PI * 2)
@@ -317,14 +324,20 @@ function drawBlocks(ctx: CanvasRenderingContext2D, m: Model, tt: number, now: nu
         ctx.lineTo(5, 7.4)
         ctx.lineTo(8.6, 7)
         ctx.closePath()
-        ctx.fillStyle = AGENT_COLORS[j]
+        ctx.fillStyle = CURSOR_COLOR
         ctx.strokeStyle = '#fff'
         ctx.lineWidth = 1.2
         ctx.stroke()
         ctx.fill()
         ctx.restore()
-        pill(ctx, AGENT_NAMES[j], pos.x + 26, pos.y + 14, AGENT_DOTS[j], a, false, placed)
-      }
+        const lastClick = mine.reduce((acc, g) => (g.t <= tt ? g.t : acc), t1)
+        curs.push({ j, pos, a, last: lastClick })
+      })
+      // name chips: only the most recently active cursors, so seven agents do not turn into seven labels
+      curs
+        .sort((x, y) => y.last - x.last)
+        .slice(0, MAX_CHIPS)
+        .forEach((c) => pill(ctx, sc.agents[c.j].short, c.pos.x + 26, c.pos.y + 14, AGENT_DOTS[c.j % AGENT_DOTS.length], c.a, false, placed))
     }
   }
 }
@@ -376,9 +389,20 @@ function Blocks({ run, w, h }: { run: RunState; w: number; h: number }) {
 /* ------------------------------------------------------------------ */
 export function BlocksCard({ run, onDetails }: { run: RunState; onDetails: () => void }) {
   const done = run.done
+  // the per-agent steps share the card; open by default, and open again for every new run
+  const [open, setOpen] = useState(true)
+  const fresh = run.t < 0.3
+  useEffect(() => {
+    if (fresh) setOpen(true)
+  }, [fresh])
+  // when thinking finishes the steps fold away by themselves (they can still be opened again)
+  useEffect(() => {
+    if (run.done) setOpen(false)
+  }, [run.done])
   return (
     <div className={'bl-wrap' + (done ? ' done' : '')}>
       <div className="bl-ring" aria-hidden="true"><i /></div>
+      <div className={'gbw' + (open ? ' open' : '')}>
       <div className={'gb bl' + (done ? ' done' : '')}>
         <div className="gb-left">
           <div className="gb-pane run" aria-hidden={done}>
@@ -388,11 +412,11 @@ export function BlocksCard({ run, onDetails }: { run: RunState; onDetails: () =>
               <Icon n="right" size={16} className="gb-chev" />
             </button>
             <div className="gb-event" key={run.event}>{run.event}</div>
-            <div className="gb-meta"><span>{fmt(run.t)}</span><i /><span>{run.pct}% complete</span></div>
+            <div className="gb-meta gm"><span className="gm-pct"><b>{run.pct}</b>%</span><span className="gm-time">{Math.round(run.t)}s elapsed</span></div>
           </div>
           <div className="gb-pane fin" aria-hidden={!done}>
             <button className="gb-click" onClick={onDetails} aria-label="Open detailed view" tabIndex={done ? 0 : -1}>
-              <span className="gb-done-title">Thinking completed</span>
+              <span className="gb-done-title">Reasoning completed</span>
               <Icon n="right" size={16} className="gb-chev" />
             </button>
             <div className="gb-facts">{run.sc.chips.map((c) => <span key={c}>{c}</span>)}</div>
@@ -401,6 +425,8 @@ export function BlocksCard({ run, onDetails }: { run: RunState; onDetails: () =>
         <div className="gb-globe">
           <Blocks run={run} w={W} h={H} />
         </div>
+      </div>
+      <AgentSteps run={run} open={open} onToggle={() => setOpen(!open)} onTrace={onDetails} variant="blocks" />
       </div>
     </div>
   )

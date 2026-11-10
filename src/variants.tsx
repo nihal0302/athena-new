@@ -7,11 +7,13 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
  * To add a variation: add an option below and branch on it in ChatScreen.
  */
 export type VariantState = {
-  thinking: 'globe' | 'blocks' | 'graph'
+  thinking: 'globe' | 'blocks' | 'graph' | 'timeline'
   speed: 'quick' | 'standard'
+  agents: '3' | '5' | '10' | 'mix'
+  pane: 'cards' | 'trace' | 'ai' | 'bento'
 }
 
-export const DEFAULT_VARIANTS: VariantState = { thinking: 'globe', speed: 'standard' }
+export const DEFAULT_VARIANTS: VariantState = { thinking: 'globe', speed: 'standard', agents: '5', pane: 'bento' }
 
 export type ControlDef = {
   key: keyof VariantState
@@ -21,12 +23,23 @@ export type ControlDef = {
 
 export const CONTROLS: ControlDef[] = [
   {
+    key: 'pane',
+    label: 'Reasoning pane',
+    options: [
+      { id: 'bento', label: 'Bento' },
+      { id: 'ai', label: 'Aurora' },
+      { id: 'cards', label: 'Cards' },
+      { id: 'trace', label: 'Story' },
+    ],
+  },
+  {
     key: 'thinking',
     label: 'Variation',
     options: [
       { id: 'globe', label: 'Globe' },
       { id: 'blocks', label: 'Blocks' },
       { id: 'graph', label: 'Graph' },
+      { id: 'timeline', label: 'Timeline' },
     ],
   },
   {
@@ -37,9 +50,24 @@ export const CONTROLS: ControlDef[] = [
       { id: 'standard', label: 'Detailed' },
     ],
   },
+  {
+    key: 'agents',
+    label: 'Steps',
+    options: [
+      { id: '3', label: '3 steps' },
+      { id: '5', label: '5 steps' },
+      { id: 'mix', label: 'Complex' },
+    ],
+  },
 ]
 
-const STORAGE_KEY = 'athena-v2-variants'
+/** The Complex layout (agents in parallel and in series) only exists for the Graph variation. */
+function withRules(v: VariantState): VariantState {
+  return v.thinking !== 'graph' && v.agents === 'mix' ? { ...v, agents: '5' } : v
+}
+
+// a new key, so earlier saved choices do not hide the new defaults (Bento pane, Globe variation)
+const STORAGE_KEY = 'athena-v2-variants-v2'
 
 /** keep only values that still exist (older saved settings may name a variation that was removed) */
 function sanitize(raw: Partial<Record<string, string>>): VariantState {
@@ -48,7 +76,7 @@ function sanitize(raw: Partial<Record<string, string>>): VariantState {
     const v = raw[c.key]
     if (v && c.options.some((o) => o.id === v)) out[c.key] = v
   }
-  return out as unknown as VariantState
+  return withRules(out as unknown as VariantState)
 }
 
 function load(): VariantState {
@@ -77,7 +105,7 @@ export function VariantsProvider({ children }: { children: ReactNode }) {
     <VariantsContext.Provider
       value={{
         variants,
-        set: (k, v) => setVariants((s) => ({ ...s, [k]: v })),
+        set: (k, v) => setVariants((s) => withRules({ ...s, [k]: v })),
         reset: () => setVariants(DEFAULT_VARIANTS),
       }}
     >

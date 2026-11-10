@@ -1,7 +1,10 @@
-import { useState } from 'react'
-import { SQL } from '../data/scenario'
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
+import { SOURCES, SOURCES_EXTRA, SQL, type AgentDef } from '../data/scenario'
 import { fmt, type RunState } from '../hooks'
-import { Icon, Sparkle } from './Icon'
+import { GoldSparkle, Icon, Sparkle } from './Icon'
+import { AgentIcon } from './AgentIcon'
+import { useFollow } from './useFollow'
 
 /* ------------------------------------------------------------------ */
 /*  Detail view: right pane. It follows the steps of whichever          */
@@ -24,8 +27,6 @@ function sqlHighlight(s: string) {
 // one-line summary shown under a finished step, by step id
 const DONE_NOTE: Record<string, string> = {
   intent: 'Buyer brief · Q1 launches',
-  route: '3 agents selected',
-  agents: '3 agents · 4 sources · 9 passages',
   val: '5 of 5 checks passed',
   comp: 'Brief ready',
   read: 'Message understood',
@@ -48,20 +49,29 @@ export function ReasoningPanel({
 }) {
   const sc = run.sc
   const [expanded, setExpanded] = useState<Record<number, boolean>>({}) // all collapsed by default
-  const [sqlOpen, setSqlOpen] = useState(false)
-  const toggle = (i: number) => setExpanded((e) => ({ ...e, [i]: !e[i] }))
-  const nAgents = sc.agents.length
+  const [sqlFor, setSqlFor] = useState<string | null>(null) // which agent's query is open in the modal
+  const [copied, setCopied] = useState(false)
+  const toggle = (i: number, currentlyOpen: boolean) => setExpanded((e) => ({ ...e, [i]: !currentlyOpen }))
+  const fresh = run.t < 0.3
+  useEffect(() => {
+    if (fresh) setExpanded({})
+  }, [fresh])
+  const nAgents = sc.agentTotal ?? sc.agents.length
+  const clampP = (v: number) => Math.max(0, Math.min(1, v))
 
   const subtitle = (i: number) => {
     const s = sc.steps[i]
     const st = run.stepStatus[i]
     if (st === 'pend') return 'Waiting'
     if (st === 'act') {
-      if (s.id === 'agents') return run.finishedAgents ? `${run.finishedAgents} of ${nAgents} agents finished` : 'Agents working in parallel'
-      if (s.id === 'val') return `${run.checks} of ${sc.checks.length} checks passed`
+      if (s.id === 'agents' && sc.agents.length) return run.finishedAgents ? `${run.finishedAgents} of ${nAgents} agents finished` : 'Agents working in parallel'
+      if (s.id === 'val' || s.id === 'wrap') return `${run.checks} of ${sc.checks.length} checks passed`
       return s.live + '…'
     }
+    if (s.note) return s.note
     if (s.id === 'read' && sc.id === 'lookup') return 'Question understood'
+    if (s.id === 'route') return nAgents + ' agents selected'
+    if (s.id === 'agents') return nAgents + ' agents · ' + sc.agents.reduce((a, g) => a + g.src.length, 0) + ' sources · ' + sc.agents.reduce((a, g) => a + g.pass, 0) + ' passages'
     return DONE_NOTE[s.id] ?? 'Done'
   }
 
@@ -85,51 +95,85 @@ export function ReasoningPanel({
           <>
             <div className="as">Assigned Agent: <span className="ch"><Sparkle size={13} />Aldar X</span></div>
             <ul>
-              <li><b>Delegate specialised insights:</b> three lines of enquiry, run in parallel.</li>
-              <li>Buyer Profile Analysis Agent: who is buying.</li>
-              <li>Market Transaction Data Agent: what is selling, and how fast.</li>
-              <li>Policy &amp; Macro Signals Agent: what is driving demand.</li>
+              <li><b>Delegate specialised insights:</b> {nAgents >= 14 ? 'fourteen' : nAgents === 5 ? 'five' : 'three'} lines of enquiry, {nAgents === 5 ? 'called one after another' : 'run in parallel'}.</li>
+              {(s.agents ?? sc.agents).map((a) => <li key={a.name}>{a.name}: {a.task.charAt(0).toLowerCase() + a.task.slice(1)}.</li>)}
             </ul>
           </>
         )
-      case 'agents':
-        return sc.agents.map((a, k) => {
-          const p = run.agentProgress[k]
-          return (
-            <div key={a.name}>
-              <div className={'ag ' + (p >= 1 ? '' : p > 0 ? 'work' : 'wait')} style={{ ['--c' as string]: a.color }}>
-                <span className="ic"><Icon n={a.icon} size={16} /></span>
-                <div>
-                  <div className="nm">{a.name}</div>
-                  <div className="ds">{p >= 1 ? `${a.src.length} source${a.src.length > 1 ? 's' : ''} · ${a.pass} passages` : a.task}</div>
-                  <div className="pb"><div style={{ width: p * 100 + '%' }} /></div>
-                </div>
-                <span className={'bdg ' + (p >= 1 ? 'd' : p > 0 ? 'w' : 'q')}>{p >= 1 ? 'Done' : p > 0 ? Math.round(p * 100) + '%' : 'Queued'}</span>
-              </div>
-              {a.sql && (
-                <div className={'sqlb' + (sqlOpen ? ' open' : '')}>
-                  <button onClick={() => setSqlOpen(!sqlOpen)}><Icon n="chev" size={13} /> {sqlOpen ? 'Hide query' : 'View query'}</button>
-                  {sqlOpen && <pre>{sqlHighlight(SQL)}</pre>}
-                </div>
-              )}
-            </div>
-          )
-        })
+      case 'agents': {
+        const list = sc.agents.length ? sc.agents : s.agents ?? []
+        const doneAgents = list.filter((ag, k) => (sc.agents.length ? run.agentProgress[k] >= 1 : since >= ag.start + ag.dur))
+        return (
+          <>
+            <div className="as">Assigned Agent: <span className="ch"><Sparkle size={13} />Aldar X</span></div>
+            <ul>
+              {doneAgents.length === 0 && <li>Waiting for the agents to report back.</li>}
+              {doneAgents.map((ag) => (
+                <li key={ag.name}><b>{ag.short}:</b> {ag.finding ?? `brought back ${ag.pass} passages from ${ag.src.join(', ')}.`}</li>
+              ))}
+            </ul>
+          </>
+        )
+      }
       case 'val':
         return (
+          <>
+          <div className="as">Assigned Agent: <span className="ch"><Sparkle size={13} />Aldar X</span></div>
           <ul className="chk">
             {sc.checks.map((c, k) => (
               <li key={c} className={k < run.checks ? 'ok' : ''}><span className="tk-c"><Icon n="check" size={9} /></span>{c}</li>
             ))}
           </ul>
+          </>
         )
       case 'comp':
         return (
+          <>
+          <div className="as">Assigned Agent: <span className="ch"><Sparkle size={13} />Aldar X</span></div>
           <ul className="stream">
             {['Writing the executive summary', 'Building the buyer-mix chart and table', 'Adding drivers, caveats and open items', 'Attaching sources'].map((l, k) => (
               <li key={l} className={since > k + 0.2 || run.done ? 'on' : ''}>{l}</li>
             ))}
           </ul>
+          </>
+        )
+      case 'plan':
+        return (
+          <>
+            <div className="as">Assigned Agent: <span className="ch"><Sparkle size={13} />Aldar X</span></div>
+            <ul>
+              <li><b>Interpretation:</b> a buyer-targeting brief for the Q1 launches, with market drivers.</li>
+              <li><b>Scope:</b> nationality mix, ticket size, inquiry conversion, policy and macro signals.</li>
+              <li><b>Delegated to:</b> {(s.agents ?? []).map((a) => a.short).join(', ')}.</li>
+            </ul>
+          </>
+        )
+      case 'merge':
+        return (
+          <>
+            <div className="as">Assigned Agent: <span className="ch"><Sparkle size={13} />Aldar X</span></div>
+            <ul>
+              <li>Collected the reports from the five agents.</li>
+              <li>Matched each finding to the question that was asked.</li>
+              <li>Flagged gaps: off-plan resale and agent-channel data.</li>
+            </ul>
+          </>
+        )
+      case 'wrap':
+        return (
+          <>
+            <div className="as">Assigned Agent: <span className="ch"><Sparkle size={13} />Aldar X</span></div>
+            <ul className="chk">
+              {sc.checks.map((c, k) => (
+                <li key={c} className={k < run.checks ? 'ok' : ''}><span className="tk-c"><Icon n="check" size={9} /></span>{c}</li>
+              ))}
+            </ul>
+            <ul className="stream">
+              {['Writing the executive summary', 'Building the buyer-mix chart and table', 'Adding drivers, caveats and open items', 'Attaching sources'].map((l, k) => (
+                <li key={l} className={since > 4.4 + k * 0.9 || run.done ? 'on' : ''}>{l}</li>
+              ))}
+            </ul>
+          </>
         )
       case 'read':
         return (
@@ -154,45 +198,278 @@ export function ReasoningPanel({
           </ul>
         )
       default:
+        if (s.agent) {
+          const a = s.agent
+          return (
+            <>
+              <div className="as">Assigned Agent: <span className="ch" style={{ ['--c' as string]: a.color }}><AgentIcon n={a.icon} size={14} />{a.name.replace(/ Agent$/, "")}</span></div>
+              <ul>
+                <li><b>Task:</b> {a.task}.</li>
+                <li><b>Sources:</b> {a.src.join(', ')} · {a.pass} passages.</li>
+              </ul>
+              {a.sql && (
+                            <button className="sq-link" onClick={() => setSqlFor(a.name)}><Icon n="doc" size={13} />View query</button>
+                          )}
+            </>
+          )
+        }
         return null
     }
   }
 
+  // the agents get a card each, between "planned and routed" and the stage that gathers what they found
+  const agStage = sc.agents.length ? sc.agentStep : sc.steps.findIndex((x) => x.id === 'agents' && x.agents && x.agents.length)
+  const agList: AgentDef[] = sc.agents.length ? sc.agents : agStage >= 0 ? (sc.steps[agStage].agents as AgentDef[]) : []
+
+  // ---- the three sections: stages, activity, sources found ----
+  const [tab, setTab] = useState<'stages' | 'activity' | 'sources'>('stages')
+  const nSteps = sc.steps.length
+  const standard = sc.id === 'standard'
+  const stepsNow = run.done ? nSteps : run.stepsDone
+  const chips = standard && !run.done
+    ? [
+        `${stepsNow} of ${nSteps} steps`,
+        `${nAgents && run.t >= sc.steps[0].dur + 1.5 ? nAgents : 0} agents`,
+        `${run.sources} sources`,
+        `${run.checks} checks passed`,
+      ]
+    : sc.chips
+
+  // what the run has said so far, newest first, each line tagged with the stage it belongs to
+  const stageAt = (tm: number) => {
+    let k = 0
+    sc.t0.forEach((s0, i) => {
+      if (tm >= s0) k = i
+    })
+    return k
+  }
+  const feed = sc.events.filter((e) => run.done || run.t >= e.t).map((e) => ({ ...e, stage: stageAt(e.t) }))
+  if (run.done) feed.push({ t: sc.total, txt: 'Answer ready', stage: nSteps - 1 })
+
+  // sources found, with the agent that brought each one back and when
+  const noteOf = (n: string) => [...SOURCES, ...SOURCES_EXTRA].find((x) => x.name === n)?.note ?? 'p. 2'
+  type Found = { name: string; by: string; color: string; note: string; at: number }
+  const found: Found[] = []
+  const addFrom = (a: { name: string; short: string; color: string; src: string[] }, at: number) =>
+    a.src.forEach((n) => found.push({ name: n, by: a.short, color: a.color, note: noteOf(n), at }))
+  if (sc.agents.length) sc.agents.forEach((a) => addFrom(a, sc.gs + a.start + a.dur))
+  else
+    sc.steps.forEach((st, i) => {
+      if (st.agent) addFrom(st.agent, sc.t0[i] + st.dur)
+      else if (st.id === 'agents' && st.agents) st.agents.forEach((a) => addFrom(a, sc.t0[i] + a.start + a.dur))
+    })
+  if (!found.length && sc.sources > 0) found.push({ name: 'Buyer Profile Database', by: 'Aldar X', color: '#2f245c', note: 'p. 2', at: (sc.t0[1] ?? 0) + (sc.steps[1]?.dur ?? 0) })
+  found.sort((x, y) => x.at - y.at)
+  const foundNow = found.filter((f) => run.done || run.t >= f.at)
+
+  useEffect(() => {
+    if (!sqlFor) return
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setSqlFor(null)
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [sqlFor])
+  const rzRef = useRef<HTMLElement>(null)
+  useFollow(rzRef, (tab === 'activity' || tab === 'stages') && !run.done, [feed.length, tab, run.stepStatus.join(','), agList.filter((ag) => run.t >= (sc.agents.length ? sc.gs : sc.t0[Math.max(0, agStage)]) + ag.start).length].join(','), run.t < 0.3)
+
   return (
-    <aside className={'rz' + (open ? '' : ' closed') + (wide ? ' wide' : '') + (run.done ? ' done' : '')} aria-label="Reasoning">
+    <aside ref={rzRef} className={'rz' + (open ? '' : ' closed') + (wide ? ' wide' : '') + (run.done ? ' done' : '')} aria-label="Reasoning">
       <div className="rz-h">
-        <h4>Reasoning</h4>
+        <span className="rz-ic"><GoldSparkle size={22} /></span>
+        <div className="rz-ttl">
+          <h4>Reasoning</h4>
+          <div className="rz-st"><span className="dot" /><span>{run.done ? 'Completed' : 'Live · ' + sc.steps[run.idx].live.toLowerCase()}</span></div>
+        </div>
         <button onClick={onWide} aria-label="Expand"><Icon n="expand" size={18} /></button>
         <button onClick={onClose} aria-label="Close"><Icon n="x" size={18} /></button>
       </div>
-      <div className="rz-st"><span className="dot" /><span>{run.done ? 'Completed · ' + fmt(sc.total) : 'Live · ' + sc.steps[run.idx].live.toLowerCase()}</span></div>
+
+      <div className="rz-time">
+        <div className="rz-t1"><small>Overall time</small><b>{run.done ? fmt(sc.total) : fmt(run.t)}</b></div>
+        <div className="rz-t2"><span>{run.pct}%</span></div>
+      </div>
       <div className="rz-bar"><div style={{ width: run.pct + '%' }} /></div>
-      <div className="rz-m">
-        <div><b>{run.done ? sc.steps.length : Math.min(sc.steps.length, run.stepsDone + 1)}</b>steps</div>
-        <div><b>{nAgents && run.t >= sc.steps[0].dur + 1.5 ? nAgents : 0}</b>agents</div>
-        <div><b>{run.sources}</b>sources</div>
-        <div><b>{run.checks}</b>checks</div>
+      <div className="rz-chips">{chips.map((c) => <span key={c}>{c}</span>)}</div>
+
+      <div className="rz-tabs" role="tablist">
+        {([
+          ['stages', 'Stages'],
+          ['activity', 'Activity'],
+          ['sources', 'Sources'],
+        ] as const).map(([id, label]) => (
+          <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'on' : ''} onClick={() => setTab(id)}>
+            {label}
+          </button>
+        ))}
       </div>
-      <div className="rz-n"><Icon n="lock" size={13} /><span>Shows how agents worked and what was checked. Internal model reasoning isn’t displayed.</span></div>
+
       <div className="rz-b">
-        <ol className="tl">
-          {sc.steps.map((s, i) => {
-            const st = run.stepStatus[i]
-            const isOpen = !!expanded[i] && st !== 'pend'
-            return (
-              <li key={sc.id + s.id + i} className={'stp ' + st + (isOpen ? ' open' : '')}>
-                <div className="hd" onClick={() => st !== 'pend' && toggle(i)}>
-                  <span className="ck"><Icon n="check" size={11} /></span>
-                  <div className="tt"><b>{s.title}</b><small>{subtitle(i)}</small></div>
-                  <span className="dur">{st === 'done' ? s.dur.toFixed(1) + ' s' : ''}</span>
-                  <span className="chv"><Icon n="chev" size={16} /></span>
-                </div>
-                {isOpen && <div className="bd">{body(i)}</div>}
+        {tab === 'stages' && (
+          <ol className="rz-tl">
+            {sc.steps.flatMap((s, i) => {
+              const out: ReactNode[] = []
+              if (i === agStage) {
+                agList.forEach((ag, k) => {
+                  const t1 = (sc.agents.length ? sc.gs : sc.t0[agStage]) + ag.start
+                  const p = Math.max(0, Math.min(1, (run.t - t1) / ag.dur))
+                  const st = run.done || p >= 1 ? 'done' : p > 0 ? 'act' : 'pend'
+                  if (st === 'pend') return // an agent only appears once it has been called
+                  const key = 1000 + k
+                  const isOpen = expanded[key] ?? st === 'act'
+                  const sub = st === 'done' ? `${ag.src.length} source${ag.src.length > 1 ? 's' : ''} · ${ag.pass} passages` : ag.subs[Math.min(ag.subs.length - 1, Math.floor(p * ag.subs.length))]
+                  out.push(
+                    <li key={'ag' + k} className={'stp agc rz-in ' + st + (isOpen ? ' open' : '')} style={{ ['--c' as string]: ag.color }}>
+                      <div className="hd" onClick={() => toggle(key, isOpen)}>
+                        <span className="ck"><Icon n="check" size={11} /></span>
+                        <div className="tt"><b>{ag.name}</b><small>{sub}</small></div>
+                        <span className="chv"><Icon n="chev" size={16} /></span>
+                      </div>
+                      {isOpen && (
+                        <div className="bd">
+                          <Reveal p={st === 'done' ? 1 : p * 1.3}>
+                            <div className="as">Assigned Agent: <span className="ch" style={{ ['--c' as string]: ag.color }}><AgentIcon n={ag.icon} size={14} />{ag.name.replace(/ Agent$/, '')}</span></div>
+                            <ul>
+                              <li><b>Task:</b> {ag.task}.</li>
+                              <li><b>Sources:</b> {ag.src.join(', ')} · {ag.pass} passages.</li>
+                            </ul>
+                          </Reveal>
+                          {st === 'done' && <div className="rz-took">Took {ag.dur.toFixed(1)} s</div>}
+                          {ag.sql && (
+                            <button className="sq-link" onClick={() => setSqlFor(ag.name)}><Icon n="doc" size={13} />View query</button>
+                          )}
+                        </div>
+                      )}
+                    </li>,
+                  )
+                })
+              }
+              const st = run.stepStatus[i]
+              if (st === 'pend') return out // later stages do not exist yet: the process streams in as it happens
+              const isOpen = expanded[i] ?? st === 'act'
+              const p = Math.max(0, Math.min(1, (run.t - sc.t0[i]) / s.dur))
+              out.push(
+                <li key={sc.id + s.id + i} className={'stp rz-in ' + st + (isOpen ? ' open' : '')}>
+                  <div className="hd" onClick={() => toggle(i, isOpen)}>
+                    <span className="ck"><Icon n="check" size={11} /></span>
+                    <div className="tt"><b>{s.title}</b><small>{subtitle(i)}</small></div>
+                    <span className="chv"><Icon n="chev" size={16} /></span>
+                  </div>
+                  {isOpen && (
+                    <div className="bd">
+                      <Reveal p={st === 'done' ? 1 : p * 1.3}>{body(i)}</Reveal>
+                      {st === 'done' && <div className="rz-took">Took {s.dur.toFixed(1)} s</div>}
+                    </div>
+                  )}
+                </li>,
+              )
+              return out
+            })}
+          </ol>
+        )}
+
+        {tab === 'activity' && (
+          <ol className="rz-feed">
+            {feed.length === 0 && <li className="rz-empty">Activity appears here as the work happens.</li>}
+            {feed.map((e) => (
+              <li key={e.t + e.txt} className={'rz-ev s' + (e.stage % 5)}>
+                <span className="tm">{e.t.toFixed(1)} s</span>
+                <span className="pt" />
+                <span className="tx">{e.txt}</span>
               </li>
-            )
-          })}
-        </ol>
+            ))}
+          </ol>
+        )}
+
+        {tab === 'sources' && (
+          <ul className="rz-src">
+            {foundNow.length === 0 && <li className="rz-empty">{sc.id === 'greeting' ? 'No sources were needed for this message.' : 'Sources appear here as the agents report back.'}</li>}
+            {foundNow.map((f) => (
+              <li key={f.name + f.by}><Icon n="doc" size={13} />{f.name}</li>
+            ))}
+          </ul>
+        )}
       </div>
+
+      {sqlFor &&
+        createPortal(
+          <div className="sqm-back" onClick={() => setSqlFor(null)} role="presentation">
+            <div className="sqm" role="dialog" aria-modal="true" aria-label="SQL query" onClick={(e) => e.stopPropagation()}>
+              <div className="sqm-h">
+                <div>
+                  <h5>SQL query</h5>
+                  <p>{sqlFor.replace(/ Agent$/, '')}</p>
+                </div>
+                <button
+                  className="sqm-copy"
+                  onClick={() => {
+                    navigator.clipboard?.writeText(SQL).catch(() => {})
+                    setCopied(true)
+                    window.setTimeout(() => setCopied(false), 1500)
+                  }}
+                >
+                  <Icon n={copied ? 'check' : 'copy'} size={14} />{copied ? 'Copied' : 'Copy'}
+                </button>
+                <button className="sqm-x" onClick={() => setSqlFor(null)} aria-label="Close"><Icon n="x" size={18} /></button>
+              </div>
+              <pre className="sqm-code">{sqlHighlight(SQL)}</pre>
+            </div>
+          </div>,
+          document.body,
+        )}
     </aside>
   )
+}
+
+/** Splits the text inside an element into word spans (keeping any inline markup such as the bold labels) and returns them in order. */
+export function wrapWords(root: Element): HTMLElement[] {
+  const out: HTMLElement[] = []
+  const walk = (n: Node) => {
+    Array.from(n.childNodes).forEach((c) => {
+      if (c.nodeType === 3) {
+        const frag = document.createDocumentFragment()
+        ;(c.nodeValue ?? '').split(/(\s+)/).forEach((part) => {
+          if (!part) return
+          if (/^\s+$/.test(part)) frag.appendChild(document.createTextNode(part))
+          else {
+            const s = document.createElement('span')
+            s.className = 'rv-w'
+            s.textContent = part
+            out.push(s)
+            frag.appendChild(s)
+          }
+        })
+        n.replaceChild(frag, c)
+      } else if (c.nodeType === 1 && !(c as Element).classList.contains('rv-w')) walk(c)
+    })
+  }
+  walk(root)
+  return out
+}
+
+/** Streams a stage's body: the passages appear one after another (p from 0 to 1), and inside each passage the words
+ *  come in one by one, so every line fills from left to right and then the next line starts, like a live answer. */
+function Reveal({ p, children }: { p: number; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null)
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const items = Array.from(el.querySelectorAll('li'))
+    const shown = p >= 1 ? items.length : Math.max(1, Math.ceil(p * items.length))
+    items.forEach((li, k) => {
+      const show = k < shown
+      li.classList.toggle('rv-hide', !show)
+      if (show && !li.dataset.seen) {
+        li.dataset.seen = '1'
+        if (p < 1) {
+          const words = wrapWords(li)
+          let i = 0
+          const id = window.setInterval(() => {
+            // stop when finished, or when the stage has been folded away (its words are no longer on the page)
+            if (i < words.length && words[0].isConnected) words[i++].classList.add('on')
+            else window.clearInterval(id)
+          }, 34)
+        }
+      }
+    })
+  })
+  return <div ref={ref}>{children}</div>
 }

@@ -40,7 +40,9 @@ export function Response({
   onReplay,
   bare = false,
   glass = false,
+  sources = SOURCES,
 }: {
+  sources?: typeof SOURCES
   shown: number
   onFullscreen: () => void
   onToast: (m: string) => void
@@ -54,12 +56,12 @@ export function Response({
   const secs: ReactNode[] = [
     <Sec key="1" icon="msg" title="Executive summary">
       <p className="lead"><strong>Prioritise UAE nationals, Indian and UK buyers for the Q1 launches.</strong> Together they account for 56% of reservations across the last three launch cycles, and all three show supportive demand signals. Russia &amp; CIS buyers are the next-best opportunity, but depend on a policy factor that is still moving.</p>
-      <div className="figs">
-        <div className="fig"><div className="k">Priority segments</div><div className="v">3</div><span className="d"><Up />of 12 tracked</span></div>
-        <div className="fig"><div className="k">Share of reservations</div><div className="v">56<small>%</small></div><span className="d"><Up />+4 pts vs Q1-25</span></div>
-        <div className="fig"><div className="k">Average ticket</div><div className="v"><small>AED</small>2.9m</div><span className="d"><Up />+6% YoY</span></div>
-        <div className="fig"><div className="k">Inquiry to reservation</div><div className="v">4.2<small>%</small></div><span className="d"><Up />+0.5 pts</span></div>
-      </div>
+      <ol className="nums">
+        <li><span>1</span><p><strong>3</strong> priority segments, out of 12 tracked</p></li>
+        <li><span>2</span><p><strong>56%</strong> of reservations, up 4 points on Q1-25</p></li>
+        <li><span>3</span><p>Average ticket of <strong>AED 2.9m</strong>, up 6% year on year</p></li>
+        <li><span>4</span><p>Inquiry to reservation at <strong>4.2%</strong>, up 0.5 points</p></li>
+      </ol>
     </Sec>,
     <Sec key="2" icon="chart" title="Buyer mix by nationality">
       <p><strong>Three segments carry more than half of demand.</strong> UAE nationals lead at 31%, followed by India at 14% and the United Kingdom at 11%. The long tail of nine other nationalities each contributes 10% or less.</p>
@@ -85,10 +87,6 @@ export function Response({
         <div className="cr"><span className="ic"><Icon n="layers" /></span><div><b>Two reporting bases</b><p>Reservations and completed sales are counted on different dates. Quote one and name which.</p></div></div>
       </div>
     </Sec>,
-    <Sec key="6" icon="search" title="Not covered by these sources">
-      <ul className="b"><li>Off-plan resale activity</li><li>Agent and broker channel performance</li></ul>
-      <button className="add" onClick={() => onToast('Broker Channel Report added to the next run')}><Icon n="plus2" size={14} />Add the Broker Channel Report</button>
-    </Sec>,
     <Sec key="7" icon="msg" title="Suggested follow-ups">
       <div className="qs">
         {['Break this down by price band', 'Compare with last year’s launch mix', 'Draft a channel plan for UAE and India'].map((q) => (
@@ -98,7 +96,7 @@ export function Response({
     </Sec>,
     <Sec key="8" icon="doc" title="Sources">
       <div className="schips">
-        {SOURCES.map((s) => (
+        {sources.map((s) => (
           <button key={s.name} className="sc" onClick={() => onToast('Opening ' + s.name)}><Icon n="doc" size={14} />{s.name} <small>{s.note}</small></button>
         ))}
       </div>

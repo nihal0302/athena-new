@@ -42,7 +42,7 @@ export function ControlsPanel({ onReplay }: { onReplay?: () => void }) {
             <div key={c.key} className="pc-g">
               <div className="pc-l">{c.label}</div>
               <div className="pc-seg" role="radiogroup" aria-label={c.label}>
-                {c.options.map((o) => (
+                {c.options.filter((o) => !(c.key === 'agents' && o.id === 'mix' && variants.thinking !== 'graph')).map((o) => (
                   <button
                     key={o.id}
                     role="radio"

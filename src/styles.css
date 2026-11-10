@@ -627,3 +627,894 @@ ul.b{margin:0 0 10px 18px;font-size:13px}
 @keyframes pcPulse{0%{transform:scale(1);opacity:.9}100%{transform:scale(1.14,1.5);opacity:0}}
 .pc-panel{bottom:54px}
 .home .recents,.chat .recents{bottom:88px}
+
+/* Seven agents: compact graph nodes and the agent progress dots */
+.gv-node.sm{padding:0 9px;gap:7px;border-radius:8px}
+.gv-node.sm .gv-st{width:11px;height:11px}
+.gv-node.sm .gv-nt b{font-size:10px}
+.gv-node.sm .gv-nt small{display:none}
+.gv-pg{position:absolute;left:9px;right:9px;bottom:2px;height:2px;border-radius:2px;background:rgba(106,136,238,.16);overflow:hidden;opacity:0;transition:opacity .3s}
+.gv-pg i{display:block;height:100%;background:#6a88ee;border-radius:2px}
+.gv-node.act .gv-pg{opacity:1}
+.agd{display:inline-flex;align-items:center;gap:8px;margin-left:4px}
+.agd .row{display:inline-flex;gap:4px}
+.agd .row i{width:6px;height:6px;border-radius:50%;background:#d3d6e6;transition:background .4s,transform .4s}
+.agd .row i.w{background:#6a88ee;animation:gbDot 1.2s infinite ease-in-out}
+.agd .row i.d{background:var(--ok)}
+.agd b{font-weight:500;color:var(--ink2)}
+.gb-meta{white-space:nowrap}
+
+/* Agent roster: every agent, what it is doing now, and its progress (Globe and Blocks) */
+.ros{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .5s cubic-bezier(.4,0,.2,1),opacity .4s,margin .5s;margin-top:0;pointer-events:none}
+.ros.on{grid-template-rows:1fr;opacity:1;margin-top:8px;pointer-events:auto}
+.ros-in{overflow:hidden;min-height:0}
+.ros-box{border-radius:16px;padding:6px 8px 8px;background:linear-gradient(135deg,rgba(255,255,255,.55),rgba(255,255,255,.22));border:1px solid rgba(255,255,255,.85);
+  backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);box-shadow:0 12px 32px -22px rgba(47,36,92,.35),inset 0 1px 0 rgba(255,255,255,.95)}
+.ros-h{display:flex;align-items:center;justify-content:space-between;width:100%;gap:8px;padding:6px 8px;background:none;border:0;font:inherit;cursor:pointer;color:var(--ink2);text-align:left}
+.ros-t{font-size:12px;font-weight:500}
+.ros-c{color:var(--ink3);transition:transform .25s;transform:rotate(180deg)}
+.ros:not(.open) .ros-c{transform:none}
+.ros-l{list-style:none;margin:0;padding:0;max-height:244px;overflow-y:auto}
+.ros-r{display:grid;grid-template-columns:20px minmax(0,1.15fr) minmax(0,1.3fr) 54px;align-items:center;gap:8px;padding:5px 8px;border-radius:10px;font-size:11px;line-height:1.3;transition:opacity .4s}
+.ros-r+.ros-r{border-top:1px solid rgba(47,36,92,.05)}
+.ros-ic{width:20px;height:20px;border-radius:7px;display:grid;place-items:center;color:#fff;background:var(--c);position:relative}
+.ros-r.q .ros-ic{filter:grayscale(1) opacity(.4)}
+.ros-r.w .ros-ic::after{content:"";position:absolute;inset:-3px;border-radius:9px;border:1.5px solid var(--c);opacity:.55;animation:pulse 1.6s infinite}
+.ros-r.d .ros-ic{background:var(--ok)}
+.ros-r.d{opacity:.55}
+.ros-n{font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ros-x{color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;animation:gbIn .4s ease both}
+.ros-r.q .ros-x{color:#9a9aa6}
+.ros-pb{height:3px;border-radius:3px;background:rgba(47,36,92,.09);overflow:hidden}
+.ros-pb i{display:block;height:100%;background:var(--c);border-radius:3px;transition:width .3s linear}
+
+/* Graph nodes at scale: wide (name + live task), small (name only) and tiny rows */
+.gv-node.sm.wide .gv-nt{display:flex;align-items:baseline;gap:7px}
+.gv-node.sm.wide .gv-nt b{flex:none}
+.gv-node.sm.wide .gv-nt small{display:block;flex:1;min-width:0;margin:0;font-size:9.5px}
+.gv-node.sm.xs{padding:0 7px;gap:5px;border-radius:6px}
+.gv-node.sm.xs .gv-st{width:9px;height:9px}
+.gv-node.sm.xs .gv-nt b{font-size:9px}
+.gv-node.sm.xs .gv-pg{display:none}
+
+/* Graph canvas: fixed size, hold and drag to look around */
+.gv-view.can{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.gv-view.grab{cursor:grabbing}
+.gv-stage.nodrift{transition:none}
+.gv-hint{position:absolute;right:6px;bottom:4px;z-index:3;pointer-events:none;font-size:10px;color:var(--ink3);opacity:.85}
+.gv-hint button{pointer-events:auto;display:inline-flex;align-items:center;gap:4px;font:inherit;font-size:10.5px;font-weight:500;color:var(--brand);padding:3px 9px;border-radius:99px;border:1px solid rgba(255,255,255,.9);background:rgba(255,255,255,.85);cursor:pointer;box-shadow:0 4px 10px -6px rgba(47,36,92,.4)}
+
+/* Variation 4: Timeline. Aldar tokens only: brand #2f245c, steel blue #49658b, greys #878787 #a3a3a3 #d4d4d4 #e7e7e7, ink #252525 */
+.tl{position:relative;padding:18px 22px 16px;border-radius:20px;
+  background:linear-gradient(135deg,rgba(255,255,255,.62),rgba(255,255,255,.28));border:1px solid rgba(255,255,255,.9);
+  backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);
+  box-shadow:0 12px 32px -22px rgba(47,36,92,.35),inset 0 1px 0 rgba(255,255,255,.95),inset 0 0 0 1px rgba(47,36,92,.04)}
+.tl-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.tl-l{min-width:0;padding-top:2px}
+.tl-title{padding:0}
+.tl-t{font-weight:600;font-size:16px;letter-spacing:.1px;background:linear-gradient(90deg,#2f245c 0,#2f245c 35%,#49658b 50%,#2f245c 65%,#2f245c 100%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shim 2.6s linear infinite}
+.tl-t.done{animation:none;background:none;color:#2f245c;-webkit-text-fill-color:currentColor}
+.tl-sub{margin-top:4px;font-size:13px;color:#4a4a4a;line-height:1.45;max-width:340px;animation:gbIn .45s ease both}
+.tl-r{flex:none;text-align:right}
+.tl-pct{display:flex;align-items:baseline;justify-content:flex-end;gap:1px;line-height:1;color:#2f245c;font-variant-numeric:tabular-nums}
+.tl-pct b{font-size:30px;font-weight:600;letter-spacing:-.5px}
+.tl-pct span{font-size:15px;font-weight:500;color:#49658b}
+.tl-time{margin-top:5px;font-size:11px;color:#878787;font-variant-numeric:tabular-nums}
+.tl-track{margin-top:8px}
+.tl-mk{position:relative;height:40px}
+.tl-m{position:absolute;top:0;bottom:0;width:0;animation:gbIn .4s ease both}
+.tl-mi{position:absolute;left:0;top:2px;transform:translateX(-10px);display:flex;align-items:center;gap:8px;white-space:nowrap}
+.tl-m.flip .tl-mi{flex-direction:row-reverse;transform:translateX(calc(-100% + 10px))}
+.tl-ics{display:inline-flex}
+.tl-ics i{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;color:#fff;background:#2f245c;border:1.5px solid #fff;margin-left:-7px;box-shadow:0 2px 6px -2px rgba(47,36,92,.55)}
+.tl-ics i:first-child{margin-left:0}
+.tl-mt{font-size:11.5px;font-weight:500;color:#2f245c}
+.tl-stem{position:absolute;left:-1px;top:26px;bottom:0;width:2px;border-radius:2px;background:#2f245c;opacity:.35}
+.tl-m.live .tl-stem{opacity:.7}
+.tl-bar{position:relative;height:30px}
+.tl-rest{position:absolute;inset:0;border-radius:9px;background:repeating-linear-gradient(90deg,#d4d4d4 0 3px,transparent 3px 9px)}
+.tl-fill{position:absolute;left:0;top:0;bottom:0;border-radius:9px;min-width:8px;z-index:1;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;
+  background:linear-gradient(90deg,#49658b 0%,#3c4a78 55%,#2f245c 100%);box-shadow:0 8px 16px -10px rgba(47,36,92,.65)}
+.tl-pc{font-size:11px;font-weight:600;color:#fff;padding:2px 8px;border-radius:7px;background:rgba(255,255,255,.2);font-variant-numeric:tabular-nums}
+.tl.done .tl-fill{background:linear-gradient(90deg,#878787,#6f6f78)}
+.tl-more{display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:14px;padding:11px 16px;border-radius:99px;font:inherit;font-size:13px;font-weight:500;color:#252525;cursor:pointer;
+  background:#e7e7e7;border:1px solid #d4d4d4;transition:background .2s}
+.tl-more:hover{background:#dedede}
+.tl-chev{color:#252525;transition:transform .25s}
+.tl.open .tl-chev{transform:rotate(180deg)}
+.tl-ex{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s cubic-bezier(.4,0,.2,1)}
+.tl-ex.open{grid-template-rows:1fr}
+.tl-ex-in{overflow:hidden;min-height:0}
+.tl-rows{list-style:none;margin:0;padding:8px 2px 0;max-height:250px;overflow-y:auto}
+.tl-wait{font-size:12px;color:#878787;padding:10px 4px}
+.tl-row{padding:10px 4px 8px;animation:gbIn .4s ease both}
+.tl-row+.tl-row{border-top:1px solid #e7e7e7}
+.tl-rh{display:flex;align-items:center;gap:8px;min-width:0}
+.tl-ai{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;color:#fff;background:#2f245c;flex:none}
+.tl-an{font-size:13px;font-weight:600;color:#2f245c;white-space:nowrap;flex:none}
+.tl-at{font-size:12px;color:#878787;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1;animation:gbIn .4s ease both}
+.tl-ad{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#12b76a;font-variant-numeric:tabular-nums;flex:none}
+.tl-rt{position:relative;height:8px;margin-top:7px;border-radius:6px;background:#e7e7e7;overflow:hidden}
+.tl-seg{position:absolute;top:0;bottom:0;border-radius:6px;background:linear-gradient(90deg,#49658b,#2f245c)}
+.tl-row.fin .tl-seg{background:#49658b}
+
+/* Graph agent nodes: two lines (name over live task) with more room between rows */
+.gv-node.sm.wide{padding:0 11px;gap:8px;border-radius:10px}
+.gv-node.sm.wide .gv-st{width:13px;height:13px}
+.gv-node.sm.wide .gv-nt{display:block;line-height:1.3}
+.gv-node.sm.wide .gv-nt b{display:block;font-size:11px}
+.gv-node.sm.wide .gv-nt small{display:block;margin-top:1px;font-size:9.5px}
+.gv-pg{bottom:4px}
+
+/* Prototype controls panel: wider, roomy, nothing wraps (four options per setting) */
+.pc-panel{width:min(420px,calc(100vw - 40px));padding:18px 20px 18px;border-radius:20px;bottom:56px;max-height:calc(100vh - 110px)}
+.pc-h{margin-bottom:6px;font-size:15px}
+.pc-h b{font-weight:600}
+.pc-g{margin:16px 0 0}
+.pc-l{font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:8px;letter-spacing:.2px}
+.pc-seg{gap:3px;padding:4px;border-radius:13px}
+.pc-seg button{height:34px;border-radius:10px;font-size:12.5px;white-space:nowrap;padding:0 8px}
+.pc-f{margin-top:20px;padding-top:14px;border-top:1px solid var(--line)}
+.pc-b{height:36px;padding:0 16px;font-size:12.5px}
+
+/* Timeline v3: agents pinned under the bar (no stems), each in its own colour; calmer button; slimmer agent bars */
+.tl-track{margin-top:14px}
+.tl-mk{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s cubic-bezier(.4,0,.2,1)}
+.tl-mk.on{grid-template-rows:1fr}
+.tl-mk-in{position:relative;min-height:0;height:0;overflow:visible}
+.tl-mk.on .tl-mk-in{height:34px}
+.tl-m{top:0;bottom:auto}
+.tl-mi{top:9px;transform:translateX(-10px)}
+.tl-m.flip .tl-mi{flex-direction:row-reverse;transform:translateX(calc(-100% + 10px))}
+.tl-ics i{background:#2f245c}
+.tl-ics i.more{background:#e7e7e7;color:#4a4a4a;font-size:9px;font-weight:600;font-style:normal}
+.tl-bar{height:26px}
+.tl-more{background:transparent;border:1px solid #d4d4d4;margin-top:14px}
+.tl-more:hover{background:#f7f6f4;border-color:#a3a3a3}
+.tl-ai{background:var(--c)}
+.tl-an{color:#252525}
+.tl-rt{height:4px;margin-top:8px;border-radius:4px}
+.tl-seg{border-radius:4px;background:var(--c)!important}
+.tl-row.fin .tl-seg{opacity:.85}
+.tl-at{font-size:12px}
+
+/* Timeline v4: running = Aldar steel blue, completed = Aldar success green; Done sits at the far right of each agent row */
+.tl-fill{background:#49658b;box-shadow:0 8px 16px -10px rgba(73,101,139,.7)}
+.tl.done .tl-fill{background:#12b76a;box-shadow:0 8px 16px -10px rgba(18,183,106,.55)}
+.tl-ics i.more{width:auto;min-width:20px;padding:0 5px;border-radius:99px}
+.tl-row.fin .tl-at{text-align:right;color:#12b76a;font-weight:500}
+
+/* Timeline v5: thin stems, filled tinted agent badges, gradient + white shimmer on the running bar */
+.tl-stem{display:block;position:absolute;left:0;top:0;width:1px;height:11px;margin-left:-.5px;background:rgba(47,36,92,.28);border-radius:1px;opacity:1}
+.tl-mi{top:10px}
+.tl-ics i,.tl-ai{background:color-mix(in srgb,var(--c) 15%,#fff);color:var(--c)}
+.tl-ics i{width:22px;height:22px;border:1.5px solid #fff;margin-left:-6px;box-shadow:0 2px 6px -2px rgba(47,36,92,.4)}
+.tl-ics i:first-child{margin-left:0}
+.tl-ics i.more{background:#fff;color:#4a4a4a;border-color:#e7e7e7}
+.tl-ai{width:24px;height:24px;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 22%,#fff)}
+.tl-fill{overflow:hidden;background:linear-gradient(90deg,#2f245c 0%,#3d5a9b 45%,#5f8fd1 100%);box-shadow:0 8px 18px -10px rgba(61,90,155,.75)}
+.tl:not(.done) .tl-fill::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%);background-size:220% 100%;background-repeat:no-repeat;animation:tlShimmer 1.9s ease-in-out infinite}
+@keyframes tlShimmer{from{background-position:130% 0}to{background-position:-30% 0}}
+.tl.done .tl-fill{background:#12b76a}
+
+/* Timeline v6: fixed one-line sub-step (no height jumps), subtler shimmer, softer completed green */
+.tl-l{flex:1;min-width:0}
+.tl-sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;height:19px;line-height:19px}
+.tl:not(.done) .tl-fill::after{background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.16) 50%,transparent 62%);animation-duration:2.8s}
+.tl-fill{box-shadow:0 6px 14px -10px rgba(61,90,155,.5)}
+.tl.done .tl-fill{background:rgba(18,183,106,.72);box-shadow:0 6px 14px -10px rgba(18,183,106,.35)}
+
+/* Timeline v7: no markers under the bar; triggered agents live on the "Agent details" button; no stripes once completed */
+.tl.done .tl-rest{display:none}
+.tl-track{margin-top:12px}
+.tl-more{gap:12px}
+.tl-more .tl-mt1{flex:none}
+.tl-trig{margin-left:auto;display:inline-flex;align-items:center;gap:8px;min-width:0}
+.tl-trig .tl-mt{font-size:12px;font-weight:500;color:#4a4a4a;white-space:nowrap}
+
+/* Timeline v8: agents slide into the button from below while they work and slide away upwards when they finish */
+.tl-trig{height:26px;overflow:hidden;align-items:center}
+.tl-ics i.in{animation:tlUp .5s cubic-bezier(.2,.8,.2,1) both}
+.tl-ics i.out{animation:tlAway .42s cubic-bezier(.5,0,.8,.4) both}
+@keyframes tlUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes tlAway{from{opacity:1;transform:none}to{opacity:0;transform:translateY(-22px)}}
+.tl-trig .tl-mt{animation:tlUp .45s cubic-bezier(.2,.8,.2,1) both}
+
+/* Timeline v9: "Show steps" + "Agent trace"; no dividers between agents; whole-pixel rows so every agent bar is the same thickness */
+.tl-acts{display:flex;gap:10px;margin-top:14px}
+.tl-acts .tl-more{margin-top:0;width:auto}
+.tl-acts .tl-more:first-child{flex:1;min-width:0}
+.tl-trace{flex:none;gap:8px;padding:11px 18px}
+.tl-trace .i{color:#49658b}
+.tl-row+.tl-row{border-top:0}
+.tl-row{padding:7px 4px 7px}
+.tl-rh{height:24px;line-height:24px}
+.tl-an,.tl-at{line-height:24px}
+.tl-rt{flex:none;height:4px;min-height:4px;margin-top:8px;overflow:hidden;transform:translateZ(0)}
+.tl-seg{top:0;height:4px;bottom:auto}
+
+/* Timeline v10: quiet text actions instead of pill buttons */
+.tl-acts{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding:0 2px}
+.tl-act{display:inline-flex;align-items:center;gap:4px;padding:4px 0;font:inherit;font-size:12.5px;font-weight:500;color:#49658b;background:none;border:0;cursor:pointer}
+.tl-act:hover{color:#2f245c;text-decoration:underline;text-underline-offset:3px}
+.tl-act .tl-chev{color:inherit;transition:transform .25s}
+.tl.open .tl-act .tl-chev{transform:rotate(180deg)}
+.tl-rows{padding-top:2px}
+
+/* Timeline v11: more breathing room between agent rows */
+.tl-row{padding:13px 4px 13px}
+.tl-rt{margin-top:10px}
+.tl-rows{padding-top:4px}
+
+/* Globe: the agent steps live inside the same glass card as the thinking header */
+.gbw{border-radius:20px;overflow:hidden;
+  background:linear-gradient(135deg,rgba(255,255,255,.55),rgba(255,255,255,.22));border:1px solid rgba(255,255,255,.85);
+  backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);
+  box-shadow:0 12px 32px -22px rgba(47,36,92,.35),inset 0 1px 0 rgba(255,255,255,.95),inset 0 0 0 1px rgba(47,36,92,.04)}
+.gbw>.gb{background:none;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;border-radius:0}
+.gbw .tl-acts{padding:0 22px;margin-top:0}
+.gbw .tl-rows{padding:0 20px 12px}
+.gbw .tl-ex-in{padding-bottom:0}
+.gbw.open .tl-act .tl-chev{transform:rotate(180deg)}
+.gbw:not(.open) .tl-acts{padding-bottom:12px}
+
+/* Globe: prominent percentage with the elapsed time beside it */
+.gm{align-items:baseline;gap:10px;margin-top:8px}
+.gm-pct{display:inline-flex;align-items:baseline;gap:1px;color:#2f245c;line-height:1;font-variant-numeric:tabular-nums}
+.gm-pct b{font-size:26px;font-weight:600;letter-spacing:-.4px}
+.gm-pct{font-size:14px;font-weight:500;color:#49658b}
+.gm-pct b{color:#2f245c}
+.gm-time{font-size:12px;color:#878787;font-variant-numeric:tabular-nums}
+
+/* Blocks: the agent steps live inside the same card as the header (same layout as Globe) */
+.bl-wrap>.gbw{position:relative;z-index:1}
+
+/* Steps actions as their own section: more space above and a faint divider (Timeline, Globe, Blocks) */
+.tl .tl-acts{margin-top:18px;padding:12px 2px 0;border-top:1px solid rgba(47,36,92,.09)}
+.gbw .tl-acts{margin:16px 22px 0;padding:12px 0 2px;border-top:1px solid rgba(47,36,92,.09)}
+.gbw:not(.open) .tl-acts{padding-bottom:12px}
+
+/* Globe finished state: bigger globe, tighter space above the divider */
+.gbw>.gb:not(.bl).done .gb-globe{width:78px;height:78px}
+.gbw>.gb:not(.bl).done{height:92px;padding:7px 18px 7px 22px}
+.gbw:has(.gb.done) .tl-acts{margin-top:4px}
+
+/* Blocks steps: its own layout. Every agent in a list with room to breathe; the meter is a strip of blocks, like the grid above */
+.bs{padding:2px 22px 16px}
+.bs-sum{display:flex;gap:18px;padding:4px 0 10px;font-size:12px;color:#878787}
+.bs-sum b{font-weight:600;color:#2f245c;margin-right:3px}
+.bs-list{list-style:none;margin:0;padding:0;max-height:330px;overflow-y:auto}
+.bs-row{display:grid;grid-template-columns:34px minmax(0,1fr) auto;align-items:center;column-gap:14px;padding:12px 0;border-top:1px solid rgba(47,36,92,.07)}
+.bs-row:first-child{border-top:0}
+.bs-ic{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 14%,#fff);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 20%,#fff)}
+.bs-row.bs-q .bs-ic{filter:grayscale(1);opacity:.45}
+.bs-tx{display:flex;flex-direction:column;gap:3px;min-width:0}
+.bs-tx b{font-size:13.5px;font-weight:600;color:#252525;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bs-tx small{font-size:12px;color:#878787;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;animation:gbIn .4s ease both}
+.bs-row.bs-q .bs-tx b{color:#a3a3a3}
+.bs-row.bs-q .bs-tx small{color:#c2c2c2}
+.bs-row.bs-q{background:none;box-shadow:none;cursor:default}
+.bs-st{display:flex;justify-content:flex-end;min-width:104px}
+.bs-meter{display:inline-flex;gap:3px}
+.bs-meter i{width:5px;height:16px;border-radius:2px;background:#e7e7e7;transition:background .3s}
+.bs-meter i.on{background:var(--c)}
+.bs-done{font-size:12.5px;font-weight:500;color:#12b76a}
+.bs-wait{font-size:12px;color:#a3a3a3}
+
+/* Graph card: header, "Show steps / Agent trace", then a collapsible canvas */
+.gv{height:auto!important}
+.gv-head{position:relative;height:66px;transition:height .55s cubic-bezier(.4,0,.2,1)}
+.gv.done .gv-head{height:84px}
+.gv-head .gv-pane{padding:16px 20px 0}
+.gv-head .gv-pane.fin{padding:0 22px}
+.gv-sub{margin-top:4px;font-size:12px;color:var(--ink3);line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;animation:gbIn .45s ease both}
+.gv .tl-acts{margin:6px 20px 0;padding:12px 0 2px;border-top:1px solid rgba(47,36,92,.09)}
+.gv:not(.open) .tl-acts{padding-bottom:12px}
+.gv.open .tl-act .tl-chev{transform:rotate(180deg)}
+.gv-cv{padding:8px 14px 16px}
+.gv-cv .gv-view{margin-top:0}
+
+/* Graph agent boxes: breathing room, a progress ring instead of a spinner, no bar inside the box */
+.gv-node.act .gv-st{animation:none;border:0;background:none}
+.gv-st{width:15px;height:15px;border-width:0}
+.gv-node.ok .gv-st{width:15px;height:15px}
+.gv-node.sm.wide{padding:0 16px;gap:12px;border-radius:12px}
+.gv-node.sm.wide .gv-nt{display:flex;flex-direction:column;gap:4px;line-height:1.3}
+.gv-node.sm.wide .gv-nt b{font-size:12px;font-weight:500}
+.gv-node.sm.wide .gv-nt small{margin:0;font-size:10.5px;line-height:1.3}
+.gv-pg{display:none}
+
+/* Reasoning pane: sources an agent reports back with */
+.ag-docs{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 6px 42px}
+.ag-docs span{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#4a4a4a;padding:3px 9px;border-radius:99px;background:#f1f0ee}
+
+/* Stage rows: step name, what it is doing (or its result), and the time it took */
+.tl-row.st .tl-at{text-align:left;color:#878787;font-weight:400}
+.tl-row.st.fin .tl-at{color:#878787}
+.tl-row.st.pend{opacity:.5}
+.tl-row.st .tl-an{flex:none;max-width:62%;overflow:hidden;text-overflow:ellipsis}
+.tl-tm{flex:none;min-width:44px;text-align:right;font-size:12px;font-variant-numeric:tabular-nums;color:#49658b;font-weight:500}
+.tl-row.st.fin .tl-tm{color:#4a4a4a}
+.bs-time{font-size:12.5px;font-weight:500;color:#4a4a4a;font-variant-numeric:tabular-nums}
+
+/* Subtle, thin scrollbars inside the thinking cards (steps lists) */
+.tl-rows,.bs-list,.ros-l{scrollbar-width:thin;scrollbar-color:rgba(47,36,92,.2) transparent}
+.tl-rows::-webkit-scrollbar,.bs-list::-webkit-scrollbar,.ros-l::-webkit-scrollbar{width:5px}
+.tl-rows::-webkit-scrollbar-track,.bs-list::-webkit-scrollbar-track,.ros-l::-webkit-scrollbar-track{background:transparent}
+.tl-rows::-webkit-scrollbar-thumb,.bs-list::-webkit-scrollbar-thumb,.ros-l::-webkit-scrollbar-thumb{background:rgba(47,36,92,.2);border-radius:99px}
+.tl-rows::-webkit-scrollbar-thumb:hover,.bs-list::-webkit-scrollbar-thumb:hover{background:rgba(47,36,92,.35)}
+.tl-rows::-webkit-scrollbar-button,.bs-list::-webkit-scrollbar-button,.ros-l::-webkit-scrollbar-button{display:none;width:0;height:0}
+
+/* Globe steps: a path of nodes on a dotted thread. Gold glow for the step that is running (the globe's own highlight colour). */
+.gj{list-style:none;margin:0;padding:4px 20px 14px;max-height:320px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(47,36,92,.2) transparent}
+.gj-row{position:relative;display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;column-gap:14px;padding:11px 12px;margin:2px 0;border-radius:16px;transition:background .4s,box-shadow .4s}
+.gj-row::after{content:"";position:absolute;left:29px;top:49px;bottom:-13px;border-left:2px dotted #cfccdc}
+.gj-row.last::after{display:none}
+.gj-row.gj-d::after{border-left:2px solid #49658b;opacity:.55}
+.gj-node{position:relative;width:36px;height:36px}
+.gj-ic{position:absolute;inset:0;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 14%,#fff);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 22%,#fff)}
+.gj-ok{position:absolute;right:-3px;bottom:-3px;width:15px;height:15px;border-radius:50%;display:grid;place-items:center;background:#12b76a;color:#fff;border:2px solid #fff;box-sizing:border-box}
+.gj-ok .i{stroke-width:4}
+.gj-tx{display:flex;flex-direction:column;gap:3px;min-width:0}
+.gj-tx b{font-size:13.5px;font-weight:600;color:#252525;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gj-tx small{font-size:12px;color:#878787;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;animation:gbIn .4s ease both}
+.gj-pill{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 11px;border-radius:99px;font-size:11.5px;font-weight:500;font-variant-numeric:tabular-nums;color:#4a4a4a;background:rgba(47,36,92,.07)}
+.gj-pill.live{color:#2f245c;background:rgba(255,208,89,.32)}
+.gj-pill.live i{width:6px;height:6px;border-radius:50%;background:#2f245c;animation:gjBlink 1.4s ease-in-out infinite}
+.gj-w{background:rgba(255,255,255,.6);box-shadow:0 8px 20px -14px rgba(47,36,92,.45),inset 0 0 0 1px rgba(255,255,255,.9)}
+.gj-w .gj-ic{box-shadow:inset 0 0 0 1.5px #FFD059,0 0 0 4px rgba(255,208,89,.28);animation:gjGlow 2.6s ease-in-out infinite}
+.gj-p .gj-ic{background:#f4f3f6;box-shadow:inset 0 0 0 1.5px #d9d7e1;filter:grayscale(1);opacity:.55}
+.gj-p .gj-tx b{color:#a3a3a3}
+.gj-p .gj-tx small{color:#c2c2c2}
+@keyframes gjGlow{0%,100%{box-shadow:inset 0 0 0 1.5px #FFD059,0 0 0 3px rgba(255,208,89,.22)}50%{box-shadow:inset 0 0 0 1.5px #FFD059,0 0 0 7px rgba(255,208,89,.08)}}
+@keyframes gjBlink{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* Globe steps: the running step stands out (filled gold node), finished steps recede until everything is done */
+.gj-row{transition:background .4s,box-shadow .4s,opacity .6s}
+.gj-d{opacity:.5}
+.gj.alldone .gj-d{opacity:1}
+.gj-w .gj-ic{--c:#2f245c;background:linear-gradient(135deg,color-mix(in srgb,#FFD059 55%,#fff) 0%,#FFD059 100%)}
+
+/* Globe steps: finished steps keep full opacity again */
+.gj-d{opacity:1}
+
+/* Globe finished state: the title and the chips sit on the same horizontal centre line as the globe */
+.gbw>.gb:not(.bl).done .gb-left{align-items:center}
+.gbw>.gb:not(.bl).done .gb-pane.fin{justify-content:center}
+.gbw>.gb:not(.bl) .gb-left{position:relative}
+.gbw>.gb:not(.bl).done .gb-pane.run{position:absolute;left:0;right:0;top:0}
+
+/* Graph: the drag hint / Follow live sits in the padding below the canvas, not on top of it */
+.gv-cv{position:relative;padding-bottom:34px}
+.gv-cv .gv-hint{right:20px;bottom:10px}
+
+/* Graph: numbered stages */
+.gv-num{display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;margin-right:6px;background:#eeedf7;color:#2f245c;font-size:9px;font-weight:600;font-style:normal;vertical-align:1px}
+
+/* ---- Stages vs agents being called: the agent calls branch off the stage before them ---- */
+/* Timeline rows */
+.tl-row.sub{position:relative;margin-left:28px;padding-top:9px;padding-bottom:9px}
+.tl-row.sub::before{content:"";position:absolute;left:-15px;top:-4px;bottom:-4px;border-left:1.5px solid #d4d4d4}
+.tl-row.sub.first::before{top:-12px}
+.tl-row.sub.last::before{bottom:50%}
+.tl-row.sub::after{content:"";position:absolute;left:-15px;top:50%;width:11px;border-top:1.5px solid #d4d4d4}
+.tl-row.sub .tl-ai{width:20px;height:20px}
+.tl-row.sub .tl-an{font-size:12.5px;font-weight:500}
+.tl-row.sub .tl-rt{margin-top:8px}
+/* Blocks list */
+.bs-row.bs-sub{position:relative;margin-left:34px;padding:9px 0;grid-template-columns:28px minmax(0,1fr) auto;column-gap:12px}
+.bs-row.bs-sub::before{content:"";position:absolute;left:-18px;top:-4px;bottom:-4px;border-left:1.5px solid rgba(47,36,92,.16)}
+.bs-row.bs-sub.first::before{top:-14px}
+.bs-row.bs-sub.last::before{bottom:50%}
+.bs-row.bs-sub::after{content:"";position:absolute;left:-18px;top:50%;width:12px;border-top:1.5px solid rgba(47,36,92,.16)}
+.bs-row.bs-sub{border-top:0}
+.bs-row.bs-sub .bs-ic{width:28px;height:28px;border-radius:9px}
+.bs-row.bs-sub .bs-tx b{font-size:12.5px}
+/* Globe path: the main thread keeps going; agent calls hang off it on a short branch */
+.gj-row.gj-sub{padding-left:46px;padding-top:8px;padding-bottom:8px}
+.gj-row.gj-sub .gj-node{width:30px;height:30px}
+.gj-row.gj-sub .gj-node::before{content:"";position:absolute;left:-17px;top:50%;width:17px;border-top:2px dotted #cfccdc}
+.gj-row.gj-sub.gj-d .gj-node::before{border-top:2px solid #49658b;opacity:.55}
+.gj-row.gj-sub .gj-tx b{font-size:12.5px;font-weight:500}
+.gj-row.gj-sub::after{top:0;bottom:0}
+.gj-row.gj-sub.first::after{top:20px}
+/* Graph: agent calls on their own lane, tinted with the agent's colour */
+.gv-node.lane{border-left:3px solid var(--c);background:color-mix(in srgb,var(--c) 7%,#fff)}
+.gj-row.gj-sub.subend::after{bottom:-14px}
+
+/* Timeline: the finished green bar keeps a very slow, faint shimmer going end to end */
+.tl.done .tl-fill{overflow:hidden}
+.tl.done .tl-fill::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.26) 50%,transparent 62%);background-size:220% 100%;background-repeat:no-repeat;animation:tlShimmer 5s ease-in-out infinite}
+
+/* Steps lists show every step in full: no inner scrolling, the page scrolls instead */
+.tl-rows,.bs-list,.gj,.ros-l{max-height:none!important;overflow:visible!important}
+
+/* ---- Reasoning panel: icon + overall time + live chips + three sections (Stages, Activity, Sources found) ---- */
+.rz-h{padding:20px 20px 8px;gap:12px}
+.rz-ic{width:44px;height:44px;flex:none;filter:drop-shadow(0 6px 10px rgba(47,36,92,.25))}
+.rz-ttl{flex:1;min-width:0}
+.rz-ttl h4{font-size:16px;font-weight:600;color:#2f245c;line-height:1.2}
+.rz-ttl .rz-st{padding:0;margin-top:3px}
+.rz-time{display:flex;align-items:flex-end;justify-content:space-between;margin:10px 24px 0}
+.rz-t1 small{display:block;font-size:11px;color:#878787;letter-spacing:.2px;margin-bottom:2px}
+.rz-t1 b{font-size:28px;font-weight:600;color:#2f245c;letter-spacing:-.5px;font-variant-numeric:tabular-nums;line-height:1}
+.rz-t2 span{font-size:13px;font-weight:600;color:#49658b;font-variant-numeric:tabular-nums}
+.rz-bar{margin-top:10px}
+.rz.done .rz-bar div{background:#12b76a}
+.rz-chips{display:flex;flex-wrap:wrap;gap:6px;margin:12px 24px 0}
+.rz-chips span{font-size:11px;font-weight:500;padding:3px 10px;border-radius:99px;color:#2f245c;background:#f4f3f9;border:1px solid #ebe9f4;font-variant-numeric:tabular-nums}
+.rz-tabs{display:flex;gap:4px;margin:14px 20px 0;padding:3px;border-radius:12px;background:#f1f0ee}
+.rz-tabs button{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;border-radius:9px;font-size:12px;font-weight:500;color:#878787;white-space:nowrap;transition:background .2s,color .2s}
+.rz-tabs button:hover{color:#252525}
+.rz-tabs button.on{background:#fff;color:#2f245c;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.rz-tabs i{font-style:normal;font-size:10.5px;font-weight:600;min-width:18px;height:18px;padding:0 5px;border-radius:99px;display:inline-grid;place-items:center;background:rgba(47,36,92,.08);color:#2f245c;font-variant-numeric:tabular-nums}
+.rz-b{padding-top:10px}
+.rz-n{margin:6px 24px 14px;padding-top:10px;border-top:1px solid #efefef}
+.rz-empty{list-style:none;font-size:12px;color:#878787;padding:18px 8px;text-align:center}
+/* activity feed */
+.rz-feed{list-style:none;margin:0;padding:4px 8px 4px}
+.rz-ev{position:relative;display:grid;grid-template-columns:50px 14px minmax(0,1fr);column-gap:10px;padding:8px 0;animation:gbIn .4s ease both}
+.rz-ev .tm{font-size:11px;color:#878787;text-align:right;padding-top:1px;font-variant-numeric:tabular-nums}
+.rz-ev .pt{position:relative;width:9px;height:9px;margin:4px 0 0 2px;border-radius:50%;background:var(--sc,#2f245c);box-shadow:0 0 0 3px color-mix(in srgb,var(--sc,#2f245c) 16%,#fff)}
+.rz-ev::before{content:"";position:absolute;left:63px;top:20px;bottom:-8px;border-left:1.5px solid #e7e7e7}
+.rz-ev:last-child::before{display:none}
+.rz-ev .tx{font-size:12.5px;color:#252525;line-height:1.45}
+.rz-ev.s0{--sc:#2f245c}.rz-ev.s1{--sc:#49658b}.rz-ev.s2{--sc:#8b5cf6}.rz-ev.s3{--sc:#12b76a}.rz-ev.s4{--sc:#FFD059}
+.rz-ev:first-child .tx{font-weight:500}
+/* sources found */
+.rz-src{list-style:none;margin:0;padding:4px 8px}
+.rz-src li{display:grid;grid-template-columns:34px minmax(0,1fr) auto;align-items:center;column-gap:12px;padding:10px 8px;border-radius:12px;animation:gbIn .4s ease both}
+.rz-src li+li{border-top:1px solid #f0f0f0}
+.rz-src .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:var(--c);background:color-mix(in srgb,var(--c) 13%,#fff)}
+.rz-src .tx{display:flex;flex-direction:column;gap:2px;min-width:0}
+.rz-src .tx b{font-size:13px;font-weight:600;color:#252525;line-height:1.3}
+.rz-src .tx small{font-size:11.5px;color:#878787}
+.rz-src .at{font-size:11px;color:#878787;font-variant-numeric:tabular-nums}
+
+/* ---- Reasoning panel v2: one scroll for the whole panel, thin and quiet; stages no longer double-padded ---- */
+.rz-tl{list-style:none;margin:0;padding:0}
+.rz{overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:rgba(47,36,92,.18) transparent}
+.rz::-webkit-scrollbar{width:4px}
+.rz::-webkit-scrollbar-track{background:transparent}
+.rz::-webkit-scrollbar-thumb{background:rgba(47,36,92,.18);border-radius:99px}
+.rz::-webkit-scrollbar-thumb:hover{background:rgba(47,36,92,.32)}
+.rz::-webkit-scrollbar-button{display:none;width:0;height:0}
+.rz>*{flex:none}
+.rz-b{flex:none;overflow:visible;padding:10px 20px 4px}
+.rz-ic{width:42px;height:42px;flex:none;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,#49658b,#2f245c);box-shadow:0 6px 12px -6px rgba(47,36,92,.5)}
+
+/* Reasoning panel: quieter Sources (grey chips, names only) and an aligned Activity line */
+.rz-src{display:flex;flex-wrap:wrap;gap:8px;padding:6px 0}
+.rz-src li{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:99px;border:1px solid #ebe9f4;background:#f7f6f4;font-size:12px;font-weight:500;color:#4a4a4a;line-height:1.2;animation:gbIn .4s ease both}
+.rz-src li+li{border-top:1px solid #ebe9f4}
+.rz-src li .i{color:#9a9a9a}
+.rz-src .rz-empty{flex:1 0 100%;border:0;background:none;padding:18px 8px}
+.rz-ev .pt{margin:4px auto 0}
+.rz-ev::before{left:66px;border-left:2px solid #ececec;top:18px}
+.rz-ev:first-child .tx{font-weight:400}
+.rz-ev:last-child .tx{font-weight:500}
+
+/* Reasoning panel: one card per agent, between the routing stage and the stage that gathers their findings */
+.stp.agc{margin-left:16px}
+.stp.agc::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:3px;background:var(--c);opacity:.85}
+.stp.agc.pend::before{opacity:.25}
+
+/* Reasoning panel: agent cards are not indented (their coloured edge is enough); the assigned-agent chip carries the agent's icon and wraps below the label when long */
+.stp.agc{margin-left:0}
+.as{flex-wrap:wrap}
+.as .ch{white-space:nowrap}
+
+/* Reasoning panel: "Assigned Agent" on top, the agent chip on its own line below, for every stage */
+.as{flex-direction:column;align-items:flex-start;gap:6px}
+
+/* "View query": a plain left-aligned link that opens a modal */
+.sq-link{display:flex;align-items:center;gap:6px;margin:10px 0 2px;padding:0;background:none;border:0;font:inherit;font-size:12.5px;font-weight:500;color:#49658b;cursor:pointer;text-align:left;width:auto}
+.sq-link:hover{color:#2f245c;text-decoration:underline;text-underline-offset:3px}
+.sqm-back{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;padding:24px;background:rgba(24,18,48,.42);backdrop-filter:blur(3px);animation:gbIn .25s ease both}
+.sqm{width:min(680px,100%);max-height:min(80vh,640px);display:flex;flex-direction:column;background:#fff;border-radius:20px;padding:22px 24px 24px;box-shadow:0 30px 70px -20px rgba(24,18,48,.55)}
+.sqm-h{display:flex;align-items:flex-start;gap:8px;margin-bottom:16px}
+.sqm-h>div{flex:1;min-width:0}
+.sqm-h h5{margin:0;font-size:17px;font-weight:600;color:#2f245c}
+.sqm-h p{margin:3px 0 0;font-size:12.5px;color:#878787}
+.sqm-copy{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;border-radius:99px;border:1px solid #d4d4d4;background:#fff;font-size:12.5px;font-weight:500;color:#252525;cursor:pointer}
+.sqm-copy:hover{background:#f7f6f4}
+.sqm-x{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;color:#4a4a4a}
+.sqm-x:hover{background:#f3f3f3}
+.sqm-code{margin:0;overflow:auto;padding:18px 20px;border-radius:14px;background:#f7f6f4;font:13px/1.75 ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',monospace;color:#252525;white-space:pre;tab-size:2}
+.sqm-code .kw{color:#2f245c;font-weight:600}
+
+/* Reasoning pane: stages stream in one at a time */
+.stp.rz-in{animation:gbIn .45s cubic-bezier(.2,.8,.2,1) both}
+.rv-hide{display:none!important}
+.rv-new{animation:rvType .9s steps(26,end) both}
+@keyframes rvType{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+
+/* streaming: a passage appears line by line (top to bottom), not sliding in from the left */
+@keyframes rvLines{from{clip-path:inset(0 0 100% 0)}to{clip-path:inset(0 0 0 0)}}
+.rv-new{animation:none}
+
+/* streaming: words arrive one by one, so each line fills from the left and the next line follows */
+.rv-w{opacity:0;transition:opacity .22s ease}
+.rv-w.on{opacity:1}
+
+/* Reasoning pane: no timer on the stage header; the time a stage took is a quiet line inside it */
+.rz-took{margin-top:8px;font-size:11px;color:#a3a3a3;font-variant-numeric:tabular-nums}
+
+/* Completed-reasoning chips (Globe, Blocks, Graph) use the same chip look as the Reasoning panel */
+.gb-facts span{font-size:11px;font-weight:500;padding:3px 10px;border-radius:99px;color:#2f245c;background:#f4f3f9;border:1px solid #ebe9f4;font-variant-numeric:tabular-nums}
+
+/* ---- Reasoning pane, variation 2: Story. Light, written like a short report ---- */
+.rz.rz-story{background:#fff}
+.sy-top{display:flex;align-items:center;gap:12px;padding:20px 18px 4px 20px;flex:none}
+.sy-mark{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;flex:none;background:linear-gradient(135deg,#49658b,#2f245c);box-shadow:0 6px 12px -6px rgba(47,36,92,.5)}
+.sy-ttl{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.sy-ttl b{font-size:16px;font-weight:600;color:#2f245c}
+.sy-ttl small{font-size:12px;color:#878787}
+.rz-story .sy-top button{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:#4a4a4a;flex:none}
+.rz-story .sy-top button:hover{background:#f3f3f3}
+.sy-time{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:14px 20px 0;padding:10px 14px;border-radius:12px;background:#f7f6f4;flex:none}
+.sy-time span{font-size:12px;color:#878787}
+.sy-time b{font-size:18px;font-weight:600;color:#2f245c;letter-spacing:-.2px;font-variant-numeric:tabular-nums}
+.rz.rz-story.done .sy-time b{color:#12b76a}
+/* stage rail: every label is shown in full (first label sits left, last sits right, the rest are centred) */
+.sy-rail{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;margin:18px 20px 0;flex:none}
+.sy-seg i{display:block;height:5px;border-radius:5px;background:#eeedf3;overflow:hidden}
+.sy-seg i b{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,#49658b,#2f245c)}
+.sy-seg.done i b{background:#12b76a}
+.sy-seg span{display:block;margin-top:7px;font-size:10.5px;font-weight:500;color:#a3a3a3;white-space:nowrap;text-align:center;overflow:visible}
+.sy-seg:first-child span{text-align:left}
+.sy-seg:last-child span{text-align:right}
+.sy-seg.act span{color:#2f245c;font-weight:600}
+.sy-seg.done span{color:#4a4a4a}
+.sy-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:18px 20px 0;flex:none}
+.sy-stats div{padding:9px 4px 8px;border-radius:12px;background:#f4f3f9;border:1px solid #ebe9f4;text-align:center}
+.sy-stats b{display:block;font-size:15px;font-weight:600;color:#2f245c;font-variant-numeric:tabular-nums}
+.sy-stats span{display:block;margin-top:2px;font-size:10px;color:#878787;line-height:1.2}
+/* the story */
+.sy-body{padding:22px 20px 26px;flex:none}
+.sy-sec{position:relative;display:grid;grid-template-columns:24px minmax(0,1fr);column-gap:12px;padding-bottom:20px;animation:gbIn .45s cubic-bezier(.2,.8,.2,1) both}
+.sy-sec::before{content:"";position:absolute;left:11px;top:26px;bottom:2px;border-left:2px solid #eeedf3}
+.sy-sec:last-of-type::before{display:none}
+.sy-dot{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#fff;box-shadow:inset 0 0 0 2px #d4d4d4;color:#fff}
+.sy-sec.done .sy-dot{background:#12b76a;box-shadow:none}
+.sy-sec.act .sy-dot{box-shadow:inset 0 0 0 2px #FFD059,0 0 0 4px rgba(255,208,89,.25)}
+.sy-sec.act .sy-dot i{width:8px;height:8px;border-radius:50%;background:#FFD059}
+.sy-c h6{margin:2px 0 6px;font-size:13.5px;font-weight:600;color:#252525;line-height:1.35}
+.sy-c p{margin:0 0 8px;font-size:12.5px;line-height:1.65;color:#4a4a4a}
+.st-called{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 4px}
+.st-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 11px 4px 7px;border-radius:99px;font-size:11.5px;font-weight:500;color:#252525;background:color-mix(in srgb,var(--c) 11%,#fff);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 22%,#fff)}
+.st-ags{display:flex;flex-direction:column;gap:12px}
+.st-ag{display:grid;grid-template-columns:30px minmax(0,1fr);column-gap:10px}
+.st-ai{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 13%,#fff);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 20%,#fff)}
+.st-at b{display:block;font-size:12.5px;font-weight:600;color:#252525;line-height:1.3;margin-bottom:2px}
+.st-at p{margin:0 0 4px;font-size:12.5px;line-height:1.6;color:#4a4a4a}
+.st-at p.wk{color:#878787}
+.st-at p.wk i{display:inline-block;width:3px;height:3px;margin-left:3px;border-radius:50%;background:#a3a3a3;animation:gbDot 1.2s infinite ease-in-out}
+.st-at p.wk i:nth-of-type(2){animation-delay:.2s}.st-at p.wk i:nth-of-type(3){animation-delay:.4s}
+.st-cites{display:inline-flex;gap:4px}
+.st-cites i{min-width:18px;height:18px;padding:0 5px;border-radius:6px;display:inline-grid;place-items:center;font-style:normal;font-size:10.5px;font-weight:600;color:#49658b;background:#edf1f8}
+.st-checks{list-style:none;margin:0 0 6px;padding:0}
+.st-checks li{display:flex;gap:9px;padding:3px 0;font-size:12.5px;line-height:1.55;color:#4a4a4a}
+.st-checks li>span:first-child{flex:none;width:15px;height:15px;margin-top:3px;border-radius:50%;display:grid;place-items:center;background:#12b76a;color:#fff}
+.sy-src{margin-top:4px;padding-top:18px;border-top:1px solid #efefef}
+.sy-src h6{margin:0 0 10px;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:#878787}
+.sy-src ol{list-style:none;margin:0;padding:0}
+.sy-src li{display:flex;align-items:baseline;gap:10px;padding:5px 0;font-size:12.5px;color:#252525;animation:gbIn .4s ease both}
+.sy-src li i{flex:none;min-width:18px;height:18px;padding:0 5px;border-radius:6px;display:inline-grid;place-items:center;font-style:normal;font-size:10.5px;font-weight:600;color:#49658b;background:#edf1f8}
+.sy-src li small{margin-left:auto;font-size:11px;color:#a3a3a3}
+
+/* Story: the line stops at the last stage; the four numbers sit in one quiet box */
+.sy-sec.last::before{display:none}
+.sy-sec.last{padding-bottom:6px}
+.sy-stats{gap:0;padding:12px 0 11px;border-radius:14px;background:#f4f3f9;border:1px solid #ebe9f4}
+.sy-stats div{padding:0 4px;background:none;border:0;border-radius:0}
+.sy-stats div+div{border-left:1px solid #e3e1ee}
+
+/* Story: the overall time lives in the status line, so the rail follows the header directly */
+.sy-rail{margin-top:16px}
+
+/* Sources look clickable: a bordered row that lifts and shows an arrow on hover (they go nowhere yet) */
+.sy-src li{display:block;padding:0;margin-bottom:6px}
+.sy-sbtn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 12px;border-radius:12px;border:1px solid #ebe9f4;background:#fff;font:inherit;font-size:12.5px;color:#252525;text-align:left;cursor:pointer;transition:background .2s,border-color .2s,box-shadow .2s,transform .2s}
+.sy-sbtn i{flex:none;min-width:18px;height:18px;padding:0 5px;border-radius:6px;display:inline-grid;place-items:center;font-style:normal;font-size:10.5px;font-weight:600;color:#49658b;background:#edf1f8}
+.sy-sbtn span{flex:1;min-width:0}
+.sy-sbtn small{font-size:11px;color:#a3a3a3}
+.sy-sbtn .go{flex:none;color:#a3a3a3;transition:transform .2s,color .2s}
+.sy-sbtn:hover{background:#f7f6fb;border-color:#c9d3e6;box-shadow:0 6px 14px -10px rgba(47,36,92,.45);transform:translateY(-1px)}
+.sy-sbtn:hover span{color:#2f245c}
+.sy-sbtn:hover .go{color:#49658b;transform:translateX(2px)}
+.sy-sbtn:active{transform:none}
+.sy-sbtn:focus-visible{outline:2px solid #49658b;outline-offset:2px}
+/* the same cue on the Cards pane's source chips */
+.rz-src li{cursor:pointer;transition:background .2s,border-color .2s,box-shadow .2s,transform .2s}
+.rz-src li:hover{background:#fff;border-color:#c9d3e6;color:#2f245c;box-shadow:0 6px 14px -10px rgba(47,36,92,.45);transform:translateY(-1px)}
+.rz-src li:hover .i{color:#49658b}
+
+/* Story: each agent is its chip, with its streaming text underneath (no icon tile, no separate name) */
+.st-ag{display:block}
+.st-ag .st-chip{margin-bottom:6px}
+.st-ag .st-at p{margin:0 0 6px}
+.st-cites{align-items:center}
+.st-cites em{margin-right:2px;font-style:normal;font-size:10.5px;color:#a3a3a3}
+
+/* citation numbers are buttons that jump to their source; the source flashes for a moment */
+.st-cites .st-c{min-width:18px;height:18px;padding:0 5px;border:0;border-radius:6px;display:inline-grid;place-items:center;font:inherit;font-size:10.5px;font-weight:600;color:#49658b;background:#edf1f8;cursor:pointer;transition:background .2s,color .2s,transform .2s}
+.st-cites .st-c:hover{background:#49658b;color:#fff;transform:translateY(-1px)}
+.st-cites .st-c:focus-visible{outline:2px solid #49658b;outline-offset:2px}
+.sy-src li.flash .sy-sbtn{animation:srcFlash 1.8s ease both}
+@keyframes srcFlash{0%{background:#FFF3C8;border-color:#FFD059;box-shadow:0 0 0 4px rgba(255,208,89,.35)}60%{background:#FFF3C8;border-color:#FFD059;box-shadow:0 0 0 4px rgba(255,208,89,.2)}100%{background:#fff;border-color:#ebe9f4;box-shadow:0 0 0 0 rgba(255,208,89,0)}}
+
+/* Story: a gentler highlight for the source you jumped to */
+.sy-src li.flash .sy-sbtn{animation:srcFlash 1.6s ease both}
+@keyframes srcFlash{0%{background:#f1f4fa;border-color:#c9d3e6;box-shadow:0 0 0 3px rgba(73,101,139,.12)}65%{background:#f1f4fa;border-color:#c9d3e6;box-shadow:0 0 0 3px rgba(73,101,139,.08)}100%{background:#fff;border-color:#ebe9f4;box-shadow:0 0 0 0 rgba(73,101,139,0)}}
+
+/* Story: the running stage shows a spinning gold arc with a pulsing core; the tick pops in when it finishes */
+.sy-sec.act .sy-dot{box-shadow:none;background:conic-gradient(from var(--ang),#FFD059 0%,#FFE7A3 38%,rgba(255,208,89,.06) 72%,rgba(255,208,89,0) 100%);animation:spin 1.1s linear infinite;position:relative}
+.sy-sec.act .sy-dot::after{content:"";position:absolute;inset:3px;border-radius:50%;background:#fff}
+.sy-sec.act .sy-dot i{position:relative;z-index:1;width:6px;height:6px;background:#FFD059;animation:syCore 1.1s ease-in-out infinite}
+@keyframes syCore{0%,100%{transform:scale(.7);opacity:.7}50%{transform:scale(1.15);opacity:1}}
+.sy-sec.done .sy-dot{animation:syPop .45s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes syPop{from{transform:scale(.55)}to{transform:scale(1)}}
+
+/* Story: stage stepper. Round nodes joined by a line that fills as each stage runs; every name is centred under its own node,
+   so different name lengths no longer make different bar sizes. */
+.sy-steps{display:flex;align-items:flex-start;margin:20px 20px 0;padding:0 34px 26px;flex:none}
+.sy-sw{display:flex;align-items:flex-start;flex:1 1 0}
+.sy-sw:last-child{flex:0 0 auto}
+.sy-nd{position:relative;flex:none;width:14px;height:14px}
+.sy-nd .dot{position:absolute;inset:0;border-radius:50%;display:grid;place-items:center;background:#fff;box-shadow:inset 0 0 0 2px #d4d4d4;color:#fff;transition:background .3s,box-shadow .3s}
+.sy-nd.done .dot{background:#12b76a;box-shadow:none}
+.sy-nd.act .dot{box-shadow:none;background:conic-gradient(from var(--ang),#FFD059 0%,#FFE7A3 38%,rgba(255,208,89,.06) 72%,rgba(255,208,89,0) 100%);animation:spin 1.1s linear infinite}
+.sy-nd.act .dot::after{content:"";position:absolute;inset:2.5px;border-radius:50%;background:#fff}
+.sy-nd .lb{position:absolute;top:21px;left:50%;transform:translateX(-50%);font-size:10.5px;font-weight:500;color:#a3a3a3;white-space:nowrap}
+.sy-nd.act .lb{color:#2f245c;font-weight:600}
+.sy-nd.done .lb{color:#4a4a4a}
+.sy-ln{display:block;flex:1;height:2px;margin:6px 4px 0;border-radius:2px;background:#eeedf3;overflow:hidden}
+.sy-ln b{display:block;height:100%;border-radius:2px;background:#12b76a}
+
+/* ---- Reasoning pane, variation 3: Aurora. The Story layout with a livelier, more "AI" look ---- */
+.rz.rz-ai{background:#fff;isolation:isolate;box-shadow:0 24px 54px -22px rgba(47,36,92,.5),0 0 0 1px rgba(137,112,255,.14)}
+.rz-ai>*{position:relative;z-index:1}
+.rz-ai>.au-bg,.rz-ai>.au-edge{position:absolute;z-index:0}
+/* aurora glow behind the header: three slow, blurred colour blobs */
+.au-bg{left:0;right:0;top:0;height:290px;overflow:hidden;pointer-events:none;-webkit-mask:linear-gradient(#000 55%,transparent);mask:linear-gradient(#000 55%,transparent)}
+.au-bg i{position:absolute;border-radius:50%;filter:blur(36px);opacity:.75}
+.au-bg i:nth-child(1){width:210px;height:190px;left:-50px;top:-60px;background:#c9b8ff;animation:auDrift 9s ease-in-out infinite alternate}
+.au-bg i:nth-child(2){width:190px;height:170px;right:-40px;top:-30px;background:#9fc3ff;animation:auDrift 11s ease-in-out infinite alternate-reverse}
+.au-bg i:nth-child(3){width:150px;height:130px;left:34%;top:50px;background:#ffe08a;opacity:.55;animation:auDrift 13s ease-in-out infinite alternate}
+@keyframes auDrift{from{transform:translate(0,0) scale(1)}to{transform:translate(26px,18px) scale(1.18)}}
+/* a bright line along the very top that fills with the run */
+.au-edge{left:0;right:0;top:0;height:3px;background:rgba(47,36,92,.08)}
+.au-edge b{display:block;height:100%;background:linear-gradient(90deg,#2f245c,#6a5bd6,#49a3ff,#FFD059);background-size:200% 100%;animation:flow 3s linear infinite;box-shadow:0 0 10px rgba(106,91,214,.8);transition:width .3s linear}
+.rz.rz-ai.done .au-edge b{background:#12b76a;animation:none;box-shadow:0 0 10px rgba(18,183,106,.6)}
+/* the orb */
+.rz-ai .sy-top{padding-top:24px}
+.au-orb{position:relative;width:46px;height:46px;border-radius:50%;flex:none;display:grid;place-items:center;background:radial-gradient(circle at 32% 28%,#8d7bff 0%,#4d3fb0 45%,#2f245c 100%);box-shadow:0 0 0 3px rgba(255,255,255,.85),0 8px 24px -4px rgba(106,91,214,.7),inset 0 2px 6px rgba(255,255,255,.35)}
+.au-orb>i{position:absolute;inset:-6px;border-radius:50%;background:conic-gradient(from var(--ang),#FFD059,rgba(255,208,89,0) 30%,#6aa8ff 55%,rgba(106,168,255,0) 80%,#FFD059);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2px));animation:spin 3.2s linear infinite;opacity:.95}
+.au-orb:not(.live)>i{animation:none;background:conic-gradient(#12b76a,#12b76a);opacity:.9}
+.au-orb .sp{position:absolute;font-style:normal;color:#FFD059;line-height:1;animation:auTwinkle 2.4s ease-in-out infinite}
+.au-orb .s1{font-size:11px;top:-9px;right:-10px}
+.au-orb .s2{font-size:8px;bottom:-6px;left:-12px;animation-delay:.8s}
+.au-orb .s3{font-size:7px;top:2px;left:-16px;animation-delay:1.5s;color:#9fc3ff}
+@keyframes auTwinkle{0%,100%{opacity:.2;transform:scale(.6) rotate(0)}50%{opacity:1;transform:scale(1.15) rotate(25deg)}}
+.rz-ai .sy-ttl b{font-size:17px;font-weight:700;letter-spacing:.1px}
+.rz-ai .sy-ttl b.au-live{background:linear-gradient(90deg,#2f245c 0,#2f245c 35%,#8a6bff 50%,#2f245c 65%,#2f245c 100%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shim 2.6s linear infinite}
+.rz-ai .sy-ttl small{color:#5d5a78}
+/* glass stat box with a glowing gradient edge */
+.rz-ai .sy-stats{margin-top:20px;border:1.5px solid transparent;background:linear-gradient(rgba(255,255,255,.86),rgba(255,255,255,.86)) padding-box,linear-gradient(135deg,#8d7bff,#6aa8ff,#FFD059) border-box;box-shadow:0 12px 28px -16px rgba(106,91,214,.55)}
+.rz-ai .sy-stats div+div{border-left-color:rgba(106,91,214,.18)}
+.rz-ai .sy-stats b{font-size:18px;background:linear-gradient(135deg,#2f245c,#6a5bd6 60%,#49a3ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.rz-ai .sy-stats span{color:#6b6888}
+/* the story: a glowing thread, glowing nodes, and each stage in its own glass card */
+.rz-ai .sy-body{padding-top:26px}
+.rz-ai .sy-sec{padding-bottom:18px}
+.rz-ai .sy-sec::before{border-left:0;width:2px;left:11px;top:28px;bottom:-6px;border-radius:2px;background:linear-gradient(180deg,#b9a9ff,#9fc3ff);opacity:.7}
+.rz-ai .sy-sec.act::before{background:linear-gradient(180deg,#FFD059,#8d7bff,#9fc3ff);background-size:100% 220%;animation:auFlow 1.6s linear infinite;opacity:1}
+@keyframes auFlow{from{background-position:0 0}to{background-position:0 220%}}
+.rz-ai .sy-dot{width:26px;height:26px;margin-left:-1px}
+.rz-ai .sy-sec.done .sy-dot{background:linear-gradient(135deg,#34d399,#12b76a);box-shadow:0 0 0 4px rgba(18,183,106,.16),0 4px 10px -2px rgba(18,183,106,.5)}
+.rz-ai .sy-sec.act .sy-dot{box-shadow:0 0 0 4px rgba(255,208,89,.28),0 0 16px rgba(255,208,89,.7)}
+.rz-ai .sy-c{padding:12px 14px 6px;border-radius:16px;border:1.5px solid transparent;background:linear-gradient(rgba(255,255,255,.92),rgba(255,255,255,.92)) padding-box,linear-gradient(135deg,rgba(141,123,255,.35),rgba(106,168,255,.25),rgba(255,208,89,.3)) border-box;box-shadow:0 10px 24px -18px rgba(47,36,92,.5)}
+.rz-ai .sy-sec.act .sy-c{background:linear-gradient(#fff,#fff) padding-box,conic-gradient(from var(--ang),#8d7bff,#6aa8ff,#FFD059,#8d7bff) border-box;animation:spin 3.4s linear infinite;box-shadow:0 14px 32px -16px rgba(106,91,214,.7)}
+.rz-ai .sy-sec.act .sy-c>*{animation:none}
+.rz-ai .sy-c h6{font-size:14px;font-weight:700;color:#2f245c}
+.rz-ai .sy-c p{color:#4a4866}
+/* agent chips glow in their own colour */
+.rz-ai .st-chip{padding:5px 12px 5px 8px;font-weight:600;background:linear-gradient(135deg,color-mix(in srgb,var(--c) 22%,#fff),#fff);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 35%,#fff),0 6px 14px -8px color-mix(in srgb,var(--c) 70%,transparent)}
+.rz-ai .st-cites .st-c,.rz-ai .sy-sbtn i{background:linear-gradient(135deg,#8d7bff,#49a3ff);color:#fff}
+.rz-ai .st-cites .st-c:hover{background:linear-gradient(135deg,#2f245c,#6a5bd6)}
+.rz-ai .st-checks li>span:first-child{background:linear-gradient(135deg,#34d399,#12b76a);box-shadow:0 0 0 3px rgba(18,183,106,.14)}
+.rz-ai .sy-src{border-top:0;position:relative;padding-top:6px}
+.rz-ai .sy-src h6{color:#6a5bd6;display:flex;align-items:center;gap:8px}
+.rz-ai .sy-src h6::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(141,123,255,.45),transparent)}
+.rz-ai .sy-sbtn{background:linear-gradient(#fff,#fff) padding-box,linear-gradient(135deg,rgba(141,123,255,.35),rgba(106,168,255,.3)) border-box;border:1.5px solid transparent}
+.rz-ai .sy-sbtn:hover{box-shadow:0 10px 22px -12px rgba(106,91,214,.7)}
+
+/* ---- Aurora, calmer: the same ideas (soft glow, orb, glass, gradient accents) at a much lower volume ---- */
+.au-bg{height:220px}
+.au-bg i{filter:blur(46px);opacity:.3}
+.au-bg i:nth-child(1){animation-duration:20s}
+.au-bg i:nth-child(2){animation-duration:24s}
+.au-bg i:nth-child(3){opacity:.2;animation-duration:28s}
+.au-edge{height:2px}
+.au-edge b{background:linear-gradient(90deg,#49658b,#8d7bff);box-shadow:none;animation:none}
+.rz.rz-ai.done .au-edge b{box-shadow:none}
+.rz.rz-ai{box-shadow:0 18px 40px -22px rgba(47,36,92,.35),0 0 0 1px rgba(47,36,92,.06)}
+/* orb: a calm brand-coloured disc with one thin, slow ring and no twinkling */
+.au-orb{width:40px;height:40px;background:linear-gradient(135deg,#49658b,#2f245c);box-shadow:0 0 0 3px #fff,0 6px 14px -6px rgba(47,36,92,.5)}
+.au-orb>i{inset:-5px;opacity:.5;animation-duration:7s;-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 1px));mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 1px))}
+.au-orb .sp{display:none}
+.rz-ai .sy-ttl b{font-size:16px;font-weight:600}
+.rz-ai .sy-ttl b.au-live{background:linear-gradient(90deg,#2f245c 0,#2f245c 40%,#6f64b8 50%,#2f245c 60%,#2f245c 100%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation-duration:4.5s}
+/* stats: a quiet frosted box */
+.rz-ai .sy-stats{border:1px solid #e6e4f1;background:rgba(255,255,255,.75);backdrop-filter:blur(6px);box-shadow:none}
+.rz-ai .sy-stats div+div{border-left-color:#e6e4f1}
+.rz-ai .sy-stats b{font-size:16px;background:none;color:#2f245c}
+/* story: pale thread, soft nodes, plain cards; only the running stage gets a gentle lift */
+.rz-ai .sy-sec::before{width:0;border-left:2px solid #eceaf4;background:none;opacity:1}
+.rz-ai .sy-sec.act::before{background:none;animation:none;border-left-color:#f1e3b0}
+.rz-ai .sy-dot{width:24px;height:24px;margin-left:0}
+.rz-ai .sy-sec.done .sy-dot{background:#12b76a;box-shadow:0 0 0 3px rgba(18,183,106,.12)}
+.rz-ai .sy-sec.act .sy-dot{box-shadow:none}
+.rz-ai .sy-c{padding:11px 14px 5px;border:1px solid #ebe9f4;border-radius:14px;background:#fff;box-shadow:none}
+.rz-ai .sy-sec.act .sy-c{background:linear-gradient(180deg,#fcfbff,#fff);border-color:#ddd8f3;box-shadow:0 10px 22px -18px rgba(106,91,214,.45);animation:none}
+.rz-ai .sy-c h6{font-size:13.5px;font-weight:600;color:#252525}
+.rz-ai .sy-c p{color:#4a4a4a}
+.rz-ai .st-chip{font-weight:500;background:color-mix(in srgb,var(--c) 11%,#fff);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 22%,#fff)}
+.rz-ai .st-cites .st-c,.rz-ai .sy-sbtn i{background:#edf1f8;color:#49658b}
+.rz-ai .st-cites .st-c:hover{background:#49658b;color:#fff}
+.rz-ai .st-checks li>span:first-child{background:#12b76a;box-shadow:none}
+.rz-ai .sy-src h6{color:#878787}
+.rz-ai .sy-src h6::after{background:#efefef}
+.rz-ai .sy-sbtn{background:#fff;border:1px solid #ebe9f4}
+.rz-ai .sy-sbtn:hover{box-shadow:0 8px 18px -12px rgba(47,36,92,.4)}
+
+/* ---- Aurora as glassmorphism: a frosted, translucent panel with frosted layers inside it ---- */
+.rz.rz-ai{background:linear-gradient(150deg,rgba(255,255,255,.66) 0%,rgba(255,255,255,.4) 55%,rgba(247,244,255,.5) 100%);backdrop-filter:blur(26px) saturate(165%);-webkit-backdrop-filter:blur(26px) saturate(165%);border:1px solid rgba(255,255,255,.75);box-shadow:0 30px 60px -26px rgba(47,36,92,.45),inset 0 1px 0 rgba(255,255,255,.95),inset 0 0 0 1px rgba(255,255,255,.25)}
+.au-bg i{opacity:.42}
+.au-bg i:nth-child(3){opacity:.3}
+.rz-ai .sy-stats{background:rgba(255,255,255,.48);border:1px solid rgba(255,255,255,.85);backdrop-filter:blur(14px) saturate(150%);-webkit-backdrop-filter:blur(14px) saturate(150%);box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 10px 26px -18px rgba(47,36,92,.35)}
+.rz-ai .sy-stats div+div{border-left-color:rgba(47,36,92,.08)}
+.rz-ai .sy-sec::before{border-left-color:rgba(47,36,92,.1)}
+.rz-ai .sy-sec.act::before{border-left-color:rgba(255,208,89,.7)}
+.rz-ai .sy-dot{background:rgba(255,255,255,.8)}
+.rz-ai .sy-sec.done .sy-dot{background:#12b76a}
+.rz-ai .sy-c{background:rgba(255,255,255,.52);border:1px solid rgba(255,255,255,.88);backdrop-filter:blur(12px) saturate(145%);-webkit-backdrop-filter:blur(12px) saturate(145%);box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 12px 28px -20px rgba(47,36,92,.4)}
+.rz-ai .sy-sec.act .sy-c{background:linear-gradient(135deg,rgba(255,255,255,.78),rgba(238,233,255,.5));border-color:rgba(255,255,255,.95);box-shadow:inset 0 1px 0 #fff,0 16px 34px -20px rgba(106,91,214,.5)}
+.rz-ai .st-chip{background:color-mix(in srgb,var(--c) 13%,rgba(255,255,255,.65));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.8),0 4px 12px -8px color-mix(in srgb,var(--c) 60%,transparent)}
+.rz-ai .sy-sbtn{background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:inset 0 1px 0 rgba(255,255,255,.95)}
+.rz-ai .sy-sbtn:hover{background:rgba(255,255,255,.78);box-shadow:inset 0 1px 0 #fff,0 10px 22px -14px rgba(47,36,92,.45)}
+.rz-ai .sy-src h6::after{background:rgba(47,36,92,.08)}
+.rz-ai .st-cites .st-c,.rz-ai .sy-sbtn i{background:rgba(237,241,248,.85)}
+.rz-ai .tr-top button:hover,.rz-ai .sy-top button:hover{background:rgba(255,255,255,.6)}
+
+/* ---- Aurora: on the running stage, light fans in from the left edge of the panel and narrows to a point at the spinner (a sideways mountain), then fades ---- */
+.rz-ai .sy-dot,.rz-ai .sy-c{position:relative;z-index:1}
+.rz-ai .sy-sec.act::after{content:"";position:absolute;left:-20px;top:-198px;width:230px;height:420px;z-index:0;pointer-events:none;opacity:0;
+  background:conic-gradient(from 0deg at 14% 50%,rgba(0,0,0,0) 0deg,rgba(0,0,0,0) 176deg,rgba(255,208,89,.12) 232deg,rgba(255,208,89,.26) 270deg,rgba(255,208,89,.12) 310deg,rgba(0,0,0,0) 364deg,rgba(0,0,0,0) 360deg);
+  -webkit-mask:radial-gradient(ellipse 100% 72% at 14% 50%,#000 0%,rgba(0,0,0,.66) 42%,transparent 100%);mask:radial-gradient(ellipse 100% 72% at 14% 50%,#000 0%,rgba(0,0,0,.66) 42%,transparent 100%);
+  filter:blur(4px);animation:auGlow 4s ease-in-out infinite}
+@keyframes auGlow{0%{opacity:0;transform:translateX(-16px)}40%{opacity:1;transform:translateX(0)}72%{opacity:.8}100%{opacity:0;transform:translateX(-6px)}}
+
+/* Aurora header: a much quieter glow */
+.au-bg{height:190px}
+.au-bg i{opacity:.16}
+.au-bg i:nth-child(3){opacity:.1}
+.rz-ai .sy-ttl b.au-live{background:none;color:#2f245c;animation:none;-webkit-text-fill-color:currentColor}
+.rz-ai .sy-ttl small{color:#878787}
+
+/* ---- Reasoning pane, variation: Bento. No panel: frosted widget tiles, each holding a solid white card ---- */
+.rz.rz-bento{background:none;box-shadow:none;border:0;border-radius:0;backdrop-filter:none;-webkit-backdrop-filter:none;display:flex;flex-direction:column;gap:10px;padding:2px 2px 16px;overflow-x:hidden;overflow-y:auto}
+.rz-bento>*{flex:none}
+.bn-t{border-radius:24px;padding:12px;background:rgba(255,255,255,.42);backdrop-filter:blur(24px) saturate(165%);-webkit-backdrop-filter:blur(24px) saturate(165%);border:1px solid rgba(255,255,255,.78);box-shadow:0 14px 34px -18px rgba(47,36,92,.34),inset 0 1px 0 rgba(255,255,255,.9)}
+.bn-head{display:flex;align-items:center;gap:12px;padding:12px 14px}
+.bn-mark{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex:none;background:linear-gradient(135deg,#49658b,#2f245c);box-shadow:0 6px 12px -6px rgba(47,36,92,.5)}
+.bn-ttl{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.bn-ttl b{font-size:15px;font-weight:600;color:#2f245c}
+.bn-ttl small{font-size:11.5px;color:#6b6888}
+.rz-bento .bn-head button{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:#4a4a4a;flex:none}
+.rz-bento .bn-head button:hover{background:rgba(255,255,255,.6)}
+.bn-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bn-stat{padding:12px 14px 10px;display:flex;flex-direction:column;gap:2px}
+.bn-stat span{font-size:9.5px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#6b6888}
+.bn-stat b{font-size:30px;font-weight:300;line-height:1.15;color:#2f245c;font-variant-numeric:tabular-nums}
+.bn-lb{display:flex;align-items:center;justify-content:space-between;margin:0 4px 8px;font-size:9.5px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#6b6888}
+.bn-st{width:16px;height:16px;border-radius:50%;display:grid;place-items:center;color:#fff}
+.bn-st.done{background:#12b76a}
+.bn-st.act{position:relative;background:conic-gradient(from var(--ang),#FFD059 0%,#FFE7A3 38%,rgba(255,208,89,.06) 72%,rgba(255,208,89,0) 100%);animation:spin 1.1s linear infinite}
+.bn-st.act::after{content:"";position:absolute;inset:3px;border-radius:50%;background:#f1eefb}
+.bn-card{background:#fff;border-radius:16px;padding:12px 14px;box-shadow:0 1px 2px rgba(47,36,92,.07)}
+.bn-card h6{margin:0 0 6px;font-size:13.5px;font-weight:600;color:#252525;line-height:1.35}
+.bn-card p{margin:0 0 8px;font-size:12.5px;line-height:1.65;color:#4a4a4a}
+.bn-card>p:last-child{margin-bottom:2px}
+.bn-stage{animation:gbIn .45s cubic-bezier(.2,.8,.2,1) both}
+.bn-stage.act{box-shadow:0 14px 34px -18px rgba(106,91,214,.45),inset 0 1px 0 rgba(255,255,255,.9),0 0 0 1px rgba(255,208,89,.45)}
+.bn-acts{padding:6px 14px}
+.bn-ev{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;padding:7px 0;animation:gbIn .35s ease both}
+.bn-ev+.bn-ev{border-top:1px solid #f1f1f1}
+.bn-ev span{font-size:11px;color:#a3a3a3;font-variant-numeric:tabular-nums;padding-top:2px}
+.bn-ev p{margin:0;font-size:12px;line-height:1.5;color:#4a4a4a}
+.bn-empty{padding:10px 0;font-size:12px;color:#878787}
+.bn-srcs{padding:10px}
+.bn-srcs .sy-src{border-top:0;margin:0;padding:0}
+
+/* Bento: room around the tiles so their soft shadows are not clipped by the scrolling pane */
+.rz.rz-bento{padding:12px 14px 34px}
+.bn-t{box-shadow:0 10px 22px -14px rgba(47,36,92,.34),inset 0 1px 0 rgba(255,255,255,.9)}
+.bn-stage.act{box-shadow:0 10px 22px -14px rgba(106,91,214,.42),inset 0 1px 0 rgba(255,255,255,.9),0 0 0 1px rgba(255,208,89,.45)}
+.bn-card{box-shadow:0 1px 3px rgba(47,36,92,.08)}
+
+/* Bento: stage icons, agent tiles of their own, and a clearly visible golden light around the running tile */
+.bn-t{position:relative}
+.bn-h{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.bn-h h6{margin:0;font-size:13.5px;font-weight:600;color:#252525;line-height:1.35}
+.bn-ti{width:30px;height:30px;border-radius:10px;flex:none;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 12%,#fff);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 22%,#fff)}
+.bn-agent .bn-card{padding-top:11px}
+.bn-agent .st-chip{margin-bottom:8px}
+.bn-agent .st-at p,.bn-agent .bn-card p{margin:0 0 6px}
+.bn-card p.wk{color:#878787}
+.bn-card p.wk i{display:inline-block;width:3px;height:3px;margin-left:3px;border-radius:50%;background:#a3a3a3;animation:gbDot 1.2s infinite ease-in-out}
+.bn-card p.wk i:nth-of-type(2){animation-delay:.2s}.bn-card p.wk i:nth-of-type(3){animation-delay:.4s}
+/* the running tile: a travelling golden edge, a golden outline and a glow that breathes */
+.bn-stage.act{box-shadow:0 10px 24px -12px rgba(255,190,50,.6),0 0 26px -4px rgba(255,208,89,.5),inset 0 0 26px -10px rgba(255,208,89,.5),inset 0 1px 0 rgba(255,255,255,.9);animation:gbIn .45s cubic-bezier(.2,.8,.2,1) both,bnBreath 2.8s ease-in-out .5s infinite}
+.bn-stage.act::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;pointer-events:none;background:conic-gradient(from var(--ang),#FFD059 0%,rgba(255,208,89,.25) 22%,#FFE9A8 42%,rgba(255,208,89,.25) 62%,#FFD059 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);mask-composite:exclude;animation:spin 3.6s linear infinite}
+@keyframes bnBreath{0%,100%{box-shadow:0 10px 24px -12px rgba(255,190,50,.5),0 0 20px -4px rgba(255,208,89,.4),inset 0 0 22px -10px rgba(255,208,89,.4),inset 0 1px 0 rgba(255,255,255,.9)}50%{box-shadow:0 12px 28px -12px rgba(255,190,50,.75),0 0 34px -2px rgba(255,208,89,.65),inset 0 0 32px -8px rgba(255,208,89,.6),inset 0 1px 0 rgba(255,255,255,.9)}}
+
+/* Bento, running tile: a golden comet runs around the outline (top, down the side, round the corner, along the bottom and up the other side) with a glow that follows it */
+.bn-stage.act{animation:gbIn .45s cubic-bezier(.2,.8,.2,1) both;box-shadow:0 10px 22px -14px rgba(255,190,50,.45),0 0 16px -6px rgba(255,208,89,.32),inset 0 1px 0 rgba(255,255,255,.9)}
+.bn-stage.act::before,.bn-stage.act::after{content:"";position:absolute;border-radius:inherit;pointer-events:none;
+  background:conic-gradient(from var(--ang),rgba(255,208,89,0) 0deg,rgba(255,208,89,0) 215deg,rgba(255,208,89,.3) 285deg,rgba(255,216,118,.9) 345deg,#FFE9A8 360deg),linear-gradient(rgba(255,208,89,.3),rgba(255,208,89,.3));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);mask-composite:exclude;animation:spin 4.2s linear infinite}
+.bn-stage.act::before{inset:0;padding:1.5px;z-index:1}
+.bn-stage.act::after{inset:-3px;padding:6px;z-index:-1;filter:blur(7px);opacity:.85}
+
+/* Bento: calm pacing. Tiles drift in, open slowly while they stream, fold slowly when done; a quieter gold */
+@keyframes bnIn{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:none}}
+.bn-stage,.bn-stage.act{animation:bnIn 1s cubic-bezier(.22,.8,.24,1) .45s both}
+.bn-late{animation:bnIn 1.1s cubic-bezier(.22,.8,.24,1) 1.3s both}
+.bn-late2{animation-delay:1.7s}
+.bn-click{cursor:pointer}
+.bn-r{display:inline-flex;align-items:center;gap:8px}
+.bn-chv{color:#9a97b5;transition:transform .7s cubic-bezier(.22,.8,.24,1)}
+.bn-chv.on{transform:rotate(180deg)}
+.bn-bd{display:grid;grid-template-rows:0fr;transition:grid-template-rows .95s cubic-bezier(.22,.8,.24,1)}
+.bn-bd.open{grid-template-rows:1fr}
+.bn-bd-in{min-height:0;overflow:hidden;opacity:0;transition:opacity .6s ease}
+.bn-bd.open .bn-bd-in{opacity:1;transition:opacity .9s ease .25s}
+.bn-pad{padding-top:2px}
+.bn-card{transition:padding .6s ease}
+.bn-card .bn-h{margin-bottom:0}
+.bn-bd.open .bn-pad{padding-top:8px}
+.bn-agent .st-chip{margin-bottom:0}
+/* the gold is quieter */
+.bn-stage.act{box-shadow:0 10px 22px -14px rgba(255,190,50,.25),0 0 12px -6px rgba(255,208,89,.2),inset 0 1px 0 rgba(255,255,255,.9)}
+.bn-stage.act::before,.bn-stage.act::after{background:conic-gradient(from var(--ang),rgba(255,208,89,0) 0deg,rgba(255,208,89,0) 215deg,rgba(255,208,89,.14) 285deg,rgba(255,216,118,.5) 345deg,rgba(255,230,160,.78) 360deg),linear-gradient(rgba(255,208,89,.14),rgba(255,208,89,.14))}
+.bn-stage.act::after{opacity:.4}
+
+/* Bento, in harmony: the top tiles appear together, each stage slides in from the right, then opens, streams, folds; every stage icon shares one colour; tiles show they are clickable */
+@keyframes bnSlide{from{opacity:0;transform:translateX(56px)}to{opacity:1;transform:none}}
+@keyframes bnFade{from{opacity:0}to{opacity:1}}
+.bn-fade{animation:bnFade 1s ease both}
+.bn-stage,.bn-stage.act,.bn-slide{animation:bnSlide .95s cubic-bezier(.22,.8,.24,1) both}
+.bn-slide2{animation-delay:1.2s}
+.bn-late,.bn-late2{animation:none}
+.bn-ti{--c:#2f245c}
+.bn-tag{display:inline-flex;align-items:center;gap:6px}
+.bn-tag .i{color:#6b6888}
+.bn-click{cursor:pointer}
+.bn-stage{transition:background .35s ease,box-shadow .35s ease}
+.bn-stage:hover{background:rgba(255,255,255,.62);box-shadow:0 12px 26px -14px rgba(47,36,92,.45),inset 0 1px 0 rgba(255,255,255,.95)}
+.bn-stage:hover .bn-chv{color:#2f245c;transform:translateY(1px)}
+.bn-stage:hover .bn-chv.on{transform:rotate(180deg) translateY(1px)}
+.bn-stage:hover .bn-card{box-shadow:0 2px 8px -2px rgba(47,36,92,.18)}
+.bn-card{transition:box-shadow .35s ease}
+.bn-bd{transition:grid-template-rows 1.05s cubic-bezier(.22,.8,.24,1)}
+.bn-bd-in{transition:opacity .7s ease}
+.bn-bd.open .bn-bd-in{transition:opacity 1s ease .3s}
+
+/* Numbered key points instead of KPI cards: a ringed number, then the sentence */
+.nums{list-style:none;margin:10px 0 2px;padding:0;display:flex;flex-direction:column;gap:14px}
+.nums li{display:flex;align-items:center;gap:14px}
+.nums li>span{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:600;color:#6b6b6b;background:#fff;box-shadow:inset 0 0 0 1.5px #e4e4e4,0 2px 6px -3px rgba(0,0,0,.12);font-variant-numeric:tabular-nums}
+.nums li p{margin:0;font-size:14.5px;line-height:1.45;color:#252525}
+.nums li p strong{font-weight:600}
