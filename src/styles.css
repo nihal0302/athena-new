@@ -2005,3 +2005,5 @@ ul.b{margin:0 0 10px 18px;font-size:13px}
 .gj-row::after{left:37px}
 .gj-row.gj-sub{padding-left:54px}
 .gj-pill{align-self:start;margin-top:6px}
+/* home hero: the title lines up with the second recent chat ("Policy Update Quick Search") */
+.hero{top:calc(50% - 75px)}
