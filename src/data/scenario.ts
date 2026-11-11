@@ -16,11 +16,11 @@ export type StepDef = {
 }
 
 export const STEPS: StepDef[] = [
-  { id: 'intent', title: 'Understood the intent', short: 'Understand', live: 'Understanding your intent', dur: 2.6, icon: 'eye' },
-  { id: 'route', title: 'Planned and routed the work', short: 'Plan', live: 'Planning and routing', dur: 3, icon: 'route' },
+  { id: 'intent', title: 'Understood the intent', short: 'Understand', live: 'Understanding your intent', dur: 6, icon: 'eye' },
+  { id: 'route', title: 'Planned and routed the work', short: 'Plan', live: 'Planning and routing', dur: 6, icon: 'route' },
   { id: 'agents', title: 'Agents gathered evidence', short: 'Agents', live: 'Agents gathering evidence', dur: 9, icon: 'users' },
-  { id: 'val', title: 'Validated the figures', short: 'Validate', live: 'Validating the figures', dur: 4, icon: 'shield' },
-  { id: 'comp', title: 'Composed the summary', short: 'Summary', live: 'Composing the summary', dur: 4.4, icon: 'pen' },
+  { id: 'val', title: 'Validated the figures', short: 'Validate', live: 'Validating the figures', dur: 6, icon: 'shield' },
+  { id: 'comp', title: 'Composed the summary', short: 'Summary', live: 'Composing the summary', dur: 6, icon: 'pen' },
 ]
 
 export const T0: number[] = []
@@ -49,9 +49,9 @@ export type AgentDef = {
 }
 
 export const AGENTS: AgentDef[] = [
-  { name: 'Buyer Profile Analysis Agent', short: 'Buyer profiles', finding: 'UAE nationals, Indian and UK buyers account for 56% of reservations across the last three launch cycles.', subs: ['Segmenting buyers', 'Reading profiles', 'Scoring segments'], start: 0, icon: 'users', color: '#2f245c', dur: 6.5, src: ['Buyer Profile Database'], pass: 3, task: 'Segmenting buyers by nationality, ticket size and channel' },
-  { name: 'Market Transaction Data Agent', short: 'Transactions', finding: 'Average ticket is AED 2.9m, up 6% year on year, and inquiry-to-reservation conversion is strongest for the Q1 launches.', subs: ['Querying ledger', 'Joining funnel report', 'Aggregating by nationality'], start: 0, icon: 'db', color: '#49658b', dur: 9, src: ['Transaction Ledger 2023–26', 'Inquiry Funnel Report'], pass: 4, task: 'Querying transactions and inquiry-to-reservation conversion', sql: true },
-  { name: 'Policy & Macro Signals Agent', short: 'Policy signals', finding: 'Visa reforms and easier GCC travel support UAE, Indian and UK demand; Russia & CIS depends on a policy factor still moving.', subs: ['Reading policy tracker', 'Checking macro signals'], start: 0, icon: 'globe', color: '#2bb8d6', dur: 5, src: ['Policy & Macro Tracker'], pass: 2, task: 'Reading policy and macro drivers for the target markets' },
+  { name: 'Buyer Profile Analysis Agent', short: 'Buyer profiles', finding: 'UAE nationals, Indian and UK buyers account for 56% of reservations across the last three launch cycles.', subs: ['Segmenting buyers', 'Reading buyer profiles', 'Matching nationality to ticket size', 'Scoring the segments'], start: 0, icon: 'users', color: '#2f245c', dur: 6.5, src: ['Buyer Profile Database'], pass: 3, task: 'Segmenting buyers by nationality, ticket size and channel' },
+  { name: 'Market Transaction Data Agent', short: 'Transactions', finding: 'Average ticket is AED 2.9m, up 6% year on year, and inquiry-to-reservation conversion is strongest for the Q1 launches.', subs: ['Querying the ledger', 'Joining the funnel report', 'Aggregating by nationality', 'Checking year-on-year change'], start: 0, icon: 'db', color: '#49658b', dur: 9, src: ['Transaction Ledger 2023–26', 'Inquiry Funnel Report'], pass: 4, task: 'Querying transactions and inquiry-to-reservation conversion', sql: true },
+  { name: 'Policy & Macro Signals Agent', short: 'Policy signals', finding: 'Visa reforms and easier GCC travel support UAE, Indian and UK demand; Russia & CIS depends on a policy factor still moving.', subs: ['Reading the policy tracker', 'Checking visa and residency rules', 'Checking macro signals', 'Rating policy risk by market'], start: 0, icon: 'globe', color: '#2bb8d6', dur: 5, src: ['Policy & Macro Tracker'], pass: 2, task: 'Reading policy and macro drivers for the target markets' },
 ]
 
 /** Seven specialists working at once (the default). The first three are the original agents; starts are staggered. */
@@ -59,13 +59,13 @@ export const AGENTS_7: AgentDef[] = [
   { ...AGENTS[0], start: 0 },
   { ...AGENTS[1], start: 0.3, dur: 9.5 },
   { ...AGENTS[2], start: 0.6 },
-  { name: 'Pricing & Payment Plans Agent', short: 'Pricing', finding: 'Payment-plan uptake is highest among UK and Indian buyers, who favour longer post-handover plans.', subs: ['Reading price lists', 'Comparing payment plans'], start: 6.6, after: 0, icon: 'wallet', color: '#8b5cf6', dur: 3.6, src: ['Price List & Payment Plans'], pass: 3, task: 'Comparing launch pricing and payment-plan uptake by nationality' },
-  { name: 'Inventory & Launch Calendar Agent', short: 'Launch inventory', finding: 'Two phases open in Q1, with the larger share of units in the mid-price band.', subs: ['Checking unit availability', 'Reading launch calendar'], start: 1.6, icon: 'layers', color: '#12b76a', dur: 6, src: ['Launch Calendar'], pass: 2, task: 'Checking which units and phases open in Q1' },
-  { name: 'Competitor Projects Agent', short: 'Competitors', finding: 'Competing launches in the same price band are absorbing demand at a slower pace.', subs: ['Scanning competitor launches', 'Comparing take-up'], start: 2.2, icon: 'target', color: '#f2994a', dur: 8, src: ['Competitor Launch Tracker'], pass: 3, task: 'Tracking competing launches in the same price band' },
-  { name: 'Marketing Funnel Agent', short: 'Campaign funnel', finding: 'Enquiries from the target markets come mainly through broker and digital channels.', subs: ['Reading campaign reports', 'Tracing enquiry sources'], start: 2.8, icon: 'chart', color: '#e8618c', dur: 6.8, src: ['Campaign Performance Report'], pass: 2, task: 'Tracing enquiries by channel and market' },
+  { name: 'Pricing & Payment Plans Agent', short: 'Pricing', finding: 'Payment-plan uptake is highest among UK and Indian buyers, who favour longer post-handover plans.', subs: ['Reading price lists', 'Comparing payment plans', 'Checking post-handover terms', 'Ranking plans by uptake'], start: 6.6, after: 0, icon: 'wallet', color: '#8b5cf6', dur: 5.6, src: ['Price List & Payment Plans'], pass: 3, task: 'Comparing launch pricing and payment-plan uptake by nationality' },
+  { name: 'Inventory & Launch Calendar Agent', short: 'Launch inventory', finding: 'Two phases open in Q1, with the larger share of units in the mid-price band.', subs: ['Checking unit availability', 'Reading the launch calendar', 'Splitting units by price band', 'Matching phases to dates'], start: 1.6, icon: 'layers', color: '#12b76a', dur: 6, src: ['Launch Calendar'], pass: 2, task: 'Checking which units and phases open in Q1' },
+  { name: 'Competitor Projects Agent', short: 'Competitors', finding: 'Competing launches in the same price band are absorbing demand at a slower pace.', subs: ['Scanning competitor launches', 'Matching the price band', 'Comparing take-up', 'Estimating absorption pace'], start: 2.2, icon: 'target', color: '#f2994a', dur: 8, src: ['Competitor Launch Tracker'], pass: 3, task: 'Tracking competing launches in the same price band' },
+  { name: 'Marketing Funnel Agent', short: 'Campaign funnel', finding: 'Enquiries from the target markets come mainly through broker and digital channels.', subs: ['Reading campaign reports', 'Tracing enquiry sources', 'Splitting by channel', 'Ranking channels by volume'], start: 2.8, icon: 'chart', color: '#e8618c', dur: 6.8, src: ['Campaign Performance Report'], pass: 2, task: 'Tracing enquiries by channel and market' },
 ]
 const extra = (name: string, short: string, sub: string, icon: string, color: string, src: string): AgentDef => ({
-  name, short, subs: [sub, 'Summarising findings'], start: 0, dur: 0, icon, color, src: [src], pass: 2, task: sub,
+  name, short, subs: [sub, 'Reading the records', 'Cross-checking the figures', 'Summarising findings'], start: 0, dur: 0, icon, color, src: [src], pass: 2, task: sub,
 })
 const BASE_14: AgentDef[] = [
   ...AGENTS_7.map((x) => ({ ...x, after: undefined })),
@@ -214,11 +214,11 @@ const layout = (steps: StepDef[]) => {
 
 const STD_STYLE: StepStyle[] = ['rows', 'scatter', 'agents', 'scan', 'write']
 const STD_SUB = [
-  ['Reading question', 'Detecting intent'],
-  ['Planning enquiries', 'Routing to agents'],
+  ['Reading question', 'Detecting intent', 'Spotting the market and time frame', 'Matching it to buyer briefs'],
+  ['Planning enquiries', 'Splitting into three lines of enquiry', 'Choosing the right agents', 'Routing to agents'],
   [],
-  ['Checking totals', 'Reconciling shares'],
-  ['Drafting summary', 'Adding sources'],
+  ['Checking totals', 'Reconciling shares', 'Comparing with the sales ledger', 'Confirming every figure has a source'],
+  ['Drafting summary', 'Choosing the key points', 'Building the chart', 'Adding sources'],
 ]
 const STD_NODE = ['Understand', 'Plan', 'Agents', 'Validate', 'Summary']
 
@@ -285,9 +285,9 @@ function makeSerial(n: 3 | 5 | 10): Scenario {
 
   if (n === 3) {
     steps = [
-      mk('plan', 'Understood the intent and routed the work', 'Understand', 'Understanding and routing', 5.6, 'route', 'rows', ['Reading question', 'Routing to agents'], 'Understand', { agents: AGENTS, note: '3 agents briefed' }),
-      mk('agents', 'Agents gathered evidence', 'Agents', 'Agents gathering evidence', 9, 'users', 'scatter', ['Reading sources', 'Collecting evidence'], 'Agents', { agents: AGENTS, note: '3 agents · 4 sources · 9 passages' }),
-      mk('wrap', 'Validated the figures and composed the summary', 'Summary', 'Validating and composing', 8.4, 'pen', 'write', ['Checking totals', 'Drafting summary'], 'Summary', { note: 'Brief ready' }),
+      mk('plan', 'Understood the intent and routed the work', 'Understand', 'Understanding and routing', 5.6, 'route', 'rows', ['Reading question', 'Detecting intent', 'Planning enquiries', 'Routing to agents'], 'Understand', { agents: AGENTS, note: '3 agents briefed' }),
+      mk('agents', 'Agents gathered evidence', 'Agents', 'Agents gathering evidence', 9, 'users', 'scatter', ['Reading sources', 'Collecting evidence', 'Cross-checking findings', 'Handing findings back'], 'Agents', { agents: AGENTS, note: '3 agents · 4 sources · 9 passages' }),
+      mk('wrap', 'Validated the figures and composed the summary', 'Summary', 'Validating and composing', 8.4, 'pen', 'write', ['Checking totals', 'Reconciling shares', 'Drafting summary', 'Adding sources'], 'Summary', { note: 'Brief ready' }),
     ]
     E.push([0, 0.2, 'Intent received'], [0, 1.6, brief], [0, 3.6, routed3], [1, 0.3, 'Three agents are gathering evidence in parallel'], [1, 5.5, 'Most agents have finished, the last one is still reading'])
     E.push([2, 0.8, 'Validation: ' + CHECKS[0]], [2, 2.6, 'Validation: ' + CHECKS[1]], [2, 4.6, 'Composing the executive summary'], [2, 6.6, 'Adding the chart, caveats and sources'])
@@ -297,7 +297,7 @@ function makeSerial(n: 3 | 5 | 10): Scenario {
     steps = STEPS.map((st, i) => ({
       ...st,
       style: i === 2 ? ('scatter' as StepStyle) : STD_STYLE[i],
-      sub: i === 2 ? ['Reading sources', 'Collecting evidence'] : STD_SUB[i],
+      sub: i === 2 ? ['Reading sources', 'Collecting evidence', 'Cross-checking findings', 'Handing findings back'] : STD_SUB[i],
       node: STD_NODE[i],
       agents: i === 1 || i === 2 ? AGENTS : undefined,
       note: ['Buyer brief · Q1 launches', '3 agents selected', '3 agents · 4 sources · 9 passages', '5 of 5 checks passed', 'Brief ready'][i],

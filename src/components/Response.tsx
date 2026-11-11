@@ -1,4 +1,5 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useVariants } from '../variants'
 import { SOURCES, quickAnswer } from '../data/scenario'
 import { Icon } from './Icon'
 import { ChartCard } from './Charts'
@@ -24,12 +25,63 @@ const Up = () => (
   <svg viewBox="0 0 10 10" width="9" height="9"><path d="M5 1 9.3 8.5H.7z" fill="currentColor" /></svg>
 )
 
-function Sec({ icon, title, children }: { icon: string; title: string; children: ReactNode }) {
+function Sec({ icon, title, children, util = false }: { icon: string; title: string; children: ReactNode; util?: boolean }) {
   return (
-    <section className="sec in">
+    <section className={"sec in" + (util ? " util" : "")}>
       <h3><span className="ht"><Icon n={icon} size={15} /></span>{title}</h3>
       {children}
     </section>
+  )
+}
+
+type Guide = { top: number; left: number; width: number; height: number; px: number; name: string; kind: 'tight' | 'el' | 'block' | 'sec' }
+
+/** Spacing guides: measures the real gaps in the rendered answer and draws them as labelled bands (prototype setting). */
+function SpacingGuides({ root }: { root: React.RefObject<HTMLDivElement | null> }) {
+  const [g, setG] = useState<Guide[]>([])
+  useEffect(() => {
+    const measure = () => {
+      const el = root.current
+      if (!el) return
+      const base = el.getBoundingClientRect()
+      const sc = base.width / el.offsetWidth || 1
+      const out: Guide[] = []
+      const add = (top: number, h: number, px: number, name: string, left: number, width: number) => {
+        if (px < 2) return
+        const kind = name.startsWith('section') ? 'sec' : name === 'block' ? 'block' : px >= 10 ? 'el' : 'tight'
+        out.push({ top: (top - base.top) / sc, left: (left - base.left) / sc, width: width / sc, height: h / sc, px: Math.round(px / sc), name, kind })
+      }
+      el.querySelectorAll<HTMLElement>(':scope > .sec').forEach((s) => {
+        const cs = getComputedStyle(s)
+        const sr = s.getBoundingClientRect()
+        const pt = parseFloat(cs.paddingTop) * sc
+        const pb = parseFloat(cs.paddingBottom) * sc
+        add(sr.top, pt, pt, 'section start', sr.left, sr.width)
+        add(sr.bottom - pb, pb, pb, 'section end', sr.left, sr.width)
+        const kids = [...s.children] as HTMLElement[]
+        kids.slice(1).forEach((k, i) => {
+          const a = kids[i].getBoundingClientRect()
+          const b = k.getBoundingClientRect()
+          const gap = b.top - a.bottom
+          const name = i === 0 && kids[0].tagName === 'H3' ? 'heading to content' : (getComputedStyle(k).marginTop === '24px' ? 'block' : 'element')
+          add(a.bottom, gap, gap, name, a.left, a.width)
+        })
+      })
+      setG(out)
+    }
+    measure()
+    const id = setInterval(measure, 500)
+    window.addEventListener('resize', measure)
+    return () => { clearInterval(id); window.removeEventListener('resize', measure) }
+  }, [root])
+  return (
+    <div className="sg" aria-hidden="true">
+      {g.map((x, i) => (
+        <div key={i} className={'sg-b sg-' + x.kind} style={{ top: x.top, left: x.left, width: x.width, height: x.height }}>
+          <span className="sg-l">{x.px} · {x.name}</span>
+        </div>
+      ))}
+    </div>
   )
 }
 
@@ -53,6 +105,8 @@ export function Response({
   glass?: boolean
 }) {
   const [vote, setVote] = useState<'up' | 'down' | null>(null)
+  const { variants } = useVariants()
+  const root = useRef<HTMLDivElement>(null)
   const secs: ReactNode[] = [
     <Sec key="1" icon="msg" title="Executive summary">
       <p className="lead"><strong>Prioritise UAE nationals, Indian and UK buyers for the Q1 launches.</strong> Together they account for 56% of reservations across the last three launch cycles, and all three show supportive demand signals. Russia &amp; CIS buyers are the next-best opportunity, but depend on a policy factor that is still moving.</p>
@@ -87,14 +141,14 @@ export function Response({
         <div className="cr"><span className="ic"><Icon n="layers" /></span><div><b>Two reporting bases</b><p>Reservations and completed sales are counted on different dates. Quote one and name which.</p></div></div>
       </div>
     </Sec>,
-    <Sec key="7" icon="msg" title="Suggested follow-ups">
+    <Sec key="7" util icon="msg" title="Suggested follow-ups">
       <div className="qs">
         {['Break this down by price band', 'Compare with last year’s launch mix', 'Draft a channel plan for UAE and India'].map((q) => (
           <button key={q} className="q" onClick={() => onToast('Running: ' + q.toLowerCase())}>{q}</button>
         ))}
       </div>
     </Sec>,
-    <Sec key="8" icon="doc" title="Sources">
+    <Sec key="8" util icon="doc" title="Sources">
       <div className="schips">
         {sources.map((s) => (
           <button key={s.name} className="sc" onClick={() => onToast('Opening ' + s.name)}><Icon n="doc" size={14} />{s.name} <small>{s.note}</small></button>
@@ -110,7 +164,12 @@ export function Response({
       </div>
     </Sec>,
   ]
-  return <div className={'rcard' + (bare ? ' bare' : '') + (glass ? ' glass' : '')}>{secs.slice(0, shown)}</div>
+  return (
+    <div ref={root} className={'rcard' + (bare ? ' bare' : '') + (glass ? ' glass' : '')}>
+      {secs.slice(0, shown)}
+      {variants.spacing === 'on' && <SpacingGuides root={root} />}
+    </div>
+  )
 }
 
 export const SECTION_COUNT = 8

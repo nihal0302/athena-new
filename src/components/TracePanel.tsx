@@ -231,6 +231,9 @@ export function TracePanel({
           ))}
         </div>
 
+        {revealed > 0 && (
+        <div className="bn-t bn-stages">
+          <div className="bn-lb bn-glb"><span className="bn-tag"><Icon n="layers" size={12} />Stages</span><span className="bn-cnt">{Math.min(revealed, sc.steps.length)} / {sc.steps.length}</span></div>
         {startedIdx.slice(0, revealed).map((i) => {
           const s = sc.steps[i]
           const st = run.done ? 'done' : run.stepStatus[i]
@@ -239,8 +242,6 @@ export function TracePanel({
             <BentoTile
               key={key}
               className={st}
-              label={'Stage ' + (i + 1)}
-              tagIcon="layers"
               done={st === 'done'}
               userOpen={tileOpen[key]}
               onToggle={(cur) => setTileOpen((o) => ({ ...o, [key]: !cur }))}
@@ -258,6 +259,8 @@ export function TracePanel({
             </BentoTile>
           )
         })}
+        </div>
+        )}
 
         {allShown && (
           <div className="bn-t bn-slide">
@@ -371,8 +374,6 @@ export function TracePanel({
  *  heading opens or folds it again. */
 function BentoTile({
   className,
-  label,
-  tagIcon,
   done,
   userOpen,
   onToggle,
@@ -381,8 +382,6 @@ function BentoTile({
   children,
 }: {
   className: string
-  label: string
-  tagIcon: string
   done: boolean
   userOpen: boolean | undefined
   onToggle: (currentlyOpen: boolean) => void
@@ -410,16 +409,15 @@ function BentoTile({
   }, [settled])
   const open = entered && (userOpen ?? !settled)
   return (
-    <div className={'bn-t bn-stage ' + className}>
-      <div className="bn-lb bn-click" onClick={() => onToggle(open)}>
-        <span className="bn-tag"><Icon n={tagIcon} size={12} />{label}</span>
-        <span className="bn-r">
-          <span className={'bn-st ' + (done ? 'done' : 'act')}>{done ? <Icon n="check" size={10} /> : <i />}</span>
-          <Icon n="chev" size={14} className={'bn-chv' + (open ? ' on' : '')} />
-        </span>
-      </div>
+    <div className={'bn-stage bn-sub ' + className}>
       <div className="bn-card bn-click" onClick={(e) => { if ((e.target as HTMLElement).closest('.bn-bd')) return; onToggle(open) }}>
-        {head}
+        <div className="bn-hrow">
+          {head}
+          <span className="bn-r">
+            <span className={'bn-st ' + (done ? 'done' : 'act')}>{done ? <Icon n="check" size={10} /> : <i />}</span>
+            <Icon n="chev" size={14} className={'bn-chv' + (open ? ' on' : '')} />
+          </span>
+        </div>
         <div className={'bn-bd' + (open ? ' open' : '')}>
           <div className="bn-bd-in">{entered && <div className="bn-pad">{children}</div>}</div>
         </div>

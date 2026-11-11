@@ -2,7 +2,7 @@
   --brand:#2f245c; --brand-2:#49658b; --sec:#eeedf7; --ink:#252525; --ink2:#4a4a4a; --ink3:#878787;
   --line:#e7e7e7; --line2:#d4d4d4; --warm:#f7f6f4; --ok:#12b76a; --ok-bg:#e3f7ee; --sun:#a0b7de;
   --g1:#8b5cf6; --g2:#2bb8d6; --warn:#b54708; --warn-bg:#fff4e5;
-  --rp:332px;
+  --rp:398px;
   /* conversation column and input box share this width (442px + 15% = 508px) */
   /* conversation thread and input box share one width */
   --thread:584px;
@@ -14,7 +14,7 @@
 @property --ang{syntax:'<angle>';initial-value:0deg;inherits:false}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body,#root{height:100%}
-body{font-family:'Poppins',system-ui,sans-serif;color:var(--ink);font-size:14px;line-height:1.5;background:var(--warm);-webkit-font-smoothing:antialiased;overflow:auto}
+body{zoom:.8;font-family:'Poppins',system-ui,sans-serif;color:var(--ink);font-size:14px;line-height:1.5;background:var(--warm);-webkit-font-smoothing:antialiased;overflow:auto}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .i{stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .app{position:relative;height:100%;min-width:1100px;min-height:700px;overflow:hidden}
@@ -31,22 +31,20 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 /* ---------- top bar ---------- */
 .top{position:absolute;top:16px;left:24px;right:24px;height:64px;display:flex;align-items:center;justify-content:space-between;z-index:20}
 .top .l{display:flex;align-items:center;gap:14px}
-.pill-w{height:40px;padding:0 16px;border-radius:99px;background:#fff;color:var(--ink);font-size:12px;font-weight:500;display:flex;align-items:center;gap:8px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
-.avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#d9c3a3,#8a6a4a);display:grid;place-items:center;color:#fff;font-weight:600;font-size:13px;border:2px solid #fff}
-.dock{position:absolute;left:50%;transform:translateX(-50%);top:0;height:64px;padding:8px;border-radius:24px;background:rgba(37,37,37,.82);display:flex;gap:8px;align-items:center;backdrop-filter:blur(30px);box-shadow:0 8px 24px rgba(0,0,0,.18)}
-.dock .nc{height:48px;padding:0 22px 0 16px;border-radius:18px;background:rgba(255,255,255,.14);color:#fff;font-size:12px;font-weight:500;display:flex;align-items:center;gap:8px}
+.pill-w{height:40px;padding:8px 12px;border-radius:74px;background:#fff;border:.74px solid #d4d4d4;color:var(--ink);font-size:12px;font-weight:500;letter-spacing:.05px;display:flex;align-items:center;gap:6px}
+.avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#d9c3a3,#8a6a4a);display:grid;place-items:center;color:#fff;font-weight:600;font-size:13px;border:2px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,.25)}
+.dock{position:absolute;left:50%;transform:translateX(-50%);top:0;height:64px;padding:8px;border-radius:1000px;background:rgba(0,0,0,.64);border:1px solid #fff;display:flex;gap:12px;align-items:center;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 4px 16px rgba(0,0,0,.25)}
+.dock .nc{height:48px;padding:12px 24px;border-radius:100px;background:rgba(255,255,255,.16);color:#fff;font-size:12px;font-weight:400;letter-spacing:.03px;display:flex;align-items:center;justify-content:center;gap:8px}
 .dock .nc:hover{background:rgba(255,255,255,.22)}
-.dock .ch{width:48px;height:48px;border-radius:18px;display:grid;place-items:center;color:#fff}
-.home .dock{background:rgba(0,0,0,.6)}
-.round{width:48px;height:48px;border-radius:50%;background:rgba(37,37,37,.82);color:#fff;display:grid;place-items:center}
+.dock .ch{width:64px;height:48px;border-radius:100px;display:grid;place-items:center;color:#fff}
+.round{width:48px;height:48px;border-radius:50%;background:rgba(0,0,0,.64);border:1px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,.25);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:#fff;display:grid;place-items:center}
 .top .r{display:flex;gap:12px}
-.home .round{background:rgba(0,0,0,.6)}
 
 /* ---------- recents menu ---------- */
-.recents{position:absolute;border-radius:32px;padding:16px;overflow:hidden;z-index:15;color:#fff;width:264px;transition:width .3s cubic-bezier(.3,.8,.3,1),padding .3s}
-.chat .recents{background:#5a5856;left:28px;top:156px;bottom:36px;box-shadow:0 20px 40px -16px rgba(0,0,0,.35)}
+.recents{position:absolute;border-radius:32px;padding:16px;overflow:hidden;z-index:15;color:#fff;width:317px;transition:width .3s cubic-bezier(.3,.8,.3,1),padding .3s}
+.chat .recents{background:#5a5856;left:28px;top:128px;bottom:36px;box-shadow:0 20px 40px -16px rgba(0,0,0,.35)}
 .home .recents{background:rgba(5,9,16,.82);border:1px solid rgba(255,255,255,.1);left:12px;top:106px;bottom:36px;backdrop-filter:blur(20px)}
-.recents.collapsed{width:60px;padding:16px 10px;bottom:auto;height:68px}
+.recents.collapsed{width:60px;border-radius:18px;padding:12px;bottom:auto;height:60px}
 .rc-h{display:flex;align-items:center;justify-content:space-between;height:36px;padding-left:2px;font-weight:500;font-size:14px}
 .recents.collapsed .rc-h{justify-content:center;padding:0}
 .rc-h .btns{display:flex;gap:14px;align-items:center}
@@ -58,7 +56,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .rc-i:hover{opacity:1;background:rgba(255,255,255,.06)}
 
 /* ---------- home hero (centred on the viewport, same axis as top nav + input) ---------- */
-.hero{position:absolute;left:50%;transform:translateX(-50%);top:230px;width:min(620px,calc(100vw - 620px));text-align:center}
+.hero{position:absolute;left:50%;transform:translate(-50%,-50%);top:50%;width:min(620px,calc(100vw - 620px));text-align:center}
 .hero h1{font-size:36px;font-weight:500;letter-spacing:-.01em;line-height:1.2}
 .hero p{margin-top:14px;font-size:16px;opacity:.92}
 .chips{display:flex;gap:12px;margin-top:34px;justify-content:center;flex-wrap:wrap}
@@ -100,17 +98,17 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .chat .composer{bottom:8px;width:calc(100% - 48px);max-width:var(--col)}
 
 /* ---------- chat layout ---------- */
-.ctitle{position:absolute;top:104px;left:24px;right:24px;display:flex;align-items:center;gap:12px;height:40px;z-index:5}
+.ctitle{position:absolute;top:80px;left:24px;right:24px;display:flex;align-items:center;gap:12px;height:36px;z-index:5}
 .ctitle h2{font-size:14px;font-weight:500;flex:1}
 .tag{display:flex;align-items:center;gap:8px;height:34px;padding:0 14px;border-radius:99px;background:rgba(0,0,0,.04);font-size:12px;font-weight:500;color:var(--ink2)}
 .tag.dl{background:#fff;border:1px solid var(--brand);color:var(--brand)}
-.hr{position:absolute;top:144px;left:0;right:0;height:1px;background:var(--line)}
+.hr{position:absolute;top:118px;left:0;right:0;height:1px;background:var(--line)}
 /* stage follows the two panes: menu (left) and reasoning (right) */
 /* The conversation never moves: the stage spans the full width and the column is centred on the
    viewport. The menu (left) and reasoning pane (right) overlay the side gutters. */
-.stage{position:absolute;top:156px;bottom:0;left:0;right:0;transform:translateX(var(--shift))}
+.stage{--thread:min(clamp(584px,calc(584px + (100cqw - 1232px) / 2),1500px),calc(100cqw - 892px));--col:var(--thread);container-type:inline-size;position:absolute;top:119px;bottom:0;left:0;right:0;transform:translateX(var(--shift))}
 .chat.panel-wide{--rp:520px}
-.scroll{position:absolute;inset:0;overflow-y:auto;padding:24px 24px 150px;scrollbar-width:none}
+.scroll{position:absolute;inset:0;overflow-y:auto;padding:33px 24px 150px;scrollbar-width:none}
 .scroll::-webkit-scrollbar{display:none}
 /* one shared column: thread and input box have identical left and right edges */
 .thread{max-width:var(--thread);margin:0 auto}
@@ -235,7 +233,7 @@ ul.b{margin:0 0 10px 18px;font-size:13px}
 .illus{font-size:11px;color:var(--ink3);margin-top:8px}
 
 /* ---------- detail pane (collapsed by default) ---------- */
-.rz{position:absolute;right:24px;top:156px;bottom:36px;width:var(--rp);background:#fff;border-radius:16px;box-shadow:0 8px 28px -12px rgba(30,30,60,.2);display:flex;flex-direction:column;overflow:hidden;z-index:10;transition:width .3s,transform .3s,opacity .25s}
+.rz{position:absolute;right:24px;top:119px;bottom:36px;width:var(--rp);background:#fff;border-radius:16px;box-shadow:0 8px 28px -12px rgba(30,30,60,.2);display:flex;flex-direction:column;overflow:hidden;z-index:10;transition:width .3s,transform .3s,opacity .25s}
 .rz.closed{transform:translateX(40px);opacity:0;pointer-events:none}
 .rz-h{display:flex;align-items:center;gap:8px;padding:20px 24px 10px}
 .rz-h h4{flex:1;font-size:16px;font-weight:500}
@@ -1591,3 +1589,232 @@ ul.b{margin:0 0 10px 18px;font-size:13px}
 
 /* the stage status check marks are white (they were being greyed by the dark tag-icon rule) */
 .rz-bento.bn-dark .bn-st .i,.rz-bento .bn-st .i{color:#fff}
+.chat .top{top:8px}
+
+/* ---------- one-line composer (Figma "Input box 2") ---------- */
+.composer .cbox{display:flex;align-items:flex-end;gap:10px;padding:12px;border-radius:32px;border:1.5px solid transparent;background:rgba(255,255,255,.64);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);box-shadow:0 2px 6px rgba(244,244,244,.06),0 18px 48px rgba(33,26,88,.12);color:var(--ink)}
+.composer .cbox::before{inset:-1.5px;border-radius:inherit;padding:1.5px;background:conic-gradient(from var(--ang),#8b5cf6,#5383db,#2bd6b0,#5383db,#8b5cf6);animation:spin 6s linear infinite}
+.composer .cbox textarea{flex:1;min-width:0;height:36px;min-height:36px;max-height:168px;padding:8px 4px;line-height:20px;font-size:14px;letter-spacing:.014px;overflow-y:auto;color:var(--ink)}
+.composer .cbox textarea::placeholder{color:#878787;opacity:1}
+.composer .ib,.composer .send{flex:none;height:36px}
+.composer .ib{width:36px;border-radius:999px;background:#fff;border:1px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,.05);color:var(--ink);display:grid;place-items:center}
+.composer .ib.on{background:#edf1f8}
+.composer .send{width:65px;border-radius:99px;background:#2f245c;color:#fff;opacity:1;display:grid;place-items:center}
+.composer .send:not(.ready){opacity:.55}
+.composer .disc{margin-top:8px;font-size:12px;color:#878787;opacity:1}
+.pm{position:absolute;left:0;bottom:calc(100% + 10px);min-width:240px;padding:8px;border-radius:20px;background:#fff;border:1px solid #ececec;box-shadow:0 2px 6px rgba(244,244,244,.06),0 18px 48px rgba(33,26,88,.18);display:flex;flex-direction:column;gap:2px;z-index:5;animation:secIn .18s ease-out}
+.pm button{display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:14px;text-align:left;color:var(--ink);font-size:14px}
+.pm button:hover{background:#edf1f8}
+.pm-i{width:32px;height:32px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.08);display:grid;place-items:center;flex:none}
+.pm-t{flex:1;display:flex;flex-direction:column;line-height:1.25;font-weight:500}
+.pm-t small{font-size:12px;font-weight:400;color:#878787}
+.home .composer .cbox{background:rgba(255,255,255,.12);color:#fff;box-shadow:0 10px 30px -10px rgba(0,0,0,.4)}
+.home .composer .cbox textarea{color:#fff}
+.home .composer .cbox textarea::placeholder{color:rgba(255,255,255,.6)}
+.home .composer .disc{color:rgba(255,255,255,.55)}
+.home .composer .ib{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.2);color:#fff;box-shadow:none}
+.home .composer .send{background:#fff;color:#2f245c}
+.home .pm{background:rgba(20,22,34,.92);border-color:rgba(255,255,255,.14)}
+.home .pm button{color:#fff}
+.home .pm button:hover{background:rgba(255,255,255,.1)}
+.home .pm-t small{color:rgba(255,255,255,.6)}
+.home .pm-i{background:rgba(255,255,255,.14);box-shadow:none}
+/* opaque backing so nothing behind the input shows through; fill stays white at 64% like the Figma */
+.chat .composer .cbox{background:linear-gradient(rgba(255,255,255,.64),rgba(255,255,255,.64)),#f7f6f4}
+.home .composer .send{background:#2f245c;color:#fff}
+.composer .send img{display:block}
+.composer .ib{box-shadow:0 1px 2px rgba(0,0,0,.05),0 0 0 1px rgba(255,255,255,.9)}
+
+/* ---------- response layout protocol (see data/responseSpec.ts) ----------
+   spacing only: tight 6 · element 12 · block 24 · section 40.  header → lead → body/pointers → visual → note.
+   The look (icon chips, hairline dividers, type sizes) is the original one. */
+.rcard{--sp-tight:6px;--sp-el:12px;--sp-block:24px;--sp-sec:28px;padding:4px 28px 8px}
+.rcard.bare{padding:4px 28px 8px}
+.rcard .sec{padding:var(--sp-sec) 0}
+
+
+.rcard .sec>*{margin-top:0;margin-bottom:0}
+.rcard .sec>h3{margin:0}
+.rcard .sec>*+*{margin-top:var(--sp-el)}
+.rcard .sec>.rings,.rcard .sec>.fgr,.rcard .sec>.nums,.rcard .sec>.drv,.rcard .sec>.care,.rcard .sec>.qs,.rcard .sec>.schips{margin-top:var(--sp-block)}
+.rcard .sec>h3+*{margin-top:var(--sp-el)}
+.rcard .sec>h3+.drv,.rcard .sec>h3+.care,.rcard .sec>h3+.qs,.rcard .sec>h3+.schips{margin-top:var(--sp-el)}
+.rcard .sec>.illus,.rcard .sec>.src{margin-top:var(--sp-el)}
+.rcard .sec>.acts{margin-top:var(--sp-block)}
+.rcard .drv,.rcard .care,.rcard .rings{gap:var(--sp-el)}
+.rcard .cap{margin-bottom:var(--sp-el)}
+.rcard .qs,.rcard .schips{gap:var(--sp-el) 8px}
+.rcard.quick .sec{padding:var(--sp-sec) 0}
+.rcard.quick .lead{margin-bottom:var(--sp-el)}
+
+/* spacing guides (prototype setting) */
+.rcard{position:relative}
+.sg{position:absolute;inset:0;pointer-events:none;z-index:30}
+.sg-b{position:absolute;box-sizing:border-box;border-top:1px dashed #d6336c;border-bottom:1px dashed #d6336c;background:repeating-linear-gradient(135deg,rgba(214,51,108,.16) 0 6px,rgba(214,51,108,.06) 6px 12px)}
+.sg-tight{background:rgba(214,51,108,.28)}
+.sg-sec{border-color:#7c3aed;background:repeating-linear-gradient(135deg,rgba(124,58,237,.16) 0 6px,rgba(124,58,237,.06) 6px 12px)}
+.sg-block{border-color:#0ea5e9;background:repeating-linear-gradient(135deg,rgba(14,165,233,.18) 0 6px,rgba(14,165,233,.06) 6px 12px)}
+.sg-l{position:absolute;left:0;top:50%;transform:translateY(-50%);white-space:nowrap;font:600 10.5px/1 ui-monospace,Menlo,Consolas,monospace;padding:3px 7px;border-radius:5px;color:#fff;background:#d6336c;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.sg-sec .sg-l{background:#7c3aed}.sg-block .sg-l{background:#0ea5e9}
+
+/* ---------- response + question type scale: one step up (12→14, 14→16) ---------- */
+.ubub{font-size:15px}
+.rcard .sec h3{font-size:18px}
+.rcard .sec h3 .ht{width:32px;height:32px}
+.rcard .sec p{font-size:15px}
+.rcard .sec p.lead{font-size:16px}
+.rcard .nums li p{font-size:16px}
+.rcard .nums li>span{font-size:13px}
+.rcard .fig .k,.rcard .fig .v small,.rcard .d,.rcard .ring .lb,.rcard .ring .bg small,.rcard .src,.rcard .illus,.rcard .str{font-size:13px}
+.rcard .fig .v{font-size:21px}
+.rcard .ring .bg{font-size:17px}
+.rcard .calc{font-size:12px}
+.rcard .cap .ct{font-size:15px}
+.rcard .cap .cs,.rcard .seg button{font-size:13px}
+.rcard .dr b,.rcard .cr b{font-size:15px}
+.rcard .dr p,.rcard .cr p{font-size:14.5px}
+.rcard .q{font-size:14.5px}
+.rcard .sc,.rcard .acts .lb{font-size:14px}
+.rcard .chart-svg text{font-size:13.5px}
+.gb-done-title,.tk-done-title{font-size:17px}
+.tl-t.done{font-size:17px}
+/* centre the conversation + input in the free space between the open side panels (screen centre when none is open) */
+.chat{--shift:0px}
+.stage{transition:transform .3s}
+
+/* composer buttons lift off the background; calmer + menu */
+.chat .composer .ib{box-shadow:0 1px 2px rgba(0,0,0,.08),0 4px 10px -2px rgba(33,26,88,.16)}
+.chat .composer .ib.on{box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.pm{min-width:260px;padding:6px;border-radius:18px}
+.pm button{gap:14px;padding:10px 12px;border-radius:12px}
+.pm-i{width:auto;height:auto;border-radius:0;background:none;box-shadow:none;color:var(--brand);display:grid;place-items:center}
+.pm-c{color:var(--ink3);display:grid;place-items:center}
+.pm-t{font-size:14px}
+.home .pm-i{background:none;color:#fff}
+/* home input box: same position and width as the conversation screen */
+.home .composer{bottom:8px;width:min(calc(100% - 48px),min(clamp(584px,calc(584px + (100% - 1232px) / 2),1500px),calc(100% - 892px)))}
+
+/* glass outline: Figma "Glass/Outline" = linear gradient, white → transparent (49%) → white, 24% opacity */
+.dock,.round,.avatar{position:relative;border-color:transparent}
+.dock{position:absolute}
+.dock::before,.round::before,.avatar::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;pointer-events:none;background:linear-gradient(132deg,rgba(255,255,255,.24) 0%,rgba(255,255,255,0) 49%,rgba(255,255,255,.24) 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.avatar::before{inset:-2px;padding:2px}
+/* input box fill #F5F5F7 so the white plus / mic buttons stand out; subtle hover lift */
+.chat .composer .cbox{background:#f5f5f7}
+.composer .ib{transition:transform .15s,box-shadow .15s,background .15s}
+.chat .composer .ib:hover{transform:translateY(-1px);background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.08),0 8px 16px -4px rgba(33,26,88,.24)}
+.chat .composer .ib:active{transform:translateY(0);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.home .composer .ib:hover{transform:translateY(-1px);background:rgba(255,255,255,.26)}
+/* input text + hint: one step up (14 → 16) */
+.composer .cbox textarea{font-size:16px;line-height:24px;padding:6px 4px}
+.recents{border-radius:20px}
+.recents.collapsed{border-radius:18px}
+.recents{padding-top:6px}
+.recents.collapsed{padding-top:12px}
+
+/* Bento: all stages live in ONE glass tile; each stage is a sub-section inside it */
+.bn-stages{display:flex;flex-direction:column;gap:12px;padding:12px}
+.bn-stages>.bn-glb{margin:0 4px 0;font-size:10px}
+.bn-cnt{font-variant-numeric:tabular-nums;letter-spacing:.6px}
+.bn-stages .bn-stage.bn-sub,.bn-stages .bn-stage.bn-sub.act,.bn-stages .bn-stage.bn-sub:hover,.rz-bento.bn-dark .bn-stages .bn-stage.bn-sub:hover{background:none;border:0;padding:0;border-radius:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.bn-stages .bn-stage.bn-sub::before,.bn-stages .bn-stage.bn-sub::after{display:none}
+.bn-stages .bn-stage.bn-sub.act .bn-card{box-shadow:0 0 0 1.5px rgba(160,183,222,.75),0 0 18px -6px rgba(160,183,222,.55)}
+.bn-stages .bn-sub .bn-lb{margin-bottom:6px}
+.rz-bento.bn-dark .bn-stages .bn-sub+.bn-sub{padding-top:0}
+
+/* Bento stage: no "Stage N" label; status tick + chevron sit at the right end of the step row */
+.bn-hrow{display:flex;align-items:center;gap:10px}
+.bn-hrow .bn-h{flex:1;min-width:0}
+.bn-hrow .bn-r{display:flex;align-items:center;gap:10px;flex:none}
+.bn-stages .bn-stage.bn-sub{gap:0}
+/* Recent chats header: a little more air at the top, bigger tap targets for the two icons */
+.recents{padding-top:12px}
+.recents.collapsed{padding-top:12px}
+.rc-h{height:40px}
+.rc-h .btns{gap:4px}
+.rc-h button{width:36px;height:36px;border-radius:10px;opacity:.85;transition:background .15s,opacity .15s}
+.rc-h button:hover{background:rgba(255,255,255,.12);opacity:1}
+.recents.collapsed .rc-h{height:36px}
+
+/* + menu: every row the same height; locked agent row */
+.pm button,.pm .pm-row{min-height:56px}
+.pm .pm-row{display:flex;align-items:center;gap:14px;padding:10px 12px;border-radius:12px;font-size:14px}
+.pm-lock{cursor:not-allowed;color:var(--ink)}
+.pm-lock .pm-t small{color:#878787}
+.pm-lk{width:28px;height:28px;border-radius:50%;background:#edf1f8;color:#49658b}
+.pm button{min-height:56px}
+
+.pm-lock .pm-t,.pm-lock .pm-i{opacity:.7}
+.pm-lk{width:32px;height:32px;background:#e4e9f4;color:#2f245c}
+
+/* two latest sub-steps: what just finished (ticked) above, what is running now below */
+.evp{--rh:24px;margin-top:6px;height:var(--rh);overflow:hidden;transition:height .35s cubic-bezier(.2,.8,.2,1);font-size:13px;line-height:var(--rh)}
+.evp.two{height:calc(var(--rh) * 2)}
+.evp-in{display:flex;flex-direction:column}
+.evp-in.shift{margin-top:calc(var(--rh) * -1);animation:evUp .5s cubic-bezier(.2,.8,.2,1) both}
+.evp-in:not(.shift){animation:evIn .4s ease both}
+@keyframes evUp{from{transform:translateY(var(--rh))}to{transform:none}}
+@keyframes evIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.evp-row{height:var(--rh);display:flex;align-items:center;gap:8px;white-space:nowrap;min-width:0}
+.evp-tx{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.evp-ic{flex:none;width:14px;height:14px;border-radius:50%;display:grid;place-items:center}
+.evp-row.was{color:#8a8a8a}
+.evp-row.was .evp-ic{background:#12b76a;color:#fff}
+.evp-row.now{color:#3d3d3d}
+.evp-row.now .evp-ic i{width:6px;height:6px;border-radius:50%;background:#8caad9;animation:gbDot 1.2s infinite ease-in-out}
+.evp{width:100%;max-width:100%;min-width:0}
+.gb-left,.gb-pane,.tl-l,.gv-pane{min-width:0}
+.gb-left .evp,.tl-l .evp{max-width:calc(100% - 8px)}
+
+/* active step in the list: the sub-step that just finished (ticked) sits above the one running now */
+.sub-prev,.tl-pv{display:flex;align-items:center;gap:6px;font-size:12px;line-height:1.3;color:#a0a0a0;white-space:nowrap;overflow:hidden;animation:gbIn .4s ease both}
+.sub-prev>i,.tl-pv>i{flex:none;width:12px;height:12px;border-radius:50%;display:grid;place-items:center;background:#12b76a;color:#fff}
+.sub-prev>span,.tl-pv>span{overflow:hidden;text-overflow:ellipsis}
+.tl-pv{margin:2px 0 0 31px}
+/* Cards / Story / Aurora panels float 12px below the sub nav (the same gap Bento's first tile has); Bento stays flush so its tiles scroll under the line */
+.rz:not(.rz-bento){top:131px}
+
+/* sub-step ticks: plain grey outline check (the stage's own tick turns green when the stage is done) */
+.sub-prev>i,.tl-pv>i{width:auto;height:auto;border-radius:0;background:none;color:#a3a3a3}
+.sub-prev>i svg,.tl-pv>i svg{width:11px;height:11px}
+/* Cards pane: keep the scrollbar gutter so switching tabs does not shift the content */
+.rz{scrollbar-gutter:stable}
+/* Stages / Activity / Sources tab bar: Shale 100 */
+.rz-tabs{background:#e7e7e7}
+
+/* sub-step rows: every row has a check; grey outline while it runs, green once it is done (done rows dim a little) */
+.sub-cur{display:flex;align-items:center;gap:6px}
+.sub-cur>i,.tl-ck{flex:none;width:auto;height:auto;display:inline-grid;place-items:center;color:#a3a3a3}
+.sub-cur>i svg,.tl-ck svg{width:11px;height:11px}
+.tl-ck{margin-right:6px;vertical-align:-1px}
+.sub-cur>span{overflow:hidden;text-overflow:ellipsis}
+.sub-prev,.tl-pv{opacity:.7}
+.sub-prev>i,.tl-pv>i{color:#12b76a}
+.sub-prev,.tl-pv{color:#8a8a8a}
+/* running sub-step: a grey dash; finished: green check at full strength */
+.sub-cur>i.dash,.tl-ck.dash{position:relative;width:11px;height:11px;display:inline-block;flex:none}
+.sub-cur>i.dash::before,.tl-ck.dash::before{content:"";position:absolute;left:1px;right:1px;top:50%;height:1.6px;margin-top:-.8px;border-radius:1px;background:#a3a3a3}
+.sub-prev,.tl-pv{opacity:1}
+
+/* sub-step flow: rows persist and glide; dash → green tick, then up; the next one rises in from below */
+.sf{position:relative;overflow:hidden;font-size:12px;line-height:var(--rh);transition:height .4s cubic-bezier(.22,.8,.24,1)}
+.sf-row{position:absolute;left:0;right:0;top:0;height:var(--rh);display:flex;align-items:center;gap:6px;white-space:nowrap;color:#878787;transform:translateY(var(--y,0));transition:transform .55s cubic-bezier(.22,.8,.24,1) .45s,opacity .4s ease .45s,color .3s ease;animation:sfIn .55s cubic-bezier(.22,.8,.24,1) .7s both}
+.sf-row.gone{opacity:0}
+@keyframes sfIn{from{opacity:0;transform:translateY(calc(var(--y,0px) + 14px))}}
+.sf-ic{position:relative;flex:none;width:12px;height:12px;display:grid;place-items:center}
+.sf-d{position:absolute;left:1px;right:1px;top:50%;height:1.6px;margin-top:-.8px;border-radius:1px;background:#a3a3a3;transition:opacity .25s ease}
+.sf-c{position:absolute;inset:0;display:grid;place-items:center;color:#12b76a;opacity:0;transform:scale(.6);transition:opacity .25s ease .05s,transform .3s cubic-bezier(.3,1.5,.5,1) .05s}
+.sf-c svg{width:12px;height:12px}
+.sf-row.done .sf-d{opacity:0}
+.sf-row.done .sf-c{opacity:1;transform:none}
+.sf-t{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.sf-row:first-child:not(.done){animation-delay:0s}
+.tl-sf{margin:2px 0 2px 31px}
+.gj-tx .sf,.bs-tx .sf{margin-top:1px}
+
+/* sub-step flow timing is driven from the component now (no CSS delays) */
+.sf-row{transition:transform .6s cubic-bezier(.22,.8,.24,1),opacity .45s ease,color .3s ease;animation:sfIn .6s cubic-bezier(.22,.8,.24,1) both}
+.sf-row:first-child:not(.done){animation-delay:0s}
+@keyframes sfIn{from{opacity:0;transform:translateY(calc(var(--y,0px) + 24px))}}
+/* the entrance animation must not keep holding the transform, otherwise the row cannot glide up afterwards */
+.sf-row{animation:sfIn .6s cubic-bezier(.22,.8,.24,1) backwards}

@@ -12,9 +12,10 @@ export type VariantState = {
   agents: '3' | '5' | '10' | 'mix'
   pane: 'cards' | 'trace' | 'ai' | 'bento'
   glass: 'white' | 'black'
+  spacing: 'off' | 'on'
 }
 
-export const DEFAULT_VARIANTS: VariantState = { thinking: 'globe', speed: 'standard', agents: '5', pane: 'bento', glass: 'black' }
+export const DEFAULT_VARIANTS: VariantState = { thinking: 'globe', speed: 'standard', agents: '5', pane: 'bento', glass: 'black', spacing: 'off' }
 
 export type ControlDef = {
   key: keyof VariantState
@@ -23,6 +24,14 @@ export type ControlDef = {
 }
 
 export const CONTROLS: ControlDef[] = [
+  {
+    key: 'spacing',
+    label: 'Response spacing guides',
+    options: [
+      { id: 'off', label: 'Off' },
+      { id: 'on', label: 'On' },
+    ],
+  },
   {
     key: 'glass',
     label: 'Bento glass',
