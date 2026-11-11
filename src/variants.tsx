@@ -27,8 +27,8 @@ export const CONTROLS: ControlDef[] = [
     key: 'glass',
     label: 'Bento glass',
     options: [
-      { id: 'white', label: 'White' },
       { id: 'black', label: 'Black' },
+      { id: 'white', label: 'White' },
     ],
   },
   {
@@ -76,7 +76,7 @@ function withRules(v: VariantState): VariantState {
 }
 
 // a new key, so earlier saved choices do not hide the new defaults (Bento pane, Globe variation)
-const STORAGE_KEY = 'athena-v2-variants-v2'
+const STORAGE_KEY = 'athena-v2-variants-v3'
 
 /** keep only values that still exist (older saved settings may name a variation that was removed) */
 function sanitize(raw: Partial<Record<string, string>>): VariantState {

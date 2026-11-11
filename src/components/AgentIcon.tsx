@@ -100,7 +100,7 @@ const GLYPH: Record<string, ReactNode> = {
   shield: (
     <>
       <path d="M12 2.4l8.6 3v6.4c0 5-3.6 8.5-8.6 9.8-5-1.3-8.6-4.8-8.6-9.8V5.4z" />
-      <path d="M8.2 12.2l2.6 2.6 5-5.4" {...W} style={{ stroke: '#fff' }} strokeWidth="1.8" />
+      <path d="M8.2 12.2l2.6 2.6 5-5.4" {...W} strokeWidth="1.8" />
     </>
   ),
 }

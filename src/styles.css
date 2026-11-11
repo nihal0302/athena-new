@@ -1588,3 +1588,6 @@ ul.b{margin:0 0 10px 18px;font-size:13px}
 .rz-bento.bn-dark .bn-ev span{color:#d4d4d4;font-weight:500}
 .rz-bento.bn-dark .bn-ev p{color:#fff}
 .rz-bento.bn-dark .rz-took{color:#d4d4d4}
+
+/* the stage status check marks are white (they were being greyed by the dark tag-icon rule) */
+.rz-bento.bn-dark .bn-st .i,.rz-bento .bn-st .i{color:#fff}
