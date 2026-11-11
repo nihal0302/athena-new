@@ -20,7 +20,7 @@ const subPair = (subs: string[], q: number) => {
  *     takes the second row, while the one after it rises in from below.
  *  The component steps through the real progress one sub-step at a time so each change can be seen. */
 function SubFlow({ subs, i, fin = false }: { subs: string[]; i: number; fin?: boolean }) {
-  const RH = 20
+  const RH = 22
   const [shown, setShown] = useState(i) // the sub-step currently on screen as "running"
   const [ticked, setTicked] = useState(false) // has the running one been ticked yet
   useEffect(() => {
