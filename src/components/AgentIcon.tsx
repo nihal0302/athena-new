@@ -121,3 +121,53 @@ export function AgentIcon({ n, size = 12 }: { n: string; size?: number }) {
     </svg>
   )
 }
+
+/** Solid two-tone icons for the Story pane's KPI cards (Figma palette). */
+export function KpiIcon({ k, size = 24 }: { k: 'steps' | 'agents' | 'sources' | 'checks'; size?: number }) {
+  // one colour for all four (sky/800); the lighter parts are the same colour at lower strength
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true" style={{ color: '#49658b' }}>
+      {k === 'steps' && (
+        <>
+          <path d="M12 2.5l9.5 5-9.5 5-9.5-5z" fill="currentColor" />
+          <path d="M2.5 11.2l9.5 5 9.5-5v2.2l-9.5 5-9.5-5z" fill="currentColor" fillOpacity=".6" />
+          <path d="M2.5 16.2l9.5 5 9.5-5v2.2l-9.5 5-9.5-5z" fill="currentColor" fillOpacity=".32" />
+        </>
+      )}
+      {k === 'agents' && (
+        <>
+          <circle cx="9" cy="8" r="4" fill="currentColor" />
+          <path d="M1.8 21c0-4.2 3.2-6.6 7.2-6.6s7.2 2.4 7.2 6.6z" fill="currentColor" />
+          <circle cx="17.6" cy="9" r="3" fill="currentColor" fillOpacity=".45" />
+          <path d="M16.2 14.4c3.4-.2 6 1.8 6 5.2V21h-4.4c0-2.4-.6-4.7-1.6-6.6z" fill="currentColor" fillOpacity=".45" />
+        </>
+      )}
+      {k === 'sources' && (
+        <>
+          <path d="M6 2.5h8l5 5V20a1.8 1.8 0 01-1.8 1.8H6A1.8 1.8 0 014.2 20V4.3A1.8 1.8 0 016 2.5z" fill="currentColor" />
+          <path d="M14 2.5l5 5h-3.2A1.8 1.8 0 0114 5.7z" fill="currentColor" fillOpacity=".45" />
+          <rect x="7.6" y="11.5" width="8.8" height="1.9" rx=".95" fill="#fff" />
+          <rect x="7.6" y="15.2" width="6" height="1.9" rx=".95" fill="#fff" />
+        </>
+      )}
+      {k === 'checks' && (
+        <>
+          <path d="M12 2l8.5 3v6.2c0 5.2-3.6 8.8-8.5 10.8-4.9-2-8.5-5.6-8.5-10.8V5z" fill="currentColor" />
+          <path d="M12 2l8.5 3v6.2c0 5.2-3.6 8.8-8.5 10.8z" fill="currentColor" fillOpacity=".7" />
+          <path d="M8 12.2l2.9 2.9 5.2-5.6" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+        </>
+      )}
+    </svg>
+  )
+}
+
+/** Solid reasoning mark: two nodes joined by a path (sun node + white node). Sits on the dark gradient badge. */
+export function ReasoningIcon({ size = 22 }: { size?: number }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true">
+      <path d="M7.2 7.2H15a3.4 3.4 0 010 6.8H9a3.4 3.4 0 000 6.8h6.8" fill="none" stroke="#fff" strokeOpacity=".55" strokeWidth="2.2" strokeLinecap="round" />
+      <circle cx="6.2" cy="6.8" r="3.6" fill="#FFD059" />
+      <circle cx="17.8" cy="19.8" r="3.2" fill="#fff" />
+    </svg>
+  )
+}

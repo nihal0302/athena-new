@@ -2047,3 +2047,75 @@ ul.b{margin:0 0 10px 18px;font-size:13px}
 .composer .ib.on::after{display:none}
 .composer .ib.plus[data-tip]::after{left:0;transform:translate(0,4px)}
 .composer .ib.plus[data-tip]:hover::after,.composer .ib.plus[data-tip]:focus-visible::after{transform:none}
+
+/* Globe steps: extra room above the running step's icon so its breathing circle clears the top of the white box */
+.gj-row.gj-w{padding-top:18px}
+.gj-row.gj-w::after{top:60px}
+.gj-row:has(+ .gj-w)::after{bottom:-20px}
+
+/* Story pane: the totals read as one plain sentence (no boxes); bigger, bolder tick in the done circles */
+.rz-story .sy-sum{margin:16px 24px 0;font-size:13.5px;line-height:1.6;color:#6b6b6b;flex:none}
+.rz-story .sy-sum b{color:#2f245c;font-weight:600;font-variant-numeric:tabular-nums}
+.rz-story .sy-dot svg{width:15px;height:15px;stroke-width:3.4}
+/* Story pane: validation pointers get a light green fill with a dark green tick */
+.rz-story .st-checks li>span:first-child{background:#d1fadf;color:#05603a}
+.rz-story .st-checks li>span:first-child svg{stroke-width:3.2}
+
+/* Story pane totals: one slim segment per step (filled as steps finish) with a quiet line of counts under it */
+.rz-story .sy-sum{display:none}
+.sy-prog{margin:18px 24px 0;flex:none}
+.sy-bars{display:flex;gap:5px}
+.sy-bars i{flex:1;height:5px;border-radius:5px;background:#e7e7e7;position:relative;overflow:hidden;transition:background .4s}
+.sy-bars i.d{background:#12b76a}
+.sy-bars i.a{background:linear-gradient(90deg,#a0b7de,#dae3f1,#a0b7de);background-size:200% 100%;animation:shim 1.4s linear infinite}
+.sy-meta{display:flex;flex-wrap:wrap;gap:4px 14px;margin:10px 0 0;font-size:12.5px;color:#878787}
+.sy-meta span{display:inline-flex;gap:4px;white-space:nowrap}
+.sy-meta b{color:#252525;font-weight:600;font-variant-numeric:tabular-nums}
+
+/* Story pane totals as dashboard KPI cards */
+.sy-prog{display:none}
+.sy-kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 24px 0;flex:none}
+.sy-kpi{position:relative;padding:12px 14px 12px;border-radius:16px;background:#fff;border:1px solid #e7e7e7;box-shadow:0 1px 2px rgba(0,0,0,.04),0 6px 14px -10px rgba(33,26,88,.2);display:flex;flex-direction:column;min-width:0}
+.sy-kpi .k-top{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:#878787}
+.sy-kpi .k-top i{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:#edf1f8;color:#49658b}
+.sy-kpi b{margin-top:6px;font-size:26px;line-height:1.05;font-weight:600;letter-spacing:-.4px;color:#2f245c;font-variant-numeric:tabular-nums}
+.sy-kpi small{margin-top:6px;font-size:12px;color:#6b6b6b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sy-kpi .k-bar{display:block;margin-top:9px;height:4px;border-radius:4px;background:#e7e7e7;overflow:hidden}
+.sy-kpi .k-bar u{display:block;height:100%;border-radius:4px;background:#12b76a;transition:width .4s ease}
+
+/* KPI cards: compact, no progress bars; the number and its note share one line */
+.sy-kpis{gap:8px;margin-top:14px}
+.sy-kpi{padding:9px 12px 10px;border-radius:14px}
+.sy-kpi .k-top{font-size:12px;line-height:1}
+.sy-kpi .k-top i{width:22px;height:22px}
+.sy-kpi .k-top i svg{width:12px;height:12px}
+.sy-kpi .k-val{display:flex;align-items:baseline;gap:7px;margin-top:4px;min-width:0}
+.sy-kpi b{margin:0;font-size:22px;line-height:1.1}
+.sy-kpi small{margin:0;font-size:12px;min-width:0}
+.sy-kpi .k-bar{display:none}
+
+/* KPI cards, final shape: four across, number + icon on top, one-word label under */
+.sy-kpis{grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+.sy-kpi{padding:9px 10px 10px;border-radius:14px}
+.sy-kpi .k-top{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.sy-kpi b{font-size:22px;line-height:1.1}
+.sy-kpi .k-top i{width:22px;height:22px;flex:none}
+.sy-kpi .k-l{margin-top:3px;font-size:12px;line-height:1.2;color:#878787}
+
+/* KPI cards: back to the 2 x 2 grid (label + icon on top, the number under it) */
+.sy-kpis{grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.sy-kpi{padding:9px 12px 10px;border-radius:14px}
+.sy-kpi .k-top{display:block}
+.sy-kpi .k-top i{display:none}
+.sy-kpi .k-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sy-kpi .k-top i{display:grid;width:22px;height:22px;flex:none}
+.sy-kpi .k-l{margin:0;font-size:12px;color:#878787}
+.sy-kpi .k-n{display:block;margin-top:4px;font-size:22px;line-height:1.1;font-weight:600;color:#2f245c;letter-spacing:-.3px;font-variant-numeric:tabular-nums}
+
+
+/* KPI icons are solid artwork now: no tinted circle behind them */
+.sy-kpi .k-top i{background:none;width:auto;height:auto}
+.sy-kpi .k-top i svg{width:22px;height:22px}
+
+.sy-kpi .k-top i svg{width:30px;height:30px}
+.sy-kpi .k-top{align-items:flex-start}

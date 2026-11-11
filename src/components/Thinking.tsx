@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom'
 import { SOURCES, SOURCES_EXTRA, SQL, type AgentDef } from '../data/scenario'
 import { fmt, type RunState } from '../hooks'
 import { Icon, Sparkle } from './Icon'
-import { AgentIcon } from './AgentIcon'
+import { AgentIcon, ReasoningIcon } from './AgentIcon'
 import { useFollow } from './useFollow'
 
 /* ------------------------------------------------------------------ */
@@ -344,7 +344,7 @@ export function ReasoningPanel({
   return (
     <aside ref={rzRef} className={'rz' + (open ? '' : ' closed') + (wide ? ' wide' : '') + (run.done ? ' done' : '')} aria-label="Reasoning">
       <div className="rz-h">
-        <span className="rz-ic"><Icon n="route" size={22} /></span>
+        <span className="rz-ic"><ReasoningIcon size={24} /></span>
         <div className="rz-ttl">
           <h4>Reasoning</h4>
           <div className="rz-st"><span className="dot" /><span>{run.done ? 'Completed' : 'Live · ' + sc.steps[run.idx].live.toLowerCase()}</span></div>

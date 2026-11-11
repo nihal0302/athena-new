@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { pal } from './palette'
+import { KpiIcon, ReasoningIcon } from './AgentIcon'
 import { SOURCES, SOURCES_EXTRA, type AgentDef } from '../data/scenario'
 import { fmt, type RunState } from '../hooks'
 import { AgentIcon } from './AgentIcon'
@@ -217,7 +218,7 @@ export function TracePanel({
     return (
       <aside ref={ref} className={'rz rz-bento' + (dark ? ' bn-dark' : '') + (open ? '' : ' closed') + (wide ? ' wide' : '') + (run.done ? ' done' : '')} aria-label="Reasoning">
         <div className="bn-t bn-head bn-fade">
-          <span className="bn-mark"><Icon n="route" size={20} /></span>
+          <span className="bn-mark"><ReasoningIcon size={22} /></span>
           <div className="bn-ttl">
             <b>Reasoning</b>
             <small>{live ? 'Live · ' + fmt(run.t) : 'Completed in ' + fmt(sc.total)}</small>
@@ -311,27 +312,43 @@ export function TracePanel({
         {ai ? (
           <span className={'au-orb' + (live ? ' live' : '')}>
             <i />
-            <Icon n="route" size={18} />
+            <ReasoningIcon size={20} />
             <em className="sp s1">✦</em>
             <em className="sp s2">✦</em>
             <em className="sp s3">✦</em>
           </span>
         ) : (
-          <span className="sy-mark"><Icon n="route" size={20} /></span>
+          <span className="sy-mark"><ReasoningIcon size={22} /></span>
         )}
         <div className="sy-ttl">
           <b className={ai && live ? 'au-live' : ''}>Reasoning</b>
-          <small>{live ? 'Live · ' + fmt(run.t) + (ai ? '' : ' · ' + sc.steps[run.idx].live.toLowerCase()) : 'Completed in ' + fmt(sc.total)}</small>
+          <small>{live ? (ai ? 'Live · ' + fmt(run.t) : fmt(run.t) + ' · ' + sc.steps[run.idx].live.toLowerCase()) : 'Completed in ' + fmt(sc.total)}</small>
         </div>
         <button aria-label="Expand" aria-disabled="true" tabIndex={-1} style={{ pointerEvents: "none" }}><Icon n="expand" size={17} /></button>
         <button onClick={onClose} aria-label="Close"><Icon n="x" size={17} /></button>
       </div>
 
-      <div className="sy-stats">
-        {stats.map(([v, l]) => (
-          <div key={l}><b>{v}</b><span>{l}</span></div>
-        ))}
-      </div>
+      {ai ? (
+        <div className="sy-stats">
+          {stats.map(([v, l]) => (
+            <div key={l}><b>{v}</b><span>{l}</span></div>
+          ))}
+        </div>
+      ) : (
+        <div className="sy-kpis">
+          {([
+            ['Steps', 'steps', run.done ? String(nSteps) : stepsNow + '/' + nSteps],
+            ['Agents', 'agents', stats[1][0]],
+            ['Sources', 'sources', stats[2][0]],
+            ['Checks', 'checks', stats[3][0]],
+          ] as [string, 'steps' | 'agents' | 'sources' | 'checks', string][]).map(([l, ic, v]) => (
+            <div key={l} className="sy-kpi">
+              <div className="k-top"><span className="k-l">{l}</span><i><KpiIcon k={ic} size={30} /></i></div>
+              <b className="k-n">{v}</b>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="sy-body">
         {sc.steps.map((s, i) => {
