@@ -279,7 +279,7 @@ export function ReasoningPanel({
           <h4>Reasoning</h4>
           <div className="rz-st"><span className="dot" /><span>{run.done ? 'Completed' : 'Live · ' + sc.steps[run.idx].live.toLowerCase()}</span></div>
         </div>
-        <button onClick={onWide} aria-label="Expand"><Icon n="expand" size={18} /></button>
+        <button aria-label="Expand" aria-disabled="true" tabIndex={-1} style={{ pointerEvents: "none" }}><Icon n="expand" size={18} /></button>
         <button onClick={onClose} aria-label="Close"><Icon n="x" size={18} /></button>
       </div>
 

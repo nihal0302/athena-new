@@ -221,7 +221,7 @@ export function TracePanel({
             <b>Reasoning</b>
             <small>{live ? 'Live · ' + fmt(run.t) : 'Completed in ' + fmt(sc.total)}</small>
           </div>
-          <button onClick={onWide} aria-label="Expand"><Icon n="expand" size={17} /></button>
+          <button aria-label="Expand" aria-disabled="true" tabIndex={-1} style={{ pointerEvents: "none" }}><Icon n="expand" size={17} /></button>
           <button onClick={onClose} aria-label="Close"><Icon n="x" size={17} /></button>
         </div>
 
@@ -319,7 +319,7 @@ export function TracePanel({
           <b className={ai && live ? 'au-live' : ''}>Reasoning</b>
           <small>{live ? 'Live · ' + fmt(run.t) + (ai ? '' : ' · ' + sc.steps[run.idx].live.toLowerCase()) : 'Completed in ' + fmt(sc.total)}</small>
         </div>
-        <button onClick={onWide} aria-label="Expand"><Icon n="expand" size={17} /></button>
+        <button aria-label="Expand" aria-disabled="true" tabIndex={-1} style={{ pointerEvents: "none" }}><Icon n="expand" size={17} /></button>
         <button onClick={onClose} aria-label="Close"><Icon n="x" size={17} /></button>
       </div>
 
