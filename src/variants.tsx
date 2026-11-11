@@ -11,9 +11,10 @@ export type VariantState = {
   speed: 'quick' | 'standard'
   agents: '3' | '5' | '10' | 'mix'
   pane: 'cards' | 'trace' | 'ai' | 'bento'
+  glass: 'white' | 'black'
 }
 
-export const DEFAULT_VARIANTS: VariantState = { thinking: 'globe', speed: 'standard', agents: '5', pane: 'bento' }
+export const DEFAULT_VARIANTS: VariantState = { thinking: 'globe', speed: 'standard', agents: '5', pane: 'bento', glass: 'black' }
 
 export type ControlDef = {
   key: keyof VariantState
@@ -22,6 +23,14 @@ export type ControlDef = {
 }
 
 export const CONTROLS: ControlDef[] = [
+  {
+    key: 'glass',
+    label: 'Bento glass',
+    options: [
+      { id: 'white', label: 'White' },
+      { id: 'black', label: 'Black' },
+    ],
+  },
   {
     key: 'pane',
     label: 'Reasoning pane',

@@ -3,7 +3,7 @@ import { Icon } from './Icon'
 
 /** Filled, two-tone agent glyphs: a soft tinted badge with a gradient-filled symbol (in the spirit of the first agent mock-ups),
  *  instead of plain outline icons. The badge size comes from the parent; the colour is the agent's own. */
-const W = { fill: 'none', stroke: '#fff', strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
+const W = { fill: 'none', strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, style: { stroke: 'var(--cut,#fff)' } }
 
 const GLYPH: Record<string, ReactNode> = {
   users: (
@@ -30,7 +30,7 @@ const GLYPH: Record<string, ReactNode> = {
   wallet: (
     <>
       <path d="M3 4.6A1.6 1.6 0 014.6 3h6.2a2 2 0 011.4.6l8.2 8.2a2 2 0 010 2.8l-5.8 5.8a2 2 0 01-2.8 0l-8.2-8.2a2 2 0 01-.6-1.4z" />
-      <circle cx="8" cy="8" r="1.8" fill="#fff" />
+      <circle cx="8" cy="8" r="1.8" style={{ fill: 'var(--cut,#fff)' }} />
     </>
   ),
   layers: (
@@ -44,7 +44,7 @@ const GLYPH: Record<string, ReactNode> = {
     <>
       <circle cx="12" cy="12" r="9.6" />
       <circle cx="12" cy="12" r="5.8" {...W} strokeWidth="1.7" />
-      <circle cx="12" cy="12" r="2.2" fill="#fff" />
+      <circle cx="12" cy="12" r="2.2" style={{ fill: 'var(--cut,#fff)' }} />
     </>
   ),
   chart: (
@@ -66,15 +66,15 @@ const GLYPH: Record<string, ReactNode> = {
   msg: (
     <>
       <path d="M4 3.8h16a2.2 2.2 0 012.2 2.2v9a2.2 2.2 0 01-2.2 2.2h-7.6l-5.2 3.8v-3.8H4A2.2 2.2 0 011.8 15V6A2.2 2.2 0 014 3.8z" />
-      <circle cx="7.8" cy="10.5" r="1.3" fill="#fff" />
-      <circle cx="12" cy="10.5" r="1.3" fill="#fff" />
-      <circle cx="16.2" cy="10.5" r="1.3" fill="#fff" />
+      <circle cx="7.8" cy="10.5" r="1.3" style={{ fill: 'var(--cut,#fff)' }} />
+      <circle cx="12" cy="10.5" r="1.3" style={{ fill: 'var(--cut,#fff)' }} />
+      <circle cx="16.2" cy="10.5" r="1.3" style={{ fill: 'var(--cut,#fff)' }} />
     </>
   ),
   eye: (
     <>
       <path d="M1.4 12C3.9 7 7.7 4.5 12 4.5S20.1 7 22.6 12c-2.5 5-6.3 7.5-10.6 7.5S3.9 17 1.4 12z" />
-      <circle cx="12" cy="12" r="3.8" fill="#fff" />
+      <circle cx="12" cy="12" r="3.8" style={{ fill: 'var(--cut,#fff)' }} />
       <circle cx="12" cy="12" r="1.8" />
     </>
   ),
@@ -88,7 +88,7 @@ const GLYPH: Record<string, ReactNode> = {
     <>
       <circle cx="6" cy="18" r="3.2" />
       <circle cx="18" cy="6" r="3.2" />
-      <path d="M6 14.8V11a4 4 0 014-4h4" {...W} strokeWidth="2" stroke="currentColor" opacity=".9" />
+      <path d="M6 14.8V11a4 4 0 014-4h4" {...W} style={{ stroke: 'var(--c)' }} strokeWidth="2" opacity=".9" />
     </>
   ),
   pen: (
@@ -100,7 +100,7 @@ const GLYPH: Record<string, ReactNode> = {
   shield: (
     <>
       <path d="M12 2.4l8.6 3v6.4c0 5-3.6 8.5-8.6 9.8-5-1.3-8.6-4.8-8.6-9.8V5.4z" />
-      <path d="M8.2 12.2l2.6 2.6 5-5.4" {...W} strokeWidth="1.8" />
+      <path d="M8.2 12.2l2.6 2.6 5-5.4" {...W} style={{ stroke: '#fff' }} strokeWidth="1.8" />
     </>
   ),
 }

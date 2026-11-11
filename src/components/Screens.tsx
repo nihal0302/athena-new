@@ -146,7 +146,7 @@ export function ChatScreen({
       </div>
 
       {variants.pane === 'trace' || variants.pane === 'ai' || variants.pane === 'bento' ? (
-        <TracePanel run={run} open={panelOpen} wide={wide} onClose={() => setPanelOpen(false)} onWide={() => setWide(!wide)} ai={variants.pane === 'ai'} bento={variants.pane === 'bento'} />
+        <TracePanel run={run} open={panelOpen} wide={wide} onClose={() => setPanelOpen(false)} onWide={() => setWide(!wide)} ai={variants.pane === 'ai'} bento={variants.pane === 'bento'} dark={variants.glass === 'black'} />
       ) : (
         <ReasoningPanel run={run} open={panelOpen} wide={wide} onClose={() => setPanelOpen(false)} onWide={() => setWide(!wide)} />
       )}

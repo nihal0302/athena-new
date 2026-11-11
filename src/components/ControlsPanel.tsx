@@ -38,7 +38,7 @@ export function ControlsPanel({ onReplay }: { onReplay?: () => void }) {
             <b>Prototype controls</b>
             <button onClick={() => setOpen(false)} aria-label="Close"><Icon n="x" size={14} /></button>
           </div>
-          {CONTROLS.map((c) => (
+          {CONTROLS.filter((c) => !(c.key === 'glass' && variants.pane !== 'bento')).map((c) => (
             <div key={c.key} className="pc-g">
               <div className="pc-l">{c.label}</div>
               <div className="pc-seg" role="radiogroup" aria-label={c.label}>

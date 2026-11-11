@@ -141,8 +141,8 @@ export function Globe({ run, size, display, complete, labels }: { run: RunState;
         const amt = k >= 0 ? clamp(lit - k) * fade : 0
         const rad = (1.0 + q.d * 1.1 + amt * 1.5) * dotScale
         if (amt > 0) {
-          ctx.fillStyle = `rgba(255,208,89,${0.35 + 0.65 * amt})`
-          ctx.shadowColor = `rgba(255,208,89,${0.6 * amt})`
+          ctx.fillStyle = `rgba(140,170,217,${0.35 + 0.65 * amt})`
+          ctx.shadowColor = `rgba(140,170,217,${0.6 * amt})`
           ctx.shadowBlur = 7 * amt
         } else {
           ctx.fillStyle = `rgba(70,86,110,${0.18 + q.d * 0.34})`
@@ -173,7 +173,7 @@ export function Globe({ run, size, display, complete, labels }: { run: RunState;
         placed.push({ x0: x - w / 2, x1: x + w / 2, y0: y - 6.5, y1: y + 6.5 })
         ctx.globalAlpha = clamp((amt - 0.2) / 0.8)
         ctx.fillStyle = 'rgba(255,255,255,.9)'
-        ctx.strokeStyle = 'rgba(255,208,89,.6)'
+        ctx.strokeStyle = 'rgba(140,170,217,.6)'
         ctx.lineWidth = 1
         ctx.beginPath()
         ctx.roundRect(x - w / 2, y - 6.5, w, 13, 6.5)

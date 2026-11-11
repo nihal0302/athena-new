@@ -41,6 +41,7 @@ export function TracePanel({
   onWide,
   ai = false,
   bento = false,
+  dark = false,
 }: {
   run: RunState
   open: boolean
@@ -49,6 +50,7 @@ export function TracePanel({
   onWide: () => void
   ai?: boolean // the livelier "Aurora" look: glow, orb, gradients, glass cards
   bento?: boolean // widget tiles: frosted glass tiles with solid white cards inside, no panel behind them
+  dark?: boolean // Bento in black glass instead of white glass
 }) {
   const sc = run.sc
   const live = !run.done
@@ -212,7 +214,7 @@ export function TracePanel({
   if (bento) {
     const feed = sc.events.filter((e) => run.done || run.t >= e.t).slice(-8)
     return (
-      <aside ref={ref} className={'rz rz-bento' + (open ? '' : ' closed') + (wide ? ' wide' : '') + (run.done ? ' done' : '')} aria-label="Reasoning">
+      <aside ref={ref} className={'rz rz-bento' + (dark ? ' bn-dark' : '') + (open ? '' : ' closed') + (wide ? ' wide' : '') + (run.done ? ' done' : '')} aria-label="Reasoning">
         <div className="bn-t bn-head bn-fade">
           <span className="bn-mark"><GoldSparkle size={20} /></span>
           <div className="bn-ttl">
