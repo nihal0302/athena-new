@@ -244,7 +244,9 @@ export function Response({
       <div className="illus">Prototype · illustrative data, not Aldar figures</div>
     </Sec>,
   ]
+  const finished = !pending && shown >= secs.length
   return (
+    <>
     <div ref={root} className={'rcard' + (bare ? ' bare' : '') + (glass ? ' glass' : '')}>
       <FlowCtx.Provider value={{ stream, onStreamed, onGrow }}>{secs.slice(0, shown)}</FlowCtx.Provider>
       {pending && (
@@ -254,6 +256,22 @@ export function Response({
         </div>
       )}
       {variants.spacing === 'on' && <SpacingGuides root={root} />}
+    </div>
+    {finished && <Feedback onToast={onToast} onReplay={onReplay} />}
+    </>
+  )
+}
+
+/** Copy, thumbs up, thumbs down and run-again: sits under the answer card, outside it. */
+function Feedback({ onToast, onReplay }: { onToast: (m: string) => void; onReplay: () => void }) {
+  const [vote, setVote] = useState<'up' | 'down' | null>(null)
+  return (
+    <div className="acts outside">
+      <button className="ibtn" onClick={() => onToast('Answer copied')} aria-label="Copy"><Icon n="copy" size={16} /></button>
+      <button className="ibtn" aria-pressed={vote === 'up'} onClick={() => setVote(vote === 'up' ? null : 'up')} aria-label="Helpful"><Icon n="up" size={16} /></button>
+      <button className="ibtn" aria-pressed={vote === 'down'} onClick={() => setVote(vote === 'down' ? null : 'down')} aria-label="Not helpful"><Icon n="down" size={16} /></button>
+      <button className="ibtn" onClick={onReplay} aria-label="Run again"><Icon n="redo" size={16} /></button>
+      <span className="lb">Was this answer helpful?</span>
     </div>
   )
 }
@@ -272,10 +290,13 @@ export function QuickResponse({
 }) {
   const a = quickAnswer(question)
   return (
-    <div className="rcard glass quick">
-      <section className="sec in">
-        <p className="lead">{a.text}</p>
-      </section>
-    </div>
+    <>
+      <div className="rcard glass quick">
+        <section className="sec in">
+          <p className="lead">{a.text}</p>
+        </section>
+      </div>
+      <Feedback onToast={onToast} onReplay={onReplay} />
+    </>
   )
 }

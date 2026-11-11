@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { RECENTS } from '../data/scenario'
-import { Icon, Sparkle } from './Icon'
+import { AldarLogo, Icon } from './Icon'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { PlusSignIcon, Mic01Icon, File01Icon, Attachment01Icon, ArrowDown01Icon } from '@hugeicons/core-free-icons'
 
@@ -49,12 +49,20 @@ export function RecentsMenu({ open, onToggle }: { open: boolean; onToggle: () =>
   )
 }
 
+/** small padlock used wherever the locked agent is shown */
+export function LockGlyph({ size = 14 }: { size?: number }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.6" /><path d="M8 10.5V8a4 4 0 018 0v2.5" /><path d="M12 14.6v2.2" /></svg>
+  )
+}
+
 export function Composer({
   value,
   onChange,
   onSend,
   files,
   locked = false,
+  lockMode = 'menu',
 }: {
   value: string
   onChange: (v: string) => void
@@ -63,6 +71,8 @@ export function Composer({
   files?: number
   /** conversation screen: the agent was chosen on the home screen and can no longer be changed */
   locked?: boolean
+  /** where the locked agent is shown: inside the + menu, as a floating chip above the box, or as a tag in the header */
+  lockMode?: 'menu' | 'chip' | 'inline'
 }) {
   const ready = !!value.trim()
   const ta = useRef<HTMLTextAreaElement>(null)
@@ -84,18 +94,32 @@ export function Composer({
   return (
     <div className="composer">
       <div className="cbox" ref={box}>
+        {locked && lockMode === 'chip' && !menu && (
+          <div className="lockchip" tabIndex={0} aria-label="Aldar X is locked for this conversation">
+            <AldarLogo size={13} />
+            <b>Aldar X</b>
+            <span className="lk"><LockGlyph size={12} /></span>
+            <small>locked for this chat</small>
+          </div>
+        )}
         {menu && (
           <div className="pm" role="menu">
-            {locked ? (
-              <div className="pm-row pm-lock" role="menuitem" aria-disabled="true" title="The agent is locked once the conversation has started"><span className="pm-i"><Sparkle size={20} /></span><span className="pm-t">Aldar X<small>Agent · locked for this chat</small></span><span className="pm-c pm-lk"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.6" /><path d="M8 10.5V8a4 4 0 018 0v2.5" /><path d="M12 14.6v2.2" /></svg></span></div>
+            {locked && lockMode !== 'menu' ? null : locked ? (
+              <div className="pm-row pm-lock" role="menuitem" aria-disabled="true" title="The agent is locked once the conversation has started"><span className="pm-i"><AldarLogo size={18} /></span><span className="pm-t">Aldar X<small>Agent is locked for this chat</small></span><span className="pm-c pm-lk"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.6" /><path d="M8 10.5V8a4 4 0 018 0v2.5" /><path d="M12 14.6v2.2" /></svg></span></div>
             ) : (
-              <button role="menuitem" onClick={() => setMenu(false)}><span className="pm-i"><Sparkle size={20} /></span><span className="pm-t">Aldar X<small>Agent</small></span><span className="pm-c"><Hi i={ArrowDown01Icon} size={16} /></span></button>
+              <button role="menuitem" onClick={() => setMenu(false)}><span className="pm-i"><AldarLogo size={18} /></span><span className="pm-t">Aldar X<small>Agent</small></span><span className="pm-c"><Hi i={ArrowDown01Icon} size={16} /></span></button>
             )}
             {!!files && <button role="menuitem" onClick={() => setMenu(false)}><span className="pm-i"><Hi i={File01Icon} /></span><span className="pm-t">Files<small>{files} attached</small></span></button>}
             <button role="menuitem" onClick={() => setMenu(false)}><span className="pm-i"><Hi i={Attachment01Icon} /></span><span className="pm-t">Attach a file</span></button>
           </div>
         )}
-        <button className={'ib plus' + (menu ? ' on' : '')} onClick={() => setMenu(!menu)} aria-label="Add agent, files or attachments" aria-expanded={menu}><Hi i={PlusSignIcon} size={18} /></button>
+        <button className={'ib plus' + (menu ? ' on' : '')} data-tip="Add files and more" onClick={() => setMenu(!menu)} aria-label="Add agent, files or attachments" aria-expanded={menu}><Hi i={PlusSignIcon} size={18} /></button>
+        {locked && lockMode === 'inline' && (
+          <span className="lockav" tabIndex={0} data-tip="Aldar X is locked for this chat" aria-label="Aldar X, locked for this conversation">
+            <AldarLogo size={16} />
+            <span className="lockov"><LockGlyph size={17} /></span>
+          </span>
+        )}
         <textarea
           ref={ta}
           rows={1}
@@ -110,8 +134,8 @@ export function Composer({
             }
           }}
         />
-        <button className="ib" aria-label="Dictate"><Hi i={Mic01Icon} size={18} /></button>
-        <button className={'send' + (ready ? ' ready' : '')} onClick={() => ready && onSend()} aria-label="Send"><span className="send-ic" aria-hidden="true" /></button>
+        <button className="ib" data-tip="Dictate" aria-label="Dictate"><Hi i={Mic01Icon} size={18} /></button>
+        <button className={'send' + (ready ? ' ready' : '')} data-tip="Send" onClick={() => ready && onSend()} aria-label="Send"><span className="send-ic" aria-hidden="true" /></button>
       </div>
       <p className="disc">Responses are generated by AI — always validate before use.</p>
     </div>

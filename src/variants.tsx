@@ -13,9 +13,10 @@ export type VariantState = {
   pane: 'cards' | 'trace' | 'ai' | 'bento'
   glass: 'white' | 'black'
   spacing: 'off' | 'on'
+  agentLock: 'menu' | 'chip' | 'inline'
 }
 
-export const DEFAULT_VARIANTS: VariantState = { thinking: 'globe', speed: 'standard', agents: '5', pane: 'cards', glass: 'black', spacing: 'off' }
+export const DEFAULT_VARIANTS: VariantState = { thinking: 'globe', speed: 'standard', agents: '5', pane: 'cards', glass: 'black', spacing: 'off', agentLock: 'menu' }
 
 export type ControlDef = {
   key: keyof VariantState
@@ -24,6 +25,15 @@ export type ControlDef = {
 }
 
 export const CONTROLS: ControlDef[] = [
+  {
+    key: 'agentLock',
+    label: 'Locked agent (input box experiment)',
+    options: [
+      { id: 'menu', label: 'In + menu' },
+      { id: 'chip', label: 'Floating chip' },
+      { id: 'inline', label: 'Beside +' },
+    ],
+  },
   {
     key: 'spacing',
     label: 'Response spacing guides',
@@ -85,7 +95,7 @@ function withRules(v: VariantState): VariantState {
 }
 
 // a new key, so earlier saved choices do not hide the new defaults (Bento pane, Globe variation)
-const STORAGE_KEY = 'athena-v2-variants-v5'
+const STORAGE_KEY = 'athena-v2-variants-v7'
 
 /** keep only values that still exist (older saved settings may name a variation that was removed) */
 function sanitize(raw: Partial<Record<string, string>>): VariantState {

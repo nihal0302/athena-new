@@ -178,7 +178,7 @@ export function ChatScreen({
             </div>
           </div>
         </div>
-        <Composer files={3} locked value={text} onChange={setText} onSend={() => { onAsk(text.trim()); setText('') }} />
+        <Composer files={3} locked lockMode={variants.agentLock} value={text} onChange={setText} onSend={() => { onAsk(text.trim()); setText('') }} />
       </div>
 
       {variants.pane === 'trace' || variants.pane === 'ai' || variants.pane === 'bento' ? (
