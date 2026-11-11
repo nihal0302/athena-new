@@ -63,8 +63,8 @@ export function GoldSparkle({ size = 24 }: { size?: number }) {
     `M${cx} ${cy - rv}Q${cx + k} ${cy - k} ${cx + rh} ${cy}Q${cx + k} ${cy + k} ${cx} ${cy + rv}Q${cx - k} ${cy + k} ${cx - rh} ${cy}Q${cx - k} ${cy - k} ${cx} ${cy - rv}Z`
   return (
     <svg width={size} height={size * (27 / 26)} viewBox="0 0 26 27" aria-hidden="true">
-      <path d={star(10, 15.6, 10, 10.5, 1.7)} fill="#FFCF5A" />
-      <path d={star(20.4, 9.4, 5.5, 5.5, 1.1)} fill="#FFCF5A" />
+      <path className="gs-a" d={star(10, 15.6, 10, 10.5, 1.7)} fill="#FFCF5A" />
+      <path className="gs-b" d={star(20.4, 9.4, 5.5, 5.5, 1.1)} fill="#FFCF5A" />
     </svg>
   )
 }

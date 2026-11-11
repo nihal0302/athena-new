@@ -44,11 +44,12 @@ function SubFlow({ subs, i, fin = false }: { subs: string[]; i: number; fin?: bo
       window.clearTimeout(t2)
     }
   }, [i, shown, fin])
-  const hasPrev = shown >= 1
+  const nVis = Math.min(shown + 1, 3) // up to three rows: two finished above, the running one last
+  const top = shown - nVis + 1
   return (
-    <div className="sf" style={{ height: (hasPrev ? 2 : 1) * RH, ['--rh' as string]: RH + 'px' }}>
-      {[shown - 2, shown - 1, shown].filter((k) => k >= 0).map((k) => {
-        const pos = hasPrev ? k - (shown - 1) : 0
+    <div className="sf" style={{ height: nVis * RH, ['--rh' as string]: RH + 'px' }}>
+      {[shown - 3, shown - 2, shown - 1, shown].filter((k) => k >= 0).map((k) => {
+        const pos = k - top
         const done = k < shown || (k === shown && ticked)
         return (
           <div key={k} className={'sf-row' + (done ? ' done' : '') + (pos < 0 ? ' gone' : '')} style={{ ['--y' as string]: pos * RH + 'px' }}>

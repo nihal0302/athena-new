@@ -1,8 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { pal } from './palette'
 import { SOURCES, SOURCES_EXTRA, type AgentDef } from '../data/scenario'
 import { fmt, type RunState } from '../hooks'
 import { AgentIcon } from './AgentIcon'
-import { GoldSparkle, Icon } from './Icon'
+import { Icon } from './Icon'
 import { wrapWords } from './Thinking'
 import { useFollow } from './useFollow'
 
@@ -110,7 +111,7 @@ export function TracePanel({
     const called = (
       <div className="st-called">
         {agList.map((ag) => (
-          <span key={ag.name} className="st-chip" style={{ ['--c' as string]: ag.color }}><AgentIcon n={ag.icon} size={13} />{ag.short}</span>
+          <span key={ag.name} className="st-chip" style={{ ['--c' as string]: pal(ag.color) }}><AgentIcon n={ag.icon} size={13} />{ag.short}</span>
         ))}
       </div>
     )
@@ -141,7 +142,7 @@ export function TracePanel({
               const fin = run.done || p >= 1
               const sub = ag.subs[Math.min(ag.subs.length - 1, Math.floor(p * ag.subs.length))]
               return (
-                <div key={ag.name} className={'st-ag' + (fin ? ' fin' : '')} style={{ ['--c' as string]: ag.color }}>
+                <div key={ag.name} className={'st-ag' + (fin ? ' fin' : '')} style={{ ['--c' as string]: pal(ag.color) }}>
                   <span className="st-chip"><AgentIcon n={ag.icon} size={13} />{ag.short}</span>
                   <div className="st-at">
                     {fin ? (
@@ -216,7 +217,7 @@ export function TracePanel({
     return (
       <aside ref={ref} className={'rz rz-bento' + (dark ? ' bn-dark' : '') + (open ? '' : ' closed') + (wide ? ' wide' : '') + (run.done ? ' done' : '')} aria-label="Reasoning">
         <div className="bn-t bn-head bn-fade">
-          <span className="bn-mark"><GoldSparkle size={20} /></span>
+          <span className="bn-mark"><Icon n="route" size={20} /></span>
           <div className="bn-ttl">
             <b>Reasoning</b>
             <small>{live ? 'Live · ' + fmt(run.t) : 'Completed in ' + fmt(sc.total)}</small>
@@ -310,13 +311,13 @@ export function TracePanel({
         {ai ? (
           <span className={'au-orb' + (live ? ' live' : '')}>
             <i />
-            <GoldSparkle size={18} />
+            <Icon n="route" size={18} />
             <em className="sp s1">✦</em>
             <em className="sp s2">✦</em>
             <em className="sp s3">✦</em>
           </span>
         ) : (
-          <span className="sy-mark"><GoldSparkle size={20} /></span>
+          <span className="sy-mark"><Icon n="route" size={20} /></span>
         )}
         <div className="sy-ttl">
           <b className={ai && live ? 'au-live' : ''}>Reasoning</b>

@@ -8,6 +8,7 @@ import { AgentSteps } from './AgentSteps'
 /*  Repeating cycle: rotate -> stop -> a few dots light up -> dotted   */
 /*  lines connect them -> hold -> reset -> rotate again.               */
 /* ------------------------------------------------------------------ */
+const SHOW_LABELS = false // the globe stays a pure visual: no chips on it
 const N = 46 // sparse, like the reference
 const PTS = Array.from({ length: N }, (_, i) => {
   const y = 1 - (2 * (i + 0.5)) / N
@@ -158,7 +159,7 @@ export function Globe({ run, size, display, complete, labels }: { run: RunState;
       ctx.textBaseline = 'middle'
       ctx.textAlign = 'center'
       const placed: { x0: number; x1: number; y0: number; y1: number }[] = []
-      labelAt.forEach((ci, n) => {
+      ;(SHOW_LABELS ? labelAt : []).forEach((ci, n) => {
         const k = cluster.indexOf(ci)
         const amt = k >= 0 ? clamp(lit - k) * fade : 0
         if (amt <= 0.2) return
@@ -305,7 +306,7 @@ export function GlobeCard({ run, onDetails }: { run: RunState; onDetails: () => 
         </div>
       </div>
       <div className="gb-globe">
-        <Globe run={run} size={112} display={done ? 78 : 112} complete={done} labels={run.sc.steps.map((s, i) => (i === run.sc.agentStep && run.sc.agents.length ? run.sc.agents.map((a) => a.short) : s.sub))} />
+        <Globe run={run} size={134} display={done ? 78 : 134} complete={done} labels={run.sc.steps.map((s, i) => (i === run.sc.agentStep && run.sc.agents.length ? run.sc.agents.map((a) => a.short) : s.sub))} />
       </div>
     </div>
     <AgentSteps run={run} open={open} onToggle={() => setOpen(!open)} onTrace={onDetails} variant="globe" />

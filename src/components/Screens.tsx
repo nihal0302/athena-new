@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { QUICK_STARTERS, STARTERS, buildScenario, sourcesFor, type AgentCount } from '../data/scenario'
 import { deriveRun, useRun } from '../hooks'
 import { useVariants } from '../variants'
@@ -70,6 +70,9 @@ export function ChatScreen({
   const [wide, setWide] = useState(false)
   const [fs, setFs] = useState(false)
   const [shown, setShown] = useState(0)
+  const [streamed, setStreamed] = useState(0) // sections of the live answer that have finished streaming
+  const [tick, setTick] = useState(0) // nudges the follow-scroll while text streams
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   // what the thinking looks like depends on the response-time setting (and, for quick, on what was asked)
   const wantMix = AGENTS_PARAM === 'mix' || (!AGENTS_PARAM && variants.agents === 'mix')
@@ -79,8 +82,41 @@ export function ChatScreen({
   const t = useRun(runKey, true, sc.total)
   const run = deriveRun(t, sc)
 
-  // Response only appears once the reasoning has finished, then streams in section by section.
+  // Detailed answers stream while the reasoning is still running: the first sections go out once the figures are being
+  // validated, the rest as soon as the reasoning has finished. Short replies still appear when the run completes.
+  const live = sc.id === 'standard'
+  const PARTIAL = 2
+  const partialAt = sc.validateStep >= 0 ? sc.t0[sc.validateStep] + sc.steps[sc.validateStep].dur * 0.45 : Infinity
+  const allowed = !live ? 0 : run.done ? sc.sectionCount : run.t >= partialAt ? PARTIAL : 0
+  const visible = live ? Math.min(allowed, streamed + 1) : 0
+  useEffect(() => setStreamed(0), [runKey])
+  const pending = live && visible > 0 && !(run.done && streamed >= sc.sectionCount)
+  // scroll 1: when the agents stage starts, bring the running steps into view, once
+  const agIdx = sc.steps.findIndex((x) => x.id === 'agents')
+  const agentsOn = agIdx >= 0 && run.stepStatus[agIdx] === 'act'
+  const agJumped = useRef(-1)
   useEffect(() => {
+    if (!agentsOn || agJumped.current === runKey) return
+    agJumped.current = runKey
+    window.setTimeout(() => {
+      const root = document.querySelector('.acol')
+      const el = root?.querySelector('.gj-row.gj-w, .bs-row.bs-w, .tl-row:not(.fin):not(.pend)') ?? root?.querySelector('.tl-acts') ?? root
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 500)
+  }, [agentsOn, runKey])
+
+  // scroll 2: the moment the first part of the answer exists, take the reader to the START of it, once. After that it is up to them.
+  const anchorRef = useRef<HTMLDivElement>(null)
+  const jumped = useRef(-1)
+  useEffect(() => {
+    if (visible > 0 && jumped.current !== runKey) {
+      jumped.current = runKey
+      window.setTimeout(() => anchorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 900)
+    }
+  }, [visible, runKey])
+
+  useEffect(() => {
+    if (live) return
     if (!run.done) {
       setShown(0)
       return
@@ -92,7 +128,7 @@ export function ChatScreen({
       if (n >= sc.sectionCount) clearInterval(id)
     }, sc.id === 'standard' ? 450 : 150)
     return () => clearInterval(id)
-  }, [run.done, runKey, sc.sectionCount, sc.id])
+  }, [run.done, runKey, sc.sectionCount, sc.id, live])
 
   // reset the pane state for a fresh question
   useEffect(() => {
@@ -115,7 +151,7 @@ export function ChatScreen({
       <RecentsMenu open={menuOpen} onToggle={onMenu} />
 
       <div className="stage">
-        <div className="scroll">
+        <div className="scroll" ref={scrollRef}>
           <div className="thread">
             <div className="ubub">
               <span>{question}</span>
@@ -130,10 +166,10 @@ export function ChatScreen({
               <div className={'spark' + (run.done ? '' : ' busy')}><GoldSparkle size={22} /></div>
               <div className="acol">
                 {variants.thinking === 'timeline' ? <TimelineCard run={run} onDetails={open} /> : variants.thinking === 'graph' ? <GraphCard run={run} onDetails={open} /> : variants.thinking === 'blocks' ? <BlocksCard run={run} onDetails={open} /> : <GlobeCard run={run} onDetails={open} />}
-                <div className="ans-anchor">
-                  {run.done && shown > 0 &&
+                <div className="ans-anchor" ref={anchorRef}>
+                  {(live ? visible > 0 : run.done && shown > 0) &&
                     (sc.id === 'standard' ? (
-                      <Response glass sources={sourcesFor(nAgents)} shown={shown} onFullscreen={() => setFs(true)} onToast={onToast} onReplay={() => onAsk(question)} />
+                      <Response glass sources={sourcesFor(nAgents)} shown={live ? visible : shown} stream={live} pending={pending} onStreamed={(i) => setStreamed((n) => Math.max(n, i + 1))} onGrow={() => setTick((n) => n + 1)} onFullscreen={() => setFs(true)} onToast={onToast} onReplay={() => onAsk(question)} />
                     ) : (
                       <QuickResponse question={question} onToast={onToast} onReplay={() => onAsk(question)} />
                     ))}

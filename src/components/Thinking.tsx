@@ -1,8 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { pal } from './palette'
 import { createPortal } from 'react-dom'
 import { SOURCES, SOURCES_EXTRA, SQL, type AgentDef } from '../data/scenario'
 import { fmt, type RunState } from '../hooks'
-import { GoldSparkle, Icon, Sparkle } from './Icon'
+import { Icon, Sparkle } from './Icon'
 import { AgentIcon } from './AgentIcon'
 import { useFollow } from './useFollow'
 
@@ -75,6 +76,63 @@ export function ReasoningPanel({
     return DONE_NOTE[s.id] ?? 'Done'
   }
 
+  /** the called agents, live inside the stage that routes the work: name, time (beside the name), task streaming in, progress */
+  const agentsLive = () => (
+    <div className="agl-list">
+      {agList.map((ag, k) => {
+        const t1 = (sc.agents.length ? sc.gs : sc.t0[agStage]) + ag.start
+        const p = Math.max(0, Math.min(1, (run.t - t1) / ag.dur))
+        const st = run.done || p >= 1 ? 'done' : p > 0 ? 'act' : 'pend'
+        const el = st === 'done' ? ag.dur : Math.max(0, run.t - t1)
+        const words = ag.task.split(' ')
+        const n = st === 'pend' ? 0 : Math.ceil(words.length * Math.min(1, el / 1.6))
+        const cur = Math.min(ag.subs.length - 1, Math.floor(p * ag.subs.length))
+        const shown = st === 'pend' ? 0 : st === 'done' ? ag.subs.length : cur + 1
+        const inSub = p * ag.subs.length - cur // 0..1 through the running sub-step
+        const R = 15
+        const C = 2 * Math.PI * R
+        return (
+          <div key={ag.name} className={'agl ' + st} style={{ ['--c' as string]: pal(ag.color) }}>
+            <div className="agl-h">
+              <span className="agl-ic">
+                <svg className="agl-ring" viewBox="0 0 34 34" aria-hidden="true">
+                  <circle cx="17" cy="17" r={R} className="trk" />
+                  <circle cx="17" cy="17" r={R} className="val" strokeDasharray={C} strokeDashoffset={C * (1 - (st === 'done' ? 1 : p))} />
+                </svg>
+                <AgentIcon n={ag.icon} size={15} />
+              </span>
+              <b>{ag.name}</b>
+            </div>
+            {shown > 0 && (
+              <ul className="agl-steps">
+                {ag.subs.slice(0, shown).map((s, j) => {
+                  const live = st === 'act' && j === cur
+                  const w = s.split(' ')
+                  const txt = live ? w.slice(0, Math.max(1, Math.ceil(w.length * Math.min(1, inSub * 2.4)))).join(' ') : s
+                  return (
+                    <li key={j} className={live ? 'cur' : 'done'}>
+                      <span className="agl-mk">{live ? <i className="agl-sp" /> : <Icon n="check" size={10} />}</span>
+                      <span className="agl-st">{txt}</span>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+            {st !== 'pend' && ag.sql && <button className="sq-link" onClick={() => setSqlFor(ag.name)}><Icon n="doc" size={13} />View query</button>}
+          </div>
+        )
+      })}
+    </div>
+  )
+
+  /** "Time taken" sits right under "Assigned Agent", in the same style, and ticks up while the stage runs */
+  const timeRow = (i: number) => {
+    const st = run.stepStatus[i]
+    if (st === 'pend') return null
+    const secs = st === 'done' || run.done ? sc.steps[i].dur : Math.max(0, run.t - sc.t0[i])
+    return <div className="as">Time taken: <span className="ch tm">{secs.toFixed(1)} s</span></div>
+  }
+
   const body = (i: number) => {
     const s = sc.steps[i]
     const since = run.t - sc.t0[i]
@@ -83,6 +141,7 @@ export function ReasoningPanel({
         return (
           <>
             <div className="as">Assigned Agent: <span className="ch"><Sparkle size={13} />Aldar X</span></div>
+            {timeRow(i)}
             <ul>
               <li><b>Interpretation:</b> a buyer-targeting brief for the Q1 launches, with market drivers.</li>
               <li><b>Scope:</b> nationality mix, ticket size, inquiry conversion, policy and macro signals.</li>
@@ -93,11 +152,12 @@ export function ReasoningPanel({
       case 'route':
         return (
           <>
-            <div className="as">Assigned Agent: <span className="ch"><Sparkle size={13} />Aldar X</span></div>
+            {agList.length > 0 ? <div className="as">Assigned Agents:<div className="as-list">{agList.map((ag) => <span key={ag.name} className="ch" style={{ ['--c' as string]: pal(ag.color) }}><AgentIcon n={ag.icon} size={14} />{ag.name.replace(/ Agent$/, '')}</span>)}</div></div> : <div className="as">Assigned Agent: <span className="ch"><Sparkle size={13} />Aldar X</span></div>}
+            {timeRow(i)}
             <ul>
               <li><b>Delegate specialised insights:</b> {nAgents >= 14 ? 'fourteen' : nAgents === 5 ? 'five' : 'three'} lines of enquiry, {nAgents === 5 ? 'called one after another' : 'run in parallel'}.</li>
-              {(s.agents ?? sc.agents).map((a) => <li key={a.name}>{a.name}: {a.task.charAt(0).toLowerCase() + a.task.slice(1)}.</li>)}
             </ul>
+            {agList.length > 0 && agentsLive()}
           </>
         )
       case 'agents': {
@@ -106,6 +166,7 @@ export function ReasoningPanel({
         return (
           <>
             <div className="as">Assigned Agent: <span className="ch"><Sparkle size={13} />Aldar X</span></div>
+            {timeRow(i)}
             <ul>
               {doneAgents.length === 0 && <li>Waiting for the agents to report back.</li>}
               {doneAgents.map((ag) => (
@@ -119,10 +180,12 @@ export function ReasoningPanel({
         return (
           <>
           <div className="as">Assigned Agent: <span className="ch"><Sparkle size={13} />Aldar X</span></div>
+            {timeRow(i)}
           <ul className="chk">
-            {sc.checks.map((c, k) => (
-              <li key={c} className={k < run.checks ? 'ok' : ''}><span className="tk-c"><Icon n="check" size={9} /></span>{c}</li>
-            ))}
+            {sc.checks.slice(0, run.done || run.stepStatus[i] === 'done' ? sc.checks.length : run.checks + 1).map((c, k) => {
+              const ok = k < run.checks || run.done || run.stepStatus[i] === 'done'
+              return <li key={c} className={ok ? 'ok' : 'cur'}><span className="tk-c">{ok ? <Icon n="check" size={11} /> : <i className="agl-sp" />}</span><span className="tk-t">{c}</span></li>
+            })}
           </ul>
           </>
         )
@@ -130,6 +193,7 @@ export function ReasoningPanel({
         return (
           <>
           <div className="as">Assigned Agent: <span className="ch"><Sparkle size={13} />Aldar X</span></div>
+            {timeRow(i)}
           <ul className="stream">
             {['Writing the executive summary', 'Building the buyer-mix chart and table', 'Adding drivers, caveats and open items', 'Attaching sources'].map((l, k) => (
               <li key={l} className={since > k + 0.2 || run.done ? 'on' : ''}>{l}</li>
@@ -140,18 +204,21 @@ export function ReasoningPanel({
       case 'plan':
         return (
           <>
-            <div className="as">Assigned Agent: <span className="ch"><Sparkle size={13} />Aldar X</span></div>
+            {agList.length > 0 ? <div className="as">Assigned Agents:<div className="as-list">{agList.map((ag) => <span key={ag.name} className="ch" style={{ ['--c' as string]: pal(ag.color) }}><AgentIcon n={ag.icon} size={14} />{ag.name.replace(/ Agent$/, '')}</span>)}</div></div> : <div className="as">Assigned Agent: <span className="ch"><Sparkle size={13} />Aldar X</span></div>}
+            {timeRow(i)}
             <ul>
               <li><b>Interpretation:</b> a buyer-targeting brief for the Q1 launches, with market drivers.</li>
               <li><b>Scope:</b> nationality mix, ticket size, inquiry conversion, policy and macro signals.</li>
               <li><b>Delegated to:</b> {(s.agents ?? []).map((a) => a.short).join(', ')}.</li>
             </ul>
+            {agList.length > 0 && agentsLive()}
           </>
         )
       case 'merge':
         return (
           <>
             <div className="as">Assigned Agent: <span className="ch"><Sparkle size={13} />Aldar X</span></div>
+            {timeRow(i)}
             <ul>
               <li>Collected the reports from the five agents.</li>
               <li>Matched each finding to the question that was asked.</li>
@@ -163,10 +230,12 @@ export function ReasoningPanel({
         return (
           <>
             <div className="as">Assigned Agent: <span className="ch"><Sparkle size={13} />Aldar X</span></div>
+            {timeRow(i)}
             <ul className="chk">
-              {sc.checks.map((c, k) => (
-                <li key={c} className={k < run.checks ? 'ok' : ''}><span className="tk-c"><Icon n="check" size={9} /></span>{c}</li>
-              ))}
+              {sc.checks.slice(0, run.done || run.stepStatus[i] === 'done' ? sc.checks.length : run.checks + 1).map((c, k) => {
+                const ok = k < run.checks || run.done || run.stepStatus[i] === 'done'
+                return <li key={c} className={ok ? 'ok' : 'cur'}><span className="tk-c">{ok ? <Icon n="check" size={11} /> : <i className="agl-sp" />}</span><span className="tk-t">{c}</span></li>
+              })}
             </ul>
             <ul className="stream">
               {['Writing the executive summary', 'Building the buyer-mix chart and table', 'Adding drivers, caveats and open items', 'Attaching sources'].map((l, k) => (
@@ -202,7 +271,8 @@ export function ReasoningPanel({
           const a = s.agent
           return (
             <>
-              <div className="as">Assigned Agent: <span className="ch" style={{ ['--c' as string]: a.color }}><AgentIcon n={a.icon} size={14} />{a.name.replace(/ Agent$/, "")}</span></div>
+              <div className="as">Assigned Agent: <span className="ch" style={{ ['--c' as string]: pal(a.color) }}><AgentIcon n={a.icon} size={14} />{a.name.replace(/ Agent$/, "")}</span></div>
+              {timeRow(i)}
               <ul>
                 <li><b>Task:</b> {a.task}.</li>
                 <li><b>Sources:</b> {a.src.join(', ')} · {a.pass} passages.</li>
@@ -251,7 +321,7 @@ export function ReasoningPanel({
   type Found = { name: string; by: string; color: string; note: string; at: number }
   const found: Found[] = []
   const addFrom = (a: { name: string; short: string; color: string; src: string[] }, at: number) =>
-    a.src.forEach((n) => found.push({ name: n, by: a.short, color: a.color, note: noteOf(n), at }))
+    a.src.forEach((n) => found.push({ name: n, by: a.short, color: pal(a.color), note: noteOf(n), at }))
   if (sc.agents.length) sc.agents.forEach((a) => addFrom(a, sc.gs + a.start + a.dur))
   else
     sc.steps.forEach((st, i) => {
@@ -274,7 +344,7 @@ export function ReasoningPanel({
   return (
     <aside ref={rzRef} className={'rz' + (open ? '' : ' closed') + (wide ? ' wide' : '') + (run.done ? ' done' : '')} aria-label="Reasoning">
       <div className="rz-h">
-        <span className="rz-ic"><GoldSparkle size={22} /></span>
+        <span className="rz-ic"><Icon n="route" size={22} /></span>
         <div className="rz-ttl">
           <h4>Reasoning</h4>
           <div className="rz-st"><span className="dot" /><span>{run.done ? 'Completed' : 'Live · ' + sc.steps[run.idx].live.toLowerCase()}</span></div>
@@ -307,44 +377,11 @@ export function ReasoningPanel({
           <ol className="rz-tl">
             {sc.steps.flatMap((s, i) => {
               const out: ReactNode[] = []
-              if (i === agStage) {
-                agList.forEach((ag, k) => {
-                  const t1 = (sc.agents.length ? sc.gs : sc.t0[agStage]) + ag.start
-                  const p = Math.max(0, Math.min(1, (run.t - t1) / ag.dur))
-                  const st = run.done || p >= 1 ? 'done' : p > 0 ? 'act' : 'pend'
-                  if (st === 'pend') return // an agent only appears once it has been called
-                  const key = 1000 + k
-                  const isOpen = expanded[key] ?? st === 'act'
-                  const sub = st === 'done' ? `${ag.src.length} source${ag.src.length > 1 ? 's' : ''} · ${ag.pass} passages` : ag.subs[Math.min(ag.subs.length - 1, Math.floor(p * ag.subs.length))]
-                  out.push(
-                    <li key={'ag' + k} className={'stp agc rz-in ' + st + (isOpen ? ' open' : '')} style={{ ['--c' as string]: ag.color }}>
-                      <div className="hd" onClick={() => toggle(key, isOpen)}>
-                        <span className="ck"><Icon n="check" size={11} /></span>
-                        <div className="tt"><b>{ag.name}</b><small>{sub}</small></div>
-                        <span className="chv"><Icon n="chev" size={16} /></span>
-                      </div>
-                      {isOpen && (
-                        <div className="bd">
-                          <Reveal p={st === 'done' ? 1 : p * 1.3}>
-                            <div className="as">Assigned Agent: <span className="ch" style={{ ['--c' as string]: ag.color }}><AgentIcon n={ag.icon} size={14} />{ag.name.replace(/ Agent$/, '')}</span></div>
-                            <ul>
-                              <li><b>Task:</b> {ag.task}.</li>
-                              <li><b>Sources:</b> {ag.src.join(', ')} · {ag.pass} passages.</li>
-                            </ul>
-                          </Reveal>
-                          {st === 'done' && <div className="rz-took">Took {ag.dur.toFixed(1)} s</div>}
-                          {ag.sql && (
-                            <button className="sq-link" onClick={() => setSqlFor(ag.name)}><Icon n="doc" size={13} />View query</button>
-                          )}
-                        </div>
-                      )}
-                    </li>,
-                  )
-                })
-              }
               const st = run.stepStatus[i]
               if (st === 'pend') return out // later stages do not exist yet: the process streams in as it happens
-              const isOpen = expanded[i] ?? st === 'act'
+              const host = (s.id === 'route' || s.id === 'plan') && agList.length > 0 && i === agStage - 1
+              const agentsEnd = host ? Math.max(...agList.map((ag) => (sc.agents.length ? sc.gs : sc.t0[agStage]) + ag.start + ag.dur)) : 0
+              const isOpen = expanded[i] ?? (st === 'act' || (host && !run.done && run.t < agentsEnd))
               const p = Math.max(0, Math.min(1, (run.t - sc.t0[i]) / s.dur))
               out.push(
                 <li key={sc.id + s.id + i} className={'stp rz-in ' + st + (isOpen ? ' open' : '')}>
@@ -356,7 +393,6 @@ export function ReasoningPanel({
                   {isOpen && (
                     <div className="bd">
                       <Reveal p={st === 'done' ? 1 : p * 1.3}>{body(i)}</Reveal>
-                      {st === 'done' && <div className="rz-took">Took {s.dur.toFixed(1)} s</div>}
                     </div>
                   )}
                 </li>,
