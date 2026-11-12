@@ -4,8 +4,10 @@ import { createPortal } from 'react-dom'
 import { SOURCES, SOURCES_EXTRA, SQL, type AgentDef } from '../data/scenario'
 import { fmt, type RunState } from '../hooks'
 import { Icon, Sparkle } from './Icon'
-import { AgentIcon, ReasoningIcon } from './AgentIcon'
+import { AgentIcon, ReasoningIcon, SpokeLoader } from './AgentIcon'
+import { AldarLogo } from './Icon'
 import { useFollow } from './useFollow'
+import { techStages, techStatus, type TechStage } from '../data/trace'
 
 /* ------------------------------------------------------------------ */
 /*  Detail view: right pane. It follows the steps of whichever          */
@@ -131,6 +133,38 @@ export function ReasoningPanel({
     if (st === 'pend') return null
     const secs = st === 'done' || run.done ? sc.steps[i].dur : Math.max(0, run.t - sc.t0[i])
     return <div className="as">Time taken: <span className="ch tm">{secs.toFixed(1)} s</span></div>
+  }
+
+  /** one technical stage: time taken, key/value facts, and live content for the stages that have it */
+  const techBody = (ts: TechStage, st: 'act' | 'done') => {
+    const p = clampP((run.t - ts.start) / (ts.end - ts.start))
+    return (
+      <>
+        <div className="as">{ts.kind === 'agents' ? 'Agents used:' : 'Agent used:'}
+          <div className="as-list">
+            {ts.kind === 'agents' && agList.length > 0
+              ? agList.map((ag) => <span key={ag.name} className="ch" style={{ ['--c' as string]: pal(ag.color) }}><AgentIcon n={ag.icon} size={14} />{ag.name.replace(/ Agent$/, '')}</span>)
+              : <span className="ch"><AldarLogo size={13} />Aldar X</span>}
+          </div>
+        </div>
+        <Reveal p={st === 'done' ? 1 : p * 1.3}>
+          <ul className="tech">
+            {ts.lines.map((l) => (
+              <li key={l}>{l}</li>
+            ))}
+          </ul>
+        </Reveal>
+        {ts.kind === 'agents' && agList.length > 0 && agentsLive()}
+        {ts.kind === 'checks' && (
+          <ul className="chk">
+            {sc.checks.slice(0, run.done || st === 'done' ? sc.checks.length : run.checks + 1).map((c, k) => {
+              const ok = k < run.checks || run.done || st === 'done'
+              return <li key={c} className={ok ? 'ok' : 'cur'}><span className="tk-c">{ok ? <Icon n="check" size={11} /> : <i className="agl-sp" />}</span><span className="tk-t">{c}</span></li>
+            })}
+          </ul>
+        )}
+      </>
+    )
   }
 
   const body = (i: number) => {
@@ -291,14 +325,21 @@ export function ReasoningPanel({
   const agStage = sc.agents.length ? sc.agentStep : sc.steps.findIndex((x) => x.id === 'agents' && x.agents && x.agents.length)
   const agList: AgentDef[] = sc.agents.length ? sc.agents : agStage >= 0 ? (sc.steps[agStage].agents as AgentDef[]) : []
 
+  // technical trace (detailed answers): 12 engineering-level stages laid over the run
+  const tech = techStages(sc)
+  const techCur = tech ? tech.filter((ts) => techStatus(ts, run.t, run.done) !== 'pend').length - 1 : -1
+  const techDone = tech ? tech.filter((ts) => techStatus(ts, run.t, run.done) === 'done').length : 0
+
   // ---- the three sections: stages, activity, sources found ----
   const [tab, setTab] = useState<'stages' | 'activity' | 'sources'>('stages')
   const nSteps = sc.steps.length
   const standard = sc.id === 'standard'
-  const stepsNow = run.done ? nSteps : run.stepsDone
-  const chips = standard && !run.done
+  const stepsNow = tech ? techDone : run.done ? nSteps : run.stepsDone
+  const chips = tech && run.done
+    ? [`${tech.length} stages`, `${nAgents} agents`, `${sc.sources} sources`, `${sc.checks.length} checks passed`]
+    : standard && !run.done
     ? [
-        `${stepsNow} of ${nSteps} steps`,
+        `${stepsNow} of ${tech ? tech.length : nSteps} ${tech ? 'stages' : 'steps'}`,
         `${nAgents && run.t >= sc.steps[0].dur + 1.5 ? nAgents : 0} agents`,
         `${run.sources} sources`,
         `${run.checks} checks passed`,
@@ -308,13 +349,13 @@ export function ReasoningPanel({
   // what the run has said so far, newest first, each line tagged with the stage it belongs to
   const stageAt = (tm: number) => {
     let k = 0
-    sc.t0.forEach((s0, i) => {
+    ;(tech ? tech.map((x) => x.start) : sc.t0).forEach((s0, i) => {
       if (tm >= s0) k = i
     })
     return k
   }
   const feed = sc.events.filter((e) => run.done || run.t >= e.t).map((e) => ({ ...e, stage: stageAt(e.t) }))
-  if (run.done) feed.push({ t: sc.total, txt: 'Answer ready', stage: nSteps - 1 })
+  if (run.done) feed.push({ t: sc.total, txt: 'Answer ready', stage: (tech ? tech.length : nSteps) - 1 })
 
   // sources found, with the agent that brought each one back and when
   const noteOf = (n: string) => [...SOURCES, ...SOURCES_EXTRA].find((x) => x.name === n)?.note ?? 'p. 2'
@@ -339,7 +380,7 @@ export function ReasoningPanel({
     return () => window.removeEventListener('keydown', onKey)
   }, [sqlFor])
   const rzRef = useRef<HTMLElement>(null)
-  useFollow(rzRef, (tab === 'activity' || tab === 'stages') && !run.done, [feed.length, tab, run.stepStatus.join(','), agList.filter((ag) => run.t >= (sc.agents.length ? sc.gs : sc.t0[Math.max(0, agStage)]) + ag.start).length].join(','), run.t < 0.3)
+  useFollow(rzRef, (tab === 'activity' || tab === 'stages') && !run.done, [feed.length, tab, tech ? techCur : run.stepStatus.join(','), agList.filter((ag) => run.t >= (sc.agents.length ? sc.gs : sc.t0[Math.max(0, agStage)]) + ag.start).length].join(','), run.t < 0.3)
 
   return (
     <aside ref={rzRef} className={'rz' + (open ? '' : ' closed') + (wide ? ' wide' : '') + (run.done ? ' done' : '')} aria-label="Reasoning">
@@ -347,7 +388,7 @@ export function ReasoningPanel({
         <span className="rz-ic"><ReasoningIcon size={24} /></span>
         <div className="rz-ttl">
           <h4>Reasoning</h4>
-          <div className="rz-st"><span className="dot" /><span>{run.done ? 'Completed' : 'Live · ' + sc.steps[run.idx].live.toLowerCase()}</span></div>
+          <div className="rz-st"><span className="dot" /><span>{run.done ? 'Completed' : 'Live · ' + (tech && techCur >= 0 ? tech[techCur].live : sc.steps[run.idx].live).toLowerCase()}</span></div>
         </div>
         <button aria-label="Expand" aria-disabled="true" tabIndex={-1} style={{ pointerEvents: "none" }}><Icon n="expand" size={18} /></button>
         <button onClick={onClose} aria-label="Close"><Icon n="x" size={18} /></button>
@@ -375,7 +416,24 @@ export function ReasoningPanel({
       <div className="rz-b">
         {tab === 'stages' && (
           <ol className="rz-tl">
-            {sc.steps.flatMap((s, i) => {
+            {tech && tech.map((ts, i) => {
+              const st = techStatus(ts, run.t, run.done)
+              if (st === 'pend') return null
+              const key = 500 + i
+              const isOpen = expanded[key] ?? st === 'act'
+              return (
+                <li key={ts.id} className={'stp rz-in ' + st + (isOpen ? ' open' : '')}>
+                  <div className="hd" onClick={() => toggle(key, isOpen)}>
+                    <span className={'ck' + (st === 'act' ? ' ld' : '')}>{st === 'act' ? <SpokeLoader size={20} /> : <Icon n="check" size={11} />}</span>
+                    <div className="tt"><b>{ts.title}</b><small>{st === 'done' ? ts.note : ts.live + '…'}</small></div>
+                    {isOpen && <span className="dur">{(st === 'done' ? ts.end - ts.start : Math.max(0, run.t - ts.start)).toFixed(1)} s</span>}
+                    <span className="chv"><Icon n="chev" size={16} /></span>
+                  </div>
+                  {isOpen && <div className="bd">{techBody(ts, st)}</div>}
+                </li>
+              )
+            })}
+            {!tech && sc.steps.flatMap((s, i) => {
               const out: ReactNode[] = []
               const st = run.stepStatus[i]
               if (st === 'pend') return out // later stages do not exist yet: the process streams in as it happens

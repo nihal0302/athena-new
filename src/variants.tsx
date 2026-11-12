@@ -14,9 +14,10 @@ export type VariantState = {
   glass: 'white' | 'black'
   spacing: 'off' | 'on'
   agentLock: 'menu' | 'chip' | 'inline'
+  layout: 'classic' | 'compact'
 }
 
-export const DEFAULT_VARIANTS: VariantState = { thinking: 'globe', speed: 'standard', agents: '5', pane: 'cards', glass: 'black', spacing: 'off', agentLock: 'menu' }
+export const DEFAULT_VARIANTS: VariantState = { thinking: 'blocks', speed: 'standard', agents: '5', pane: 'cards', glass: 'black', spacing: 'off', agentLock: 'menu', layout: 'classic' }
 
 export type ControlDef = {
   key: keyof VariantState
@@ -26,8 +27,16 @@ export type ControlDef = {
 
 export const CONTROLS: ControlDef[] = [
   {
+    key: 'layout',
+    label: 'Layout',
+    options: [
+      { id: 'classic', label: 'Classic' },
+      { id: 'compact', label: 'Compact' },
+    ],
+  },
+  {
     key: 'agentLock',
-    label: 'Locked agent (input box experiment)',
+    label: 'Locked agent',
     options: [
       { id: 'menu', label: 'In + menu' },
       { id: 'chip', label: 'Floating chip' },
@@ -55,19 +64,17 @@ export const CONTROLS: ControlDef[] = [
     label: 'Reasoning pane',
     options: [
       { id: 'cards', label: 'Cards' },
-      { id: 'trace', label: 'Story' },
-      { id: 'bento', label: 'Bento' },
       { id: 'ai', label: 'Aurora' },
+      // Story ('trace') and Bento ('bento') are hidden for now; their code is kept so they can come back
     ],
   },
   {
     key: 'thinking',
     label: 'Variation',
     options: [
-      { id: 'globe', label: 'Globe' },
-      { id: 'timeline', label: 'Timeline' },
       { id: 'blocks', label: 'Blocks' },
-      { id: 'graph', label: 'Graph' },
+      { id: 'timeline', label: 'Timeline' },
+      // Globe and Graph are retired; their code stays in the project
     ],
   },
   {
@@ -95,7 +102,7 @@ function withRules(v: VariantState): VariantState {
 }
 
 // a new key, so earlier saved choices do not hide the new defaults (Bento pane, Globe variation)
-const STORAGE_KEY = 'athena-v2-variants-v7'
+const STORAGE_KEY = 'athena-v2-variants-v9'
 
 /** keep only values that still exist (older saved settings may name a variation that was removed) */
 function sanitize(raw: Partial<Record<string, string>>): VariantState {

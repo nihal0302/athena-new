@@ -1,6 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { pal } from './palette'
-import { KpiIcon, ReasoningIcon } from './AgentIcon'
+import { techStages, techStatus, type TechStage } from '../data/trace'
+import { KpiIcon, ReasoningIcon, SpokeLoader } from './AgentIcon'
+import { AldarLogo } from './Icon'
 import { SOURCES, SOURCES_EXTRA, type AgentDef } from '../data/scenario'
 import { fmt, type RunState } from '../hooks'
 import { AgentIcon } from './AgentIcon'
@@ -56,7 +58,8 @@ export function TracePanel({
 }) {
   const sc = run.sc
   const live = !run.done
-  const nSteps = sc.steps.length
+  const tech = techStages(sc)
+  const nSteps = tech ? tech.length : sc.steps.length
 
   // the agents that take part, and where they are called
   const agStage = sc.agents.length ? sc.agentStep : sc.steps.findIndex((x) => x.id === 'agents' && x.agents && x.agents.length)
@@ -79,10 +82,10 @@ export function TracePanel({
   const foundNow = order.filter((o) => run.done || run.t >= o.at)
 
   // top numbers
-  const stepsNow = run.done ? nSteps : run.stepsDone
+  const stepsNow = tech ? tech.filter((ts) => techStatus(ts, run.t, run.done) === 'done').length : run.done ? nSteps : run.stepsDone
   const agentsTotal = sc.agentTotal ?? sc.agents.length
   const stats: [string, string][] = [
-    [run.done ? String(nSteps) : `${stepsNow}/${nSteps}`, 'steps'],
+    [run.done ? String(nSteps) : `${stepsNow}/${nSteps}`, tech ? 'stages' : 'steps'],
     [String(agentsTotal && (run.done || run.t >= sc.steps[0].dur + 1.5) ? agentsTotal : 0), 'agents'],
     [String(run.sources), 'sources'],
     [String(run.checks), 'checks passed'],
@@ -183,6 +186,33 @@ export function TracePanel({
     }
   }
 
+  /** technical stage detail: key/value facts, plus the live agents or the validation checks for the stages that have them */
+  const techDetail = (ts: TechStage) => {
+    const agI = sc.steps.findIndex((x) => x.id === 'agents')
+    return (
+      <>
+        <div className="st-called">
+          {ts.kind === 'agents' && agList.length > 0
+            ? agList.map((ag) => <span key={ag.name} className="st-chip" style={{ ['--c' as string]: pal(ag.color) }}><AgentIcon n={ag.icon} size={13} />{ag.short}</span>)
+            : <span className="st-chip" style={{ ['--c' as string]: '#F66B00' }}><AldarLogo size={12} />Aldar X</span>}
+        </div>
+        <ul className="tech">
+          {ts.lines.map((l) => (
+            <li key={l}><Streamed text={l} live={live} /></li>
+          ))}
+        </ul>
+        {ts.kind === 'agents' && agI >= 0 && story(agI)}
+        {ts.kind === 'checks' && (
+          <ul className="st-checks">
+            {sc.checks.slice(0, run.done ? sc.checks.length : run.checks).map((c) => (
+              <li key={c}><span><Icon n="check" size={9} /></span><Streamed text={c} live={live} /></li>
+            ))}
+          </ul>
+        )}
+      </>
+    )
+  }
+
   // Bento is presented one stage at a time: a tile slides in, opens and streams, folds, and only then does the next one come
   const [tileOpen, setTileOpen] = useState<Record<string, boolean>>({}) // the reader's own open / fold choices
   const [folded, setFolded] = useState<string[]>([]) // stages that have finished their turn
@@ -209,7 +239,8 @@ export function TracePanel({
   // keep the newest part in view while the run is live
   const ref = useRef<HTMLElement>(null)
   const seen = sc.steps.filter((_, i) => run.stepStatus[i] !== 'pend').length
-  const lastShown = seen - 1 // stages start in order, so the last started one is the end of the line
+  const techSeen = tech ? tech.filter((ts) => techStatus(ts, run.t, run.done) !== 'pend').length : 0
+  const lastShown = tech ? techSeen - 1 : seen - 1 // stages start in order, so the last started one is the end of the line
   useFollow(ref, live || (bento && !allShown), bento ? [revealed, allShown].join(',') : [seen, foundNow.length, run.checks, agList.filter((ag) => run.t >= agStart(ag)).length].join(','), run.t < 0.3)
 
   // ---- Bento: no panel, just frosted widget tiles; each tile holds a solid white card ----
@@ -322,7 +353,7 @@ export function TracePanel({
         )}
         <div className="sy-ttl">
           <b className={ai && live ? 'au-live' : ''}>Reasoning</b>
-          <small>{live ? (ai ? 'Live · ' + fmt(run.t) : fmt(run.t) + ' · ' + sc.steps[run.idx].live.toLowerCase()) : 'Completed in ' + fmt(sc.total)}</small>
+          <small>{live ? (ai ? 'Live · ' + fmt(run.t) : fmt(run.t) + ' · ' + (tech && techSeen > 0 ? tech[techSeen - 1].live : sc.steps[run.idx].live).toLowerCase()) : 'Completed in ' + fmt(sc.total)}</small>
         </div>
         <button aria-label="Expand" aria-disabled="true" tabIndex={-1} style={{ pointerEvents: "none" }}><Icon n="expand" size={17} /></button>
         <button onClick={onClose} aria-label="Close"><Icon n="x" size={17} /></button>
@@ -343,7 +374,7 @@ export function TracePanel({
             ['Checks', 'checks', stats[3][0]],
           ] as [string, 'steps' | 'agents' | 'sources' | 'checks', string][]).map(([l, ic, v]) => (
             <div key={l} className="sy-kpi">
-              <div className="k-top"><span className="k-l">{l}</span><i><KpiIcon k={ic} size={30} /></i></div>
+              <div className="k-top"><span className="k-l">{l}</span><i><KpiIcon k={ic} size={20} /></i></div>
               <b className="k-n">{v}</b>
             </div>
           ))}
@@ -351,7 +382,21 @@ export function TracePanel({
       )}
 
       <div className="sy-body">
-        {sc.steps.map((s, i) => {
+        {tech && tech.map((ts, i) => {
+          const st = techStatus(ts, run.t, run.done)
+          if (st === 'pend') return null
+          return (
+            <section key={ts.id} className={'sy-sec ' + st + (i === lastShown ? ' last' : '')}>
+              <div className={'sy-dot' + (st === 'act' ? ' ld' : '')}>{st === 'done' ? <Icon n="check" size={11} /> : <SpokeLoader size={22} />}</div>
+              <div className="sy-c">
+                <h6>{ts.title}</h6>
+                <small className="sy-sub">{st === 'done' ? ts.note : ts.live + '…'}</small>
+                {techDetail(ts)}
+              </div>
+            </section>
+          )
+        })}
+        {!tech && sc.steps.map((s, i) => {
           const st = run.stepStatus[i]
           if (st === 'pend') return null
           return (

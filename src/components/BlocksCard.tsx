@@ -25,17 +25,17 @@ const TRAVEL = 0.35 // seconds an agent cursor takes to reach its next block
 
 // the small dot inside each chip has its own colour (blocks and cursors stay a single colour)
 const LABEL_DOT: Record<string, string> = {
-  'Reading question': '#5b8def',
-  'Detecting intent': '#9a7bf2',
-  'Planning enquiries': '#2bb8d6',
-  'Routing to agents': '#f06fa0',
-  'Checking totals': '#3cc79a',
-  'Reconciling shares': '#f2b544',
-  'Drafting summary': '#f28b54',
-  'Adding sources': '#5d63e6',
+  'Reading question': '#769cd3', // Sky 700
+  'Detecting intent': '#8174c4', // Ink 400
+  'Planning enquiries': '#7ac9d4', // Turquoise
+  'Routing to agents': '#c4644c', // Dusk
+  'Checking totals': '#12b76a', // Success 500
+  'Reconciling shares': '#FFD059', // Sun
+  'Drafting summary': '#f07e48', // Terracotta
+  'Adding sources': '#d6ac65', // Tan
 }
-const DOT_FALLBACK = ['#5b8def', '#e8618c', '#35b6a5', '#f2b544', '#9a7bf2', '#f28b54']
-const AGENT_DOTS = ['#e8618c', '#35b6a5', '#f2b544', '#5b8def', '#9a7bf2', '#f28b54', '#3cc79a']
+const DOT_FALLBACK = ['#769cd3', '#c4644c', '#7ac9d4', '#FFD059', '#8174c4', '#f07e48']
+const AGENT_DOTS = ['#c4644c', '#7ac9d4', '#FFD059', '#769cd3', '#8174c4', '#f07e48', '#12b76a']
 const CURSOR_COLOR = '#2f245c'
 const MAX_CHIPS = 3 // with many agents only the most recent few are named, so the grid stays calm
 const cursorStart = (j: number) => ({ x: W - 12 - (j % 3) * 14, y: H - 10 - Math.floor(j / 3) * 12 })
@@ -190,13 +190,13 @@ function pill(
   ctx.beginPath()
   ctx.arc(x + 8, y, 2.2, 0, Math.PI * 2)
   ctx.fill()
-  ctx.fillStyle = '#46566e'
+  ctx.fillStyle = '#3a516f'
   ctx.fillText(text, x + 14, y + 0.5)
   ctx.restore()
 }
 
 const mixGrey = (g: number) =>
-  `rgb(${Math.round(106 + (112 - 106) * g)},${Math.round(136 + (120 - 136) * g)},${Math.round(238 + (135 - 238) * g)})`
+  `rgb(${Math.round(118 + (163 - 118) * g)},${Math.round(156 + (163 - 156) * g)},${Math.round(211 + (163 - 211) * g)})` // Sky 700 → Shale 400
 
 function drawBlocks(ctx: CanvasRenderingContext2D, m: Model, tt: number, now: number, done: boolean, grey = 0) {
   const sc = m.sc
@@ -206,7 +206,7 @@ function drawBlocks(ctx: CanvasRenderingContext2D, m: Model, tt: number, now: nu
   for (let si = 0; si < m.nst; si++) {
     for (let k = 0; k < m.cells; k++) {
       const { x, y } = cellXY(m, si, k)
-      ctx.fillStyle = 'rgba(70,86,110,.13)'
+      ctx.fillStyle = 'rgba(231,231,231,.9)'
       ctx.beginPath()
       ctx.roundRect(x, y, SW, SH, 1.4)
       ctx.fill()
@@ -426,7 +426,7 @@ export function BlocksCard({ run, onDetails }: { run: RunState; onDetails: () =>
           <Blocks run={run} w={W} h={H} />
         </div>
       </div>
-      <AgentSteps run={run} open={open} onToggle={() => setOpen(!open)} onTrace={onDetails} variant="blocks" />
+      <AgentSteps run={run} open={open} onToggle={() => setOpen(!open)} onTrace={onDetails} variant="globe" />
       </div>
     </div>
   )

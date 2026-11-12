@@ -475,7 +475,7 @@ ul.b{margin:0 0 10px 18px;font-size:13px}
   mask-image:linear-gradient(90deg,transparent 0,#000 16px,#000 calc(100% - 16px),transparent 100%),linear-gradient(180deg,transparent 0,#000 16px,#000 calc(100% - 16px),transparent 100%);
   -webkit-mask-composite:source-in;mask-composite:intersect}
 .bl-ring i{position:absolute;inset:0;
-  background-image:radial-gradient(circle,rgba(70,108,214,.9) 1px,transparent 1.5px);background-size:6px 6px;
+  background-image:radial-gradient(circle,rgba(118,156,211,.9) 1px,transparent 1.5px);background-size:6px 6px;
   -webkit-mask-image:radial-gradient(ellipse 170px 95px at var(--bx) var(--by),#000 0,rgba(0,0,0,.55) 45%,transparent 100%);
   mask-image:radial-gradient(ellipse 170px 95px at var(--bx) var(--by),#000 0,rgba(0,0,0,.55) 45%,transparent 100%);
   animation:blDrift 16s ease-in-out infinite}
@@ -2119,3 +2119,183 @@ ul.b{margin:0 0 10px 18px;font-size:13px}
 
 .sy-kpi .k-top i svg{width:30px;height:30px}
 .sy-kpi .k-top{align-items:flex-start}
+
+/* KPI icons: modern rounded line icons on a soft tinted tile */
+.sy-kpi .k-top{align-items:flex-start}
+.sy-kpi .k-top i{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:#edf1f8;color:#49658b;flex:none}
+.sy-kpi .k-top i svg{width:20px;height:20px}
+
+/* Story pane: the whole panel is frosted glass; the white KPI cards sit on top of it */
+.rz.rz-story{background:linear-gradient(145deg,rgba(255,255,255,.62),rgba(255,255,255,.3));backdrop-filter:blur(40px) saturate(160%);-webkit-backdrop-filter:blur(40px) saturate(160%);border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 18px 44px -18px rgba(47,36,92,.3)}
+.rz-story .sy-top button:hover{background:rgba(255,255,255,.6)}
+.rz-story .sy-dot{background:rgba(255,255,255,.85)}
+.rz-story .sy-sec.done .sy-dot{background:#12b76a}
+.rz-story .sy-kpi{background:#fff;border-color:rgba(255,255,255,.9);box-shadow:0 1px 2px rgba(0,0,0,.05),0 10px 22px -14px rgba(33,26,88,.3)}
+
+/* technical trace: key / value facts */
+.kv{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.kv li{display:grid;grid-template-columns:minmax(78px,32%) minmax(0,1fr);column-gap:12px;font-size:12.5px;line-height:1.5}
+.kv .k{color:#878787;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;overflow-wrap:anywhere}
+.kv .v{color:#252525;overflow-wrap:anywhere}
+.rz .bd ul.kv{list-style:none;padding-left:0}
+
+.sy-c .sy-sub{display:block;margin:-2px 0 6px;font-size:12.5px;color:#878787}
+.sy-c .kv{margin-top:6px}
+
+/* Figma loader: dark node + ring, eight spokes chasing round it */
+.spk{display:inline-grid;place-items:center;flex:none}
+.spk-n{position:relative;box-sizing:border-box;width:86%;height:86%;border-radius:50%;background:#2f245c;border:1.4px solid rgba(47,36,92,.16);overflow:hidden}
+.spk-n i{position:absolute;left:calc(50% - .5px);top:calc(50% - 5.4px);width:1.1px;height:3px;border-radius:2px;background:#d9d9d9;transform-origin:.55px 5.4px;opacity:.22;animation:spkChase 1s linear infinite}
+@keyframes spkChase{0%{opacity:1}100%{opacity:.22}}
+.stp.act .ck.ld,.sy-sec.act .sy-dot.ld{background:none;border:0;box-shadow:none;animation:none;padding:0}
+.stp.act .ck.ld::after,.sy-sec.act .sy-dot.ld::after{display:none}
+/* streamed technical details */
+.rz .bd ul.tech,ul.tech{list-style:none;padding-left:0;margin:6px 0 0;display:flex;flex-direction:column;gap:8px}
+.rz .bd ul.tech li,ul.tech li{position:relative;padding-left:14px;font-size:13px;line-height:1.55;color:#3c3c3c;margin:0}
+ul.tech li::before{content:"";position:absolute;left:2px;top:.62em;width:4px;height:4px;border-radius:50%;background:#a0b7de}
+.sy-c ul.tech{margin-top:4px}
+
+/* spinner: brighter, slightly bolder spokes (same overall size) */
+.spk-n i{width:1.5px;height:3.6px;left:calc(50% - .75px);top:calc(50% - 5.8px);transform-origin:.75px 5.8px;background:#fff;opacity:.2}
+@keyframes spkChase{0%{opacity:1}100%{opacity:.2}}
+.stp .dur{margin-right:2px;font-size:12px;font-variant-numeric:tabular-nums;color:#6b6b6b;background:rgba(47,36,92,.07);padding:2px 9px;border-radius:99px}
+
+/* Blocks: the finished grey grid melts away towards the left instead of being cut off by the clip box.
+   Only the strip that holds the grid is masked, so the text beside it is untouched. */
+.gb.bl.done .gb-globe{-webkit-mask-image:linear-gradient(90deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.08) 14%,rgba(0,0,0,.3) 32%,rgba(0,0,0,.65) 54%,rgba(0,0,0,.92) 76%,#000 92%);mask-image:linear-gradient(90deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.08) 14%,rgba(0,0,0,.3) 32%,rgba(0,0,0,.65) 54%,rgba(0,0,0,.92) 76%,#000 92%)}
+
+/* answer column: the agent icon hangs in the margin to the left, so the response (and the question above it) are
+   exactly as wide as the input box */
+.arow{display:block;position:relative}
+.arow .spark{position:absolute;left:-56px;top:0}
+.ubub{margin-left:0}
+
+/* ---------- Layout: Compact ----------
+   no sub-nav band: the chat name lives in the Recent Chats pill (left), the tags float on the right, and the
+   conversation is cut at the main top nav */
+.chat.lay-compact .hr{display:none}
+.chat.lay-compact .ctitle{top:84px;left:auto;right:24px;height:36px;width:auto}
+.chat.lay-compact .ctitle h2{display:none}
+.chat.lay-compact .stage{top:72px}
+.chat.lay-compact .scroll{padding-top:34px}
+.chat.lay-compact .recents{top:84px}
+.chat.lay-compact .rz,.chat.lay-compact .rz:not(.rz-bento){top:132px}
+.chat.lay-compact .recents.pill{width:auto;max-width:360px;height:46px;padding:0;border-radius:14px;bottom:auto}
+.rc-pill{display:flex;align-items:center;gap:10px;height:100%;padding:0 18px 0 14px;color:#fff;font-size:15px;font-weight:600;max-width:360px}
+.rc-pill span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rc-pill:hover{background:rgba(255,255,255,.08);border-radius:inherit}
+.rc-i.cur{background:rgba(255,255,255,.16);border-radius:10px;font-weight:600;opacity:1;box-shadow:inset 3px 0 0 #a0b7de}
+
+
+/* ---------- Recent Chats panel: one element that morphs, with proper motion ---------- */
+.chat .recents{--rtop:128px;top:var(--rtop);bottom:auto;height:calc(100% - var(--rtop) - 88px)}
+.chat.lay-compact .recents{--rtop:84px}
+.home .recents{--rtop:106px;top:var(--rtop);bottom:auto;height:calc(100% - var(--rtop) - 88px)}
+.chat .recents.collapsed,.home .recents.collapsed{height:60px}
+.recents{transition:width .55s cubic-bezier(.22,.8,.24,1),height .55s cubic-bezier(.22,.8,.24,1),padding .55s cubic-bezier(.22,.8,.24,1),border-radius .55s cubic-bezier(.22,.8,.24,1),background .3s ease,box-shadow .4s ease}
+.recents.collapsed{width:60px}
+.rc-h{position:relative}
+.recents.collapsed .rc-h{cursor:pointer;justify-content:flex-start}
+.rc-ic{flex:none;width:36px;height:36px;display:grid;place-items:center;border-radius:10px;color:#fff}
+.rc-tx{position:relative;flex:1;min-width:0;height:22px;margin-left:8px}
+.rc-tx span{position:absolute;left:0;top:0;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;line-height:22px;transition:opacity .3s ease,transform .45s cubic-bezier(.22,.8,.24,1)}
+.rc-tx .t1{font-size:14px;font-weight:500;opacity:1}
+.rc-tx .t2{font-size:15px;font-weight:600;opacity:0;transform:translateY(8px);pointer-events:none}
+.recents.collapsed .rc-tx .t1{opacity:0;transform:translateY(-8px)}
+.recents.collapsed.withtitle .rc-tx .t2{opacity:1;transform:none}
+.recents.collapsed:not(.withtitle) .rc-tx{flex:0;width:0;margin:0;overflow:hidden}
+.rc-h .btns{transition:opacity .25s ease .15s}
+.recents.collapsed .rc-h .btns{opacity:0;pointer-events:none;transition-delay:0s}
+.recents.collapsed .rc-ic{width:36px}
+/* list slides up and fades in after the panel has started to open */
+.rc-list{opacity:1;transform:none;transition:opacity .35s ease .22s,transform .5s cubic-bezier(.22,.8,.24,1) .18s}
+.recents.collapsed .rc-list{opacity:0;transform:translateY(10px);pointer-events:none;transition-delay:0s;transition-duration:.2s}
+/* compact: the closed shape is a pill that carries the chat name */
+.chat.lay-compact .recents.collapsed{width:300px;height:46px;padding:0 10px;border-radius:14px}
+.chat.lay-compact .recents.collapsed:not(.withtitle){width:60px}
+.chat.lay-compact .recents{padding-top:6px}
+.chat.lay-compact .recents.collapsed .rc-h{height:46px}
+/* the open chat in the list: a glass card with a bubble icon, the name and an "Active" badge */
+.rc-i.cur{display:flex;align-items:center;gap:10px;margin:6px 0 8px 0;padding:10px 12px;border:0;border-radius:14px;background:linear-gradient(135deg,rgba(255,255,255,.26),rgba(255,255,255,.08));box-shadow:inset 0 0 0 1px rgba(255,255,255,.3),0 10px 22px -12px rgba(0,0,0,.45);font-weight:600;opacity:1;white-space:normal;overflow:visible;text-overflow:clip}
+.rc-i.cur:hover{background:linear-gradient(135deg,rgba(255,255,255,.32),rgba(255,255,255,.12))}
+.cur-ic{flex:none;width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:#a0b7de;color:#223349}
+.cur-t{flex:1;min-width:0;font-size:13.5px;line-height:1.3}
+.cur-b{flex:none;display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:99px;background:rgba(18,183,106,.2);color:#6ce9a6}
+.cur-b i{width:6px;height:6px;border-radius:50%;background:#32d583;animation:gjBlink 1.6s ease-in-out infinite}
+
+
+/* ---------- Compact, revision: no bubble icon, plain active chat, and the chat details come out of the pill on hover ---------- */
+.chat.lay-compact .ctitle{display:none}
+.chat.lay-compact .rz,.chat.lay-compact .rz:not(.rz-bento){top:84px}
+.chat.lay-compact .rc-ic{display:none}
+.chat.lay-compact .rc-tx{margin-left:0}
+.chat.lay-compact .recents.collapsed{padding:0 18px;overflow:visible}
+.chat.lay-compact .recents.collapsed .rc-h{padding:0;height:46px}
+.chat.lay-compact .recents.collapsed .rc-list{visibility:hidden;transition:opacity .2s ease,transform .2s ease,visibility 0s .2s}
+.chat.lay-compact .recents:not(.collapsed) .rc-h{padding-left:4px}
+/* the active chat: the simple highlight again */
+.rc-i.cur{display:block;margin:0 0 0 16px;padding:10px 0 10px 20px;border:0;border-bottom:1px solid rgba(255,255,255,.14);border-radius:10px;background:rgba(255,255,255,.16);box-shadow:inset 3px 0 0 #a0b7de;font-weight:600;font-size:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rc-i.cur:hover{background:rgba(255,255,255,.2)}
+/* hover: agent used, date and download slide out below the pill */
+.rc-meta{display:none}
+.chat.lay-compact .rc-meta{display:flex;position:absolute;left:0;top:calc(100% + 12px);flex-direction:column;align-items:flex-start;gap:8px;pointer-events:none}
+.chat.lay-compact .rc-meta::before{content:"";position:absolute;left:0;right:0;top:-14px;height:14px}
+.chat.lay-compact .recents:not(.collapsed) .rc-meta{display:none}
+.chat.lay-compact .rc-meta>*{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 14px;border-radius:99px;background:#fff;border:1px solid #ececec;box-shadow:0 1px 2px rgba(0,0,0,.05),0 10px 22px -12px rgba(33,26,88,.28);font-size:13px;color:#252525;white-space:nowrap;opacity:0;transform:translateY(-10px) scale(.96);transform-origin:top left;transition:opacity .28s ease,transform .45s cubic-bezier(.22,.8,.24,1)}
+.chat.lay-compact .rc-meta>:nth-child(2){transition-delay:.05s}
+.chat.lay-compact .rc-meta>:nth-child(3){transition-delay:.1s}
+.chat.lay-compact .recents.collapsed:hover .rc-meta,.chat.lay-compact .recents.collapsed:focus-within .rc-meta{pointer-events:auto}
+.chat.lay-compact .recents.collapsed:hover .rc-meta>*,.chat.lay-compact .recents.collapsed:focus-within .rc-meta>*{opacity:1;transform:none}
+.rm-l{color:#878787;font-size:12px;margin-right:2px}
+.rm.dl{cursor:pointer;color:#2f245c;font-weight:500}
+.rm.dl:hover{background:#edf1f8}
+.chat.lay-compact .recents.collapsed.withtitle{width:360px}
+
+
+/* ---------- Compact pill, revision 2 ---------- */
+.rc-exp{display:none}
+.chat.lay-compact .rc-exp{display:grid;place-items:center;flex:none;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;transition:background .25s ease,transform .35s cubic-bezier(.22,.8,.24,1),opacity .25s ease}
+.chat.lay-compact .recents:not(.collapsed) .rc-exp{display:none}
+.chat.lay-compact .recents.collapsed.withtitle{width:276px;height:42px;padding:0 7px 0 18px;border-radius:999px;background:rgba(0,0,0,.64);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 4px 16px rgba(0,0,0,.25),inset 0 0 0 1px rgba(255,255,255,.55);cursor:pointer}
+.chat.lay-compact .recents.collapsed.withtitle .rc-h{height:42px;padding:0;gap:8px}
+.chat.lay-compact .recents.collapsed.withtitle .rc-tx{height:22px}
+.chat.lay-compact .recents.collapsed.withtitle .rc-tx .t2{font-size:14.5px}
+.chat.lay-compact .recents.collapsed.withtitle:hover{background:rgba(0,0,0,.78);box-shadow:0 8px 22px rgba(0,0,0,.3),inset 0 0 0 1px rgba(255,255,255,.75)}
+.chat.lay-compact .recents.collapsed.withtitle:hover .rc-exp{background:rgba(255,255,255,.28);transform:translateY(2px)}
+.chat.lay-compact .rc-meta{top:calc(100% + 12px)}
+/* read-only facts: flat, tinted, no shadow; the action: a solid button */
+.chat.lay-compact .rc-meta>.ro{height:30px;padding:0 13px;background:rgba(47,36,92,.07);border:0;box-shadow:none;color:#6b6b6b;font-size:12.5px;cursor:default}
+.chat.lay-compact .rc-meta>.ro .rm-l{color:#8a8a8a}
+.chat.lay-compact .rc-meta>.dl{height:36px;padding:0 18px;background:#2f245c;border:0;color:#fff;font-weight:500;box-shadow:0 6px 16px -6px rgba(47,36,92,.6)}
+.chat.lay-compact .rc-meta>.dl:hover{background:#3b2f73}
+.rm.dl{color:#fff}
+
+/* read-only facts: outline only, no fill (the page shows through). Download: outline secondary button on white */
+.chat.lay-compact .rc-meta>.ro{background:transparent;border:1px solid #cfcfcf;box-shadow:none;color:#6b6b6b}
+.chat.lay-compact .rc-meta>.ro .rm-l{color:#878787}
+.chat.lay-compact .rc-meta>.dl{background:#fff;border:1px solid #2f245c;color:#2f245c;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.chat.lay-compact .rc-meta>.dl:hover{background:#edf1f8;color:#2f245c}
+.rm.dl{color:#2f245c}
+
+/* compact pill: the (hidden) open-state buttons give up their space so the name runs full width and truncates only if needed */
+.chat.lay-compact .recents.collapsed .rc-h .btns{display:none}
+.chat.lay-compact .recents.collapsed.withtitle:hover .rc-exp{transform:none}
+
+
+/* compact pill, revision 4: the name wraps (no truncation), softer shadow, chips clear of it */
+.chat.lay-compact .recents.collapsed.withtitle{height:calc(var(--tx-h,22px) + 20px);padding:0 7px 0 18px;box-shadow:0 2px 8px rgba(0,0,0,.22),inset 0 0 0 1px rgba(255,255,255,.55)}
+.chat.lay-compact .recents.collapsed.withtitle:hover{box-shadow:0 4px 12px rgba(0,0,0,.26),inset 0 0 0 1px rgba(255,255,255,.75)}
+.chat.lay-compact .recents.collapsed.withtitle .rc-h{height:100%;align-items:center}
+.chat.lay-compact .recents.collapsed.withtitle .rc-tx{height:var(--tx-h,22px)}
+.chat.lay-compact .recents .rc-tx .t2{white-space:normal;line-height:20px;overflow:visible;text-overflow:clip;display:block;right:0}
+.chat.lay-compact .recents.collapsed.withtitle{border-radius:22px}
+.chat.lay-compact .rc-meta{top:calc(100% + 18px)}
+.chat.lay-compact .rc-meta::before{top:-20px;height:20px}
+/* agent and date text in the response's black */
+.chat.lay-compact .rc-meta>.ro{color:#252525}
+.chat.lay-compact .rc-meta>.ro svg{color:#252525}
+
+/* Compact: the conversation runs all the way to the top of the screen and scrolls behind the nav pills (the nav has no
+   fill of its own), so it is cut at the very top edge, not under the nav */
+.chat.lay-compact .stage{top:0}
+.chat.lay-compact .scroll{padding-top:92px}

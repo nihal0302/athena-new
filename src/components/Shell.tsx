@@ -1,8 +1,8 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { RECENTS } from '../data/scenario'
 import { AldarLogo, Icon } from './Icon'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { PlusSignIcon, Mic01Icon, File01Icon, Attachment01Icon, ArrowDown01Icon } from '@hugeicons/core-free-icons'
+import { PlusSignIcon, Mic01Icon, File01Icon, Attachment01Icon, ArrowDown01Icon, BubbleChatIcon } from '@hugeicons/core-free-icons'
 
 const Hi = ({ i, size = 18 }: { i: typeof PlusSignIcon; size?: number }) => <HugeiconsIcon icon={i} size={size} strokeWidth={1.7} />
 
@@ -25,26 +25,52 @@ export function TopBar({ onNew }: { onNew: () => void }) {
   )
 }
 
-export function RecentsMenu({ open, onToggle }: { open: boolean; onToggle: () => void }) {
+/** The Recent Chats panel. One element that morphs between its closed and open shapes (so it can animate); the closed
+ *  shape carries a chat icon, the open one puts that same icon in front of "Recent Chats". `title` (compact layout) is the
+ *  open chat's name: the closed pill shows it, and the open list highlights that chat. */
+export function RecentsMenu({ open, onToggle, title, meta }: { open: boolean; onToggle: () => void; title?: string; meta?: ReactNode }) {
+  // the chat name wraps to as many lines as it needs; measure it so the closed pill can be exactly that tall (and still animate)
+  const t2 = useRef<HTMLSpanElement>(null)
+  const [txH, setTxH] = useState(22)
+  useLayoutEffect(() => {
+    const el = t2.current
+    if (!el) return
+    const measure = () => setTxH(Math.max(22, Math.round(el.offsetHeight)))
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    document.fonts?.ready.then(measure)
+    return () => ro.disconnect()
+  }, [title])
   return (
-    <aside className={'recents' + (open ? '' : ' collapsed')} aria-label="Recent chats">
-      <div className="rc-h">
-        {open && <span className="t">Recent Chats</span>}
+    <aside style={title ? ({ ['--tx-h' as string]: txH + 'px' } as React.CSSProperties) : undefined} className={'recents' + (open ? '' : ' collapsed') + (title ? ' withtitle' : '')} aria-label="Recent chats">
+      <div className="rc-h" onClick={open ? undefined : onToggle} role={open ? undefined : 'button'} tabIndex={open ? undefined : 0} aria-label={open ? undefined : 'Expand recent chats'} onKeyDown={(e) => { if (!open && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onToggle() } }}>
+        <span className="rc-ic"><Hi i={BubbleChatIcon} size={19} /></span>
+        <span className="rc-tx">
+          <span className="t1">Recent Chats</span>
+          {title && <span className="t2" ref={t2} title={title}>{title}</span>}
+        </span>
+        <span className="rc-exp" aria-hidden="true"><Icon n="panel" size={16} /></span>
         <span className="btns">
-          {open && <button aria-label="Filter"><Icon n="sliders" size={18} /></button>}
-          <button onClick={onToggle} aria-label={open ? 'Collapse recent chats' : 'Expand recent chats'}><Icon n="panel" size={18} /></button>
+          <button aria-label="Filter" tabIndex={open ? 0 : -1}><Icon n="sliders" size={18} /></button>
+          <button onClick={onToggle} aria-label="Collapse recent chats" tabIndex={open ? 0 : -1}><Icon n="panel" size={18} /></button>
         </span>
       </div>
-      {open && (
-        <div className="rc-list">
-          {RECENTS.map(([g, items]) => (
+      {meta && <div className="rc-meta">{meta}</div>}
+      <div className="rc-list" aria-hidden={!open}>
+        {RECENTS.map(([g, base]) => {
+          const items = title && g.startsWith('Today') ? [title, ...base] : base
+          return (
             <div key={g}>
               <div className="rc-g"><Icon n="chev" size={12} />{g}</div>
-              {items.map((i, k) => <div key={g + k} className="rc-i">{i}</div>)}
+              {items.map((i, k) => {
+                const cur = !!title && i === title && k === 0 && g.startsWith('Today')
+                return <div key={g + k} className={'rc-i' + (cur ? ' cur' : '')} aria-current={cur ? 'true' : undefined}>{i}</div>
+              })}
             </div>
-          ))}
-        </div>
-      )}
+          )
+        })}
+      </div>
     </aside>
   )
 }

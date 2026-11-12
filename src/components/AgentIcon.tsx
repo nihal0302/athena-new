@@ -1,4 +1,6 @@
 import { useId, type ReactNode } from 'react'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { Layers01Icon, CpuIcon, BookOpen01Icon, SecurityCheckIcon } from '@hugeicons/core-free-icons'
 import { Icon } from './Icon'
 
 /** Filled, two-tone agent glyphs: a soft tinted badge with a gradient-filled symbol (in the spirit of the first agent mock-ups),
@@ -122,43 +124,10 @@ export function AgentIcon({ n, size = 12 }: { n: string; size?: number }) {
   )
 }
 
-/** Solid two-tone icons for the Story pane's KPI cards (Figma palette). */
-export function KpiIcon({ k, size = 24 }: { k: 'steps' | 'agents' | 'sources' | 'checks'; size?: number }) {
-  // one colour for all four (sky/800); the lighter parts are the same colour at lower strength
-  return (
-    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true" style={{ color: '#49658b' }}>
-      {k === 'steps' && (
-        <>
-          <path d="M12 2.5l9.5 5-9.5 5-9.5-5z" fill="currentColor" />
-          <path d="M2.5 11.2l9.5 5 9.5-5v2.2l-9.5 5-9.5-5z" fill="currentColor" fillOpacity=".6" />
-          <path d="M2.5 16.2l9.5 5 9.5-5v2.2l-9.5 5-9.5-5z" fill="currentColor" fillOpacity=".32" />
-        </>
-      )}
-      {k === 'agents' && (
-        <>
-          <circle cx="9" cy="8" r="4" fill="currentColor" />
-          <path d="M1.8 21c0-4.2 3.2-6.6 7.2-6.6s7.2 2.4 7.2 6.6z" fill="currentColor" />
-          <circle cx="17.6" cy="9" r="3" fill="currentColor" fillOpacity=".45" />
-          <path d="M16.2 14.4c3.4-.2 6 1.8 6 5.2V21h-4.4c0-2.4-.6-4.7-1.6-6.6z" fill="currentColor" fillOpacity=".45" />
-        </>
-      )}
-      {k === 'sources' && (
-        <>
-          <path d="M6 2.5h8l5 5V20a1.8 1.8 0 01-1.8 1.8H6A1.8 1.8 0 014.2 20V4.3A1.8 1.8 0 016 2.5z" fill="currentColor" />
-          <path d="M14 2.5l5 5h-3.2A1.8 1.8 0 0114 5.7z" fill="currentColor" fillOpacity=".45" />
-          <rect x="7.6" y="11.5" width="8.8" height="1.9" rx=".95" fill="#fff" />
-          <rect x="7.6" y="15.2" width="6" height="1.9" rx=".95" fill="#fff" />
-        </>
-      )}
-      {k === 'checks' && (
-        <>
-          <path d="M12 2l8.5 3v6.2c0 5.2-3.6 8.8-8.5 10.8-4.9-2-8.5-5.6-8.5-10.8V5z" fill="currentColor" />
-          <path d="M12 2l8.5 3v6.2c0 5.2-3.6 8.8-8.5 10.8z" fill="currentColor" fillOpacity=".7" />
-          <path d="M8 12.2l2.9 2.9 5.2-5.6" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-        </>
-      )}
-    </svg>
-  )
+/** KPI icons for the Story pane: Hugeicons rounded line icons, one colour, drawn on a soft tile by the CSS. */
+const KPI = { steps: Layers01Icon, agents: CpuIcon, sources: BookOpen01Icon, checks: SecurityCheckIcon }
+export function KpiIcon({ k, size = 20 }: { k: 'steps' | 'agents' | 'sources' | 'checks'; size?: number }) {
+  return <HugeiconsIcon icon={KPI[k]} size={size} strokeWidth={1.7} color="currentColor" />
 }
 
 /** Solid reasoning mark: two nodes joined by a path (sun node + white node). Sits on the dark gradient badge. */
@@ -169,5 +138,18 @@ export function ReasoningIcon({ size = 22 }: { size?: number }) {
       <circle cx="6.2" cy="6.8" r="3.6" fill="#FFD059" />
       <circle cx="17.8" cy="19.8" r="3.2" fill="#fff" />
     </svg>
+  )
+}
+
+/** Running indicator from the Figma "Loader": a dark node with a ring and eight thin spokes that chase round it. */
+export function SpokeLoader({ size = 20 }: { size?: number }) {
+  return (
+    <span className="spk" style={{ width: size, height: size }} role="status" aria-label="Running">
+      <span className="spk-n">
+        {Array.from({ length: 8 }, (_, i) => (
+          <i key={i} style={{ transform: `rotate(${i * 45}deg)`, animationDelay: `${(i - 8) * 0.125}s` }} />
+        ))}
+      </span>
+    </span>
   )
 }

@@ -5,10 +5,8 @@ import { useVariants } from '../variants'
 import { AGENTS_PARAM } from '../hooks'
 import { FullscreenChart } from './Charts'
 import { BlocksCard } from './BlocksCard'
-import { GraphCard } from './GraphCard'
-import { GlobeCard } from './GlobeCard'
 import { TimelineCard } from './TimelineCard'
-import { GoldSparkle, Icon, Sparkle } from './Icon'
+import { AldarLogo, GoldSparkle, Icon, Sparkle } from './Icon'
 import { QuickResponse, Response } from './Response'
 import { Composer, RecentsMenu, TopBar } from './Shell'
 import { ReasoningPanel } from './Thinking'
@@ -137,7 +135,7 @@ export function ChatScreen({
   }, [runKey])
 
   const open = () => setPanelOpen(true)
-  const cls = 'chat view' + (menuOpen ? ' menu-open' : '') + (panelOpen ? ' panel-open' : '') + (wide ? ' panel-wide' : '')
+  const cls = 'chat view' + (menuOpen ? ' menu-open' : '') + (panelOpen ? ' panel-open' : '') + (wide ? ' panel-wide' : '') + (variants.layout === 'compact' ? ' lay-compact' : '')
   return (
     <section className={cls}>
       <TopBar onNew={onNew} />
@@ -148,7 +146,13 @@ export function ChatScreen({
         <button className="tag dl" onClick={() => onToast('Brief exported as PDF')}><Icon n="dl" size={14} />Download</button>
       </div>
       <div className="hr" />
-      <RecentsMenu open={menuOpen} onToggle={onMenu} />
+      <RecentsMenu open={menuOpen} onToggle={onMenu} title={variants.layout === 'compact' ? sc.chatTitle : undefined} meta={variants.layout === 'compact' ? (
+        <>
+          <span className="rm ro"><AldarLogo size={13} />Aldar X</span>
+          <span className="rm ro"><Icon n="cal" size={14} />06-11-26 07:46:24 PM</span>
+          <button className="rm dl" title="Download this brief" onClick={() => onToast('Brief exported as PDF')}><Icon n="dl" size={14} />Download</button>
+        </>
+      ) : undefined} />
 
       <div className="stage">
         <div className="scroll" ref={scrollRef}>
@@ -165,7 +169,7 @@ export function ChatScreen({
             <div className="arow">
               <div className={'spark' + (run.done ? '' : ' busy')}><GoldSparkle size={22} /></div>
               <div className="acol">
-                {variants.thinking === 'timeline' ? <TimelineCard run={run} onDetails={open} /> : variants.thinking === 'graph' ? <GraphCard run={run} onDetails={open} /> : variants.thinking === 'blocks' ? <BlocksCard run={run} onDetails={open} /> : <GlobeCard run={run} onDetails={open} />}
+                {variants.thinking === 'timeline' ? <TimelineCard run={run} onDetails={open} /> : <BlocksCard run={run} onDetails={open} />}
                 <div className="ans-anchor" ref={anchorRef}>
                   {(live ? visible > 0 : run.done && shown > 0) &&
                     (sc.id === 'standard' ? (
