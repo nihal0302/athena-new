@@ -2188,9 +2188,9 @@ ul.tech li::before{content:"";position:absolute;left:2px;top:.62em;width:4px;hei
 
 
 /* ---------- Recent Chats panel: one element that morphs, with proper motion ---------- */
-.chat .recents{--rtop:128px;top:var(--rtop);bottom:auto;height:calc(100% - var(--rtop) - 88px)}
+.chat .recents{--rtop:128px;top:var(--rtop);bottom:auto;height:calc(100% - var(--rtop) - 33px)}
 .chat.lay-compact .recents{--rtop:84px}
-.home .recents{--rtop:106px;top:var(--rtop);bottom:auto;height:calc(100% - var(--rtop) - 88px)}
+.home .recents{--rtop:106px;top:var(--rtop);bottom:auto;height:calc(100% - var(--rtop) - 33px)}
 .chat .recents.collapsed,.home .recents.collapsed{height:60px}
 .recents{transition:width .55s cubic-bezier(.22,.8,.24,1),height .55s cubic-bezier(.22,.8,.24,1),padding .55s cubic-bezier(.22,.8,.24,1),border-radius .55s cubic-bezier(.22,.8,.24,1),background .3s ease,box-shadow .4s ease}
 .recents.collapsed{width:60px}
@@ -2299,3 +2299,69 @@ ul.tech li::before{content:"";position:absolute;left:2px;top:.62em;width:4px;hei
    fill of its own), so it is cut at the very top edge, not under the nav */
 .chat.lay-compact .stage{top:0}
 .chat.lay-compact .scroll{padding-top:92px}
+/* compact pill: equal padding on the left and right */
+.chat.lay-compact .recents.collapsed.withtitle{padding:0 18px}
+/* compact pill: as wide as the open Recent Chats panel, so the name gets the most room */
+.chat.lay-compact .recents.collapsed.withtitle{width:317px}
+
+/* active chat in Recent Chats: a quiet glass outline, like the selected item in a sidebar menu */
+.rc-i.cur,.rc-i.cur:hover{margin:3px 0 3px 6px;padding:10px 14px 10px 28px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,.13),rgba(255,255,255,.04));box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 6px 16px -10px rgba(0,0,0,.5);font-weight:500;color:#fff;opacity:1}
+.rc-i.cur:hover{background:linear-gradient(180deg,rgba(255,255,255,.17),rgba(255,255,255,.07))}
+
+/* active chat: lighter, brighter glass */
+.rc-i.cur,.rc-i.cur:hover{border-color:rgba(255,255,255,.42);background:linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,.18));box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 8px 20px -10px rgba(0,0,0,.45);color:#fff;font-weight:500}
+.rc-i.cur:hover{background:linear-gradient(180deg,rgba(255,255,255,.4),rgba(255,255,255,.22))}
+
+
+/* ---------- Recent Chats list: no divider lines; hover shows the date and a "…" menu; subtle glass active chat ---------- */
+.recents{--rcbg:#5a5856}
+.home .recents{--rcbg:#0a0e16}
+.rc-i{position:relative;border-bottom:0;border-radius:10px;padding-right:12px;transition:background .2s ease}
+.rc-i:hover{background:rgba(255,255,255,.07)}
+.rc-i .ri-end{position:absolute;right:6px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:4px;padding-left:22px;opacity:0;pointer-events:none;transition:opacity .2s ease;background:linear-gradient(90deg,transparent,var(--rcbg) 38%)}
+.rc-i:hover .ri-end,.rc-i .ri-end:focus-within{opacity:1;pointer-events:auto}
+.ri-end time{font-size:11px;font-weight:400;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums;letter-spacing:.2px}
+.ri-more{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;color:#fff;opacity:.9}
+.ri-more:hover{background:rgba(255,255,255,.16);opacity:1}
+/* active chat: the quiet fill from before, made glassier */
+.rc-i.cur,.rc-i.cur:hover{margin:0 0 0 16px;padding:10px 12px 10px 20px;border:0;border-radius:10px;background:linear-gradient(135deg,rgba(255,255,255,.22),rgba(255,255,255,.09));backdrop-filter:blur(12px) saturate(140%);-webkit-backdrop-filter:blur(12px) saturate(140%);box-shadow:inset 3px 0 0 #a0b7de,inset 0 0 0 1px rgba(255,255,255,.16),inset 0 1px 0 rgba(255,255,255,.3);font-weight:600;color:#fff}
+.rc-i.cur:hover{background:linear-gradient(135deg,rgba(255,255,255,.28),rgba(255,255,255,.12))}
+.rc-i.cur .ri-end{background:none;padding-left:0}
+/* the "…" menu (Figma glass dropdown) */
+.rc-pop{position:fixed;z-index:1000;transform:translateX(-100%);display:flex;flex-direction:column;gap:6px;min-width:168px;padding:8px;border-radius:8px;background:rgba(37,37,37,.4);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,.25);animation:popIn .22s cubic-bezier(.22,.8,.24,1) both}
+@keyframes popIn{from{opacity:0;transform:translate(-100%,-6px) scale(.97)}to{opacity:1;transform:translateX(-100%)}}
+.rc-pop button{display:flex;align-items:center;gap:6px;padding:8px 10px;border-radius:4px;color:#fff;font-size:14px;line-height:20px;text-align:left;white-space:nowrap}
+.rc-pop button:hover{background:rgba(255,255,255,.18)}
+.rc-pop button.del{color:#f97066}
+
+/* Prototype controls: just a small floating icon in the bottom-left corner, above everything (Recent Chats included) */
+.pc{left:10px;bottom:10px;z-index:2147483000}
+.pc-pill{width:34px;height:34px;padding:0;gap:0;justify-content:center}
+.pc-pill>span{display:none}
+.pc-panel{bottom:44px}
+
+/* active chat: no side accent; a soft light rising from the bottom edge of the glass */
+.rc-i.cur,.rc-i.cur:hover{background:radial-gradient(120% 90% at 50% 130%,rgba(255,255,255,.42) 0%,rgba(255,255,255,.14) 48%,rgba(255,255,255,0) 78%),linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.07));box-shadow:inset 0 0 0 1px rgba(255,255,255,.16),inset 0 1px 0 rgba(255,255,255,.2),inset 0 -14px 18px -14px rgba(255,255,255,.35)}
+.rc-i.cur:hover{background:radial-gradient(120% 90% at 50% 130%,rgba(255,255,255,.5) 0%,rgba(255,255,255,.18) 48%,rgba(255,255,255,0) 78%),linear-gradient(180deg,rgba(255,255,255,.15),rgba(255,255,255,.09))}
+
+/* Recent Chats: chat names start exactly where the category name starts (no extra indent) */
+.rc-i,.rc-i.cur,.rc-i.cur:hover{margin-left:8px;padding-left:14px}
+
+/* Recent Chats: chat names in Light so they read differently from the (semibold) category names */
+.rc-i{font-weight:300}
+.rc-i.cur,.rc-i.cur:hover{font-weight:500}
+
+/* hover: the name is cut with "…" early enough that the date and the "…" menu sit beside it, never over it */
+.rc-i{transition:background .2s ease,padding-right .2s ease}
+.rc-i:hover,.rc-i.cur:hover,.rc-i:focus-within{padding-right:76px}
+.rc-i .ri-end{padding-left:0;background:none}
+
+
+/* the "…" menu outline: the Figma Glass/Outline gradient (white 24% → clear → white 24%) instead of a solid white line */
+.rc-pop{border:1px solid transparent;position:fixed}
+.rc-pop::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;pointer-events:none;background:linear-gradient(132deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,0) 48%,rgba(255,255,255,.55) 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.rc-pop::before{background:linear-gradient(132deg,rgba(255,255,255,.34) 0%,rgba(255,255,255,0) 49%,rgba(255,255,255,.34) 100%)}
+
+/* open Recent Chats: no chat icon in front of the title (the closed square still uses it) */
+.recents:not(.collapsed) .rc-ic{display:none}
+.recents:not(.collapsed) .rc-tx{margin-left:2px}

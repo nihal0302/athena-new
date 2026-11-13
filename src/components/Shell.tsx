@@ -1,8 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { RECENTS } from '../data/scenario'
 import { AldarLogo, Icon } from './Icon'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { PlusSignIcon, Mic01Icon, File01Icon, Attachment01Icon, ArrowDown01Icon, BubbleChatIcon } from '@hugeicons/core-free-icons'
+import { PlusSignIcon, Mic01Icon, File01Icon, Attachment01Icon, ArrowDown01Icon, BubbleChatIcon, MoreHorizontalIcon, StarIcon, Edit01Icon, Download01Icon, Delete02Icon } from '@hugeicons/core-free-icons'
 
 const Hi = ({ i, size = 18 }: { i: typeof PlusSignIcon; size?: number }) => <HugeiconsIcon icon={i} size={size} strokeWidth={1.7} />
 
@@ -28,6 +29,19 @@ export function TopBar({ onNew }: { onNew: () => void }) {
 /** The Recent Chats panel. One element that morphs between its closed and open shapes (so it can animate); the closed
  *  shape carries a chat icon, the open one puts that same icon in front of "Recent Chats". `title` (compact layout) is the
  *  open chat's name: the closed pill shows it, and the open list highlights that chat. */
+/** day/month shown on hover for each conversation in the list */
+const CHAT_DATES: Record<string, string[]> = {
+  Favourites: ['28/10', '02/11'],
+  Today: ['13/11', '13/11', '13/11', '13/11', '13/11', '13/11'],
+  'Last 7 Days': ['12/11', '11/11', '10/11', '09/11', '08/11', '07/11', '07/11'],
+  Older: ['05/11', '03/11', '31/10', '29/10', '27/10', '24/10', '22/10', '20/10', '17/10', '15/10', '13/10', '10/10'],
+}
+const dateOf = (group: string, k: number) => {
+  const key = Object.keys(CHAT_DATES).find((g) => group.startsWith(g)) ?? 'Today'
+  const list = CHAT_DATES[key]
+  return list[Math.min(k, list.length - 1)]
+}
+
 export function RecentsMenu({ open, onToggle, title, meta }: { open: boolean; onToggle: () => void; title?: string; meta?: ReactNode }) {
   // the chat name wraps to as many lines as it needs; measure it so the closed pill can be exactly that tall (and still animate)
   const t2 = useRef<HTMLSpanElement>(null)
@@ -42,6 +56,30 @@ export function RecentsMenu({ open, onToggle, title, meta }: { open: boolean; on
     document.fonts?.ready.then(measure)
     return () => ro.disconnect()
   }, [title])
+  // the "…" menu of a conversation: Add to Favourite, Rename, Download, Delete (Figma glass menu)
+  const [menu, setMenu] = useState<{ x: number; y: number } | null>(null)
+  useEffect(() => {
+    if (!menu) return
+    const close = () => setMenu(null)
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close()
+    window.addEventListener('mousedown', close)
+    window.addEventListener('keydown', onKey)
+    window.addEventListener('resize', close)
+    return () => {
+      window.removeEventListener('mousedown', close)
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('resize', close)
+    }
+  }, [menu])
+  useEffect(() => {
+    if (!open) setMenu(null)
+  }, [open])
+  const openMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation()
+    const r = e.currentTarget.getBoundingClientRect()
+    const z = parseFloat(getComputedStyle(document.body).zoom) || 1 // the page is scaled, fixed positions are in scaled units
+    setMenu({ x: r.right / z, y: (r.bottom + 6) / z })
+  }
   return (
     <aside style={title ? ({ ['--tx-h' as string]: txH + 'px' } as React.CSSProperties) : undefined} className={'recents' + (open ? '' : ' collapsed') + (title ? ' withtitle' : '')} aria-label="Recent chats">
       <div className="rc-h" onClick={open ? undefined : onToggle} role={open ? undefined : 'button'} tabIndex={open ? undefined : 0} aria-label={open ? undefined : 'Expand recent chats'} onKeyDown={(e) => { if (!open && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onToggle() } }}>
@@ -65,12 +103,30 @@ export function RecentsMenu({ open, onToggle, title, meta }: { open: boolean; on
               <div className="rc-g"><Icon n="chev" size={12} />{g}</div>
               {items.map((i, k) => {
                 const cur = !!title && i === title && k === 0 && g.startsWith('Today')
-                return <div key={g + k} className={'rc-i' + (cur ? ' cur' : '')} aria-current={cur ? 'true' : undefined}>{i}</div>
+                return (
+                  <div key={g + k} className={'rc-i' + (cur ? ' cur' : '')} aria-current={cur ? 'true' : undefined}>
+                    {i}
+                    <span className="ri-end">
+                      <time>{dateOf(g, k)}</time>
+                      <button className="ri-more" aria-label={'More options for ' + i} onMouseDown={(e) => e.stopPropagation()} onClick={openMenu}><Hi i={MoreHorizontalIcon} size={16} /></button>
+                    </span>
+                  </div>
+                )
               })}
             </div>
           )
         })}
       </div>
+      {menu &&
+        createPortal(
+          <div className="rc-pop" role="menu" style={{ left: menu.x, top: menu.y }} onMouseDown={(e) => e.stopPropagation()}>
+            <button role="menuitem" onClick={() => setMenu(null)}><Hi i={StarIcon} size={16} />Add to Favourite</button>
+            <button role="menuitem" onClick={() => setMenu(null)}><Hi i={Edit01Icon} size={16} />Rename</button>
+            <button role="menuitem" onClick={() => setMenu(null)}><Hi i={Download01Icon} size={16} />Download</button>
+            <button role="menuitem" className="del" onClick={() => setMenu(null)}><Hi i={Delete02Icon} size={16} />Delete</button>
+          </div>,
+          document.body,
+        )}
     </aside>
   )
 }

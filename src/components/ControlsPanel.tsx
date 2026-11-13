@@ -62,7 +62,7 @@ export function ControlsPanel({ onReplay }: { onReplay?: () => void }) {
           </div>
         </div>
       )}
-      <button className={'pc-pill' + (!seen && !open ? ' attn' : '')} onClick={toggle} aria-expanded={open}>
+      <button className={'pc-pill' + (!seen && !open ? ' attn' : '')} onClick={toggle} aria-expanded={open} aria-label="Prototype controls" title="Prototype controls">
         <Icon n="sliders" size={16} />
         <span>Prototype controls</span>
         <span className="pc-badge">{current}</span>

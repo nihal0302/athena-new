@@ -160,7 +160,8 @@ export const sourcesFor = (n: AgentCount) =>
 export const RECENTS: [string, string[]][] = [
   ['Favourites (2)', ['Ask your workplace assistant', 'Policy Update Quick Search']],
   ['Today (2)', ['HR Guidelines Clarification', 'Resources for the Q4', 'Investment Trends Deep Dive', 'Market Analysis Overview', 'Emerging Technologies in Real Estate']],
-  ['Last 7 Days (11)', ['HR Guidelines Clarification', 'Marketing Insights Summary', 'Leasing Renewal Overview', 'Handover Process Questions']],
+  ['Last 7 Days (11)', ['HR Guidelines Clarification', 'Marketing Insights Summary', 'Leasing Renewal Overview', 'Handover Process Questions', 'Sales Pipeline Health Check', 'Broker Commission Structure', 'Customer Complaints Trend']],
+  ['Older (24)', ['Annual Sales Forecast Review', 'Off-plan Pricing Strategy', 'Payment Plan Benchmarking', 'Handover Readiness Checklist', 'Community Amenities Analysis', 'Competitor Launch Tracker Q3', 'Visa and Residency Impact Brief', 'Investor Sentiment Survey Summary', 'Marketing Spend Efficiency', 'Leasing Yield Comparison', 'Facilities Management Audit', 'Tenant Retention Playbook']],
 ]
 
 export const STARTERS = [
