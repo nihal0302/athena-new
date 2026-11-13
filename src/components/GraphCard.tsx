@@ -299,7 +299,7 @@ export function GraphCard({ run, onDetails }: { run: RunState; onDetails: () => 
         <div className="gv-pane run" aria-hidden={done}>
           <div className="gv-top">
             <button className="gb-click" onClick={onDetails} aria-label="Open detailed view" tabIndex={done ? -1 : 0}>
-              <span className="gv-title">Reasoning</span>
+              <span className="gv-title">Thinking</span>
               <Icon n="right" size={16} className="gb-chev" />
             </button>
             <span className="grow" />
@@ -312,7 +312,7 @@ export function GraphCard({ run, onDetails }: { run: RunState; onDetails: () => 
         </div>
         <div className="gv-pane fin" aria-hidden={!done}>
           <button className="gb-click" onClick={onDetails} aria-label="Open detailed view" tabIndex={done ? 0 : -1}>
-            <span className="gb-done-title">Reasoning completed</span>
+            <span className="gb-done-title">Thinking completed</span>
             <Icon n="right" size={16} className="gb-chev" />
           </button>
           <div className="gb-facts">{sc.chips.map((c) => <span key={c}>{c}</span>)}</div>
@@ -325,7 +325,7 @@ export function GraphCard({ run, onDetails }: { run: RunState; onDetails: () => 
           <Icon n="chev" size={14} className="tl-chev" />
         </button>
         <button className="tl-act" onClick={onDetails} aria-label="Open the full reasoning in the side pane">
-          <span>View reasoning</span>
+          <span>Reasoning trace</span>
           <Icon n="right" size={14} />
         </button>
       </div>

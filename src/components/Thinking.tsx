@@ -383,11 +383,11 @@ export function ReasoningPanel({
   useFollow(rzRef, (tab === 'activity' || tab === 'stages') && !run.done, [feed.length, tab, tech ? techCur : run.stepStatus.join(','), agList.filter((ag) => run.t >= (sc.agents.length ? sc.gs : sc.t0[Math.max(0, agStage)]) + ag.start).length].join(','), run.t < 0.3)
 
   return (
-    <aside ref={rzRef} className={'rz' + (open ? '' : ' closed') + (wide ? ' wide' : '') + (run.done ? ' done' : '')} aria-label="Reasoning">
+    <aside ref={rzRef} className={'rz' + (open ? '' : ' closed') + (wide ? ' wide' : '') + (run.done ? ' done' : '')} aria-label="Reasoning trace">
       <div className="rz-h">
         <span className="rz-ic"><ReasoningIcon size={24} /></span>
         <div className="rz-ttl">
-          <h4>Reasoning</h4>
+          <h4>Reasoning trace</h4>
           <div className="rz-st"><span className="dot" /><span>{run.done ? 'Completed' : 'Live · ' + (tech && techCur >= 0 ? tech[techCur].live : sc.steps[run.idx].live).toLowerCase()}</span></div>
         </div>
         <button aria-label="Expand" aria-disabled="true" tabIndex={-1} style={{ pointerEvents: "none" }}><Icon n="expand" size={18} /></button>

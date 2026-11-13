@@ -6,6 +6,7 @@ import { AGENTS_PARAM } from '../hooks'
 import { FullscreenChart } from './Charts'
 import { BlocksCard } from './BlocksCard'
 import { TimelineCard } from './TimelineCard'
+import { BlocksCard2 } from './BlocksCard2'
 import { AldarLogo, GoldSparkle, Icon, Sparkle } from './Icon'
 import { QuickResponse, Response } from './Response'
 import { Composer, RecentsMenu, TopBar } from './Shell'
@@ -169,7 +170,7 @@ export function ChatScreen({
             <div className="arow">
               <div className={'spark' + (run.done ? '' : ' busy')}><GoldSparkle size={22} /></div>
               <div className="acol">
-                {variants.thinking === 'timeline' ? <TimelineCard run={run} onDetails={open} /> : <BlocksCard run={run} onDetails={open} />}
+                {variants.thinking === 'timeline' ? <TimelineCard run={run} onDetails={open} /> : variants.thinking === 'blocks2' ? <BlocksCard2 run={run} onDetails={open} /> : <BlocksCard run={run} onDetails={open} />}
                 <div className="ans-anchor" ref={anchorRef}>
                   {(live ? visible > 0 : run.done && shown > 0) &&
                     (sc.id === 'standard' ? (

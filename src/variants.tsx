@@ -7,7 +7,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
  * To add a variation: add an option below and branch on it in ChatScreen.
  */
 export type VariantState = {
-  thinking: 'globe' | 'blocks' | 'graph' | 'timeline'
+  thinking: 'globe' | 'blocks' | 'blocks2' | 'graph' | 'timeline'
   speed: 'quick' | 'standard'
   agents: '3' | '5' | '10' | 'mix'
   pane: 'cards' | 'trace' | 'ai' | 'bento'
@@ -15,9 +15,10 @@ export type VariantState = {
   spacing: 'off' | 'on'
   agentLock: 'menu' | 'chip' | 'inline'
   layout: 'classic' | 'compact' | 'rail'
+  format: 'standard' | 'editorial'
 }
 
-export const DEFAULT_VARIANTS: VariantState = { thinking: 'blocks', speed: 'standard', agents: '5', pane: 'cards', glass: 'black', spacing: 'off', agentLock: 'menu', layout: 'compact' }
+export const DEFAULT_VARIANTS: VariantState = { thinking: 'blocks', speed: 'standard', agents: '5', pane: 'cards', glass: 'black', spacing: 'off', agentLock: 'menu', layout: 'compact', format: 'standard' }
 
 export type ControlDef = {
   key: keyof VariantState
@@ -26,6 +27,14 @@ export type ControlDef = {
 }
 
 export const CONTROLS: ControlDef[] = [
+  {
+    key: 'format',
+    label: 'Response format',
+    options: [
+      { id: 'standard', label: 'Current' },
+      { id: 'editorial', label: 'Editorial' },
+    ],
+  },
   {
     key: 'layout',
     label: 'Layout',
@@ -76,6 +85,7 @@ export const CONTROLS: ControlDef[] = [
     options: [
       { id: 'blocks', label: 'Blocks' },
       { id: 'timeline', label: 'Timeline' },
+      { id: 'blocks2', label: 'Waves' },
       // Globe and Graph are retired; their code stays in the project
     ],
   },
@@ -104,7 +114,7 @@ function withRules(v: VariantState): VariantState {
 }
 
 // a new key, so earlier saved choices do not hide the new defaults (Bento pane, Globe variation)
-const STORAGE_KEY = 'athena-v2-variants-v14'
+const STORAGE_KEY = 'athena-v2-variants-v17'
 
 /** keep only values that still exist (older saved settings may name a variation that was removed) */
 function sanitize(raw: Partial<Record<string, string>>): VariantState {

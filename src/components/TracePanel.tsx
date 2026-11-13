@@ -247,11 +247,11 @@ export function TracePanel({
   if (bento) {
     const feed = sc.events.filter((e) => run.done || run.t >= e.t).slice(-8)
     return (
-      <aside ref={ref} className={'rz rz-bento' + (dark ? ' bn-dark' : '') + (open ? '' : ' closed') + (wide ? ' wide' : '') + (run.done ? ' done' : '')} aria-label="Reasoning">
+      <aside ref={ref} className={'rz rz-bento' + (dark ? ' bn-dark' : '') + (open ? '' : ' closed') + (wide ? ' wide' : '') + (run.done ? ' done' : '')} aria-label="Reasoning trace">
         <div className="bn-t bn-head bn-fade">
           <span className="bn-mark"><ReasoningIcon size={22} /></span>
           <div className="bn-ttl">
-            <b>Reasoning</b>
+            <b>Reasoning trace</b>
             <small>{live ? 'Live · ' + fmt(run.t) : 'Completed in ' + fmt(sc.total)}</small>
           </div>
           <button aria-label="Expand" aria-disabled="true" tabIndex={-1} style={{ pointerEvents: "none" }}><Icon n="expand" size={17} /></button>
@@ -333,7 +333,7 @@ export function TracePanel({
   }
 
   return (
-    <aside ref={ref} className={'rz rz-story' + (ai ? ' rz-ai' : '') + (open ? '' : ' closed') + (wide ? ' wide' : '') + (run.done ? ' done' : '')} aria-label="Reasoning">
+    <aside ref={ref} className={'rz rz-story' + (ai ? ' rz-ai' : '') + (open ? '' : ' closed') + (wide ? ' wide' : '') + (run.done ? ' done' : '')} aria-label="Reasoning trace">
       {ai && (
         <>
           <div className="au-bg" aria-hidden="true"><i /><i /><i /></div>
@@ -352,7 +352,7 @@ export function TracePanel({
           <span className="sy-mark"><ReasoningIcon size={22} /></span>
         )}
         <div className="sy-ttl">
-          <b className={ai && live ? 'au-live' : ''}>Reasoning</b>
+          <b className={ai && live ? 'au-live' : ''}>Reasoning trace</b>
           <small>{live ? (ai ? 'Live · ' + fmt(run.t) : fmt(run.t) + ' · ' + (tech && techSeen > 0 ? tech[techSeen - 1].live : sc.steps[run.idx].live).toLowerCase()) : 'Completed in ' + fmt(sc.total)}</small>
         </div>
         <button aria-label="Expand" aria-disabled="true" tabIndex={-1} style={{ pointerEvents: "none" }}><Icon n="expand" size={17} /></button>

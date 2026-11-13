@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { ListViewIcon, Route01Icon } from '@hugeicons/core-free-icons'
 import type { RunState } from '../hooks'
 import { Icon } from './Icon'
 import { AgentIcon } from './AgentIcon'
@@ -64,7 +66,7 @@ function SubFlow({ subs, i, fin = false }: { subs: string[]; i: number; fin?: bo
 
 /** "Show steps" / "Agent trace" text actions, plus the per-agent rows (name, what it is doing now, and a slim bar that starts
  *  when the agent was triggered and ends when it finished, on the run's own time axis). Shared by the thinking cards. */
-export function AgentSteps({ run, open, onToggle, onTrace, variant = 'rows', bars = false }: { run: RunState; open: boolean; onToggle: () => void; onTrace: () => void; variant?: 'rows' | 'blocks' | 'globe'; bars?: boolean }) {
+export function AgentSteps({ run, open, onToggle, onTrace, variant = 'rows', bars = false, iconActs = false }: { run: RunState; open: boolean; onToggle: () => void; onTrace: () => void; variant?: 'rows' | 'blocks' | 'globe'; bars?: boolean; iconActs?: boolean }) {
   const sc = run.sc
   const tt = useSmoothT(run)
   const nAg = sc.agents.length
@@ -77,16 +79,29 @@ export function AgentSteps({ run, open, onToggle, onTrace, variant = 'rows', bar
 
   return (
     <>
-      <div className="tl-acts">
-        <button className="tl-act" onClick={onToggle} aria-expanded={open}>
-          <span>{open ? 'Hide steps' : 'Show steps'}</span>
-          <Icon n="chev" size={14} className="tl-chev" />
-        </button>
-        <button className="tl-act" onClick={onTrace} aria-label="Open the full reasoning in the side pane">
-          <span>View reasoning</span>
-          <Icon n="right" size={14} />
-        </button>
-      </div>
+      {iconActs ? (
+        <div className="tl-acts tl-acts-i">
+          <button className="tl-act" onClick={onToggle} aria-expanded={open}>
+            <HugeiconsIcon icon={ListViewIcon} size={16} strokeWidth={1.7} />
+            <span>{open ? 'Hide steps' : 'Show steps'}</span>
+          </button>
+          <button className="tl-act" onClick={onTrace} aria-label="Open the reasoning trace in the side pane">
+            <HugeiconsIcon icon={Route01Icon} size={16} strokeWidth={1.7} />
+            <span>Reasoning trace</span>
+          </button>
+        </div>
+      ) : (
+        <div className="tl-acts">
+          <button className="tl-act" onClick={onToggle} aria-expanded={open}>
+            <span>{open ? 'Hide steps' : 'Show steps'}</span>
+            <Icon n="chev" size={14} className="tl-chev" />
+          </button>
+          <button className="tl-act" onClick={onTrace} aria-label="Open the reasoning trace in the side pane">
+            <span>Reasoning trace</span>
+            <Icon n="right" size={14} />
+          </button>
+        </div>
+      )}
       {stages ? (
         <StageList run={run} open={open} tt={tt} variant={variant} bars={bars} />
       ) : variant === 'globe' ? (

@@ -176,6 +176,13 @@ export function Composer({
   return (
     <div className="composer">
       <div className="cbox" ref={box}>
+        {locked && lockMode === 'inline' && !!files && !menu && (
+          <div className="lockchip filechip" tabIndex={0} aria-label={`${files} files attached in this conversation`}>
+            <Hi i={File01Icon} size={15} />
+            <b>{files} files</b>
+            <small>attached in this chat</small>
+          </div>
+        )}
         {locked && lockMode === 'chip' && !menu && (
           <div className="lockchip" tabIndex={0} aria-label="Aldar X is locked for this conversation">
             <AldarLogo size={13} />
@@ -195,7 +202,7 @@ export function Composer({
             <button role="menuitem" onClick={() => setMenu(false)}><span className="pm-i"><Hi i={Attachment01Icon} /></span><span className="pm-t">Attach a file</span></button>
           </div>
         )}
-        <button className={'ib plus' + (menu ? ' on' : '')} data-tip="Add files and more" onClick={() => setMenu(!menu)} aria-label="Add agent, files or attachments" aria-expanded={menu}><Hi i={PlusSignIcon} size={18} /></button>
+        <button className={'ib plus' + (menu ? ' on' : '')} data-tip={locked && lockMode === 'inline' ? 'Attach a file' : 'Add files and more'} onClick={() => setMenu(!menu)} aria-label={locked && lockMode === 'inline' ? 'Attach files' : 'Add agent, files or attachments'} aria-expanded={menu}><Hi i={locked && lockMode === 'inline' ? Attachment01Icon : PlusSignIcon} size={18} /></button>
         {locked && lockMode === 'inline' && (
           <span className="lockav" tabIndex={0} data-tip="Aldar X is locked for this chat" aria-label="Aldar X, locked for this conversation">
             <AldarLogo size={16} />

@@ -65,10 +65,9 @@ export function TimelineCard({ run, onDetails }: { run: RunState; onDetails: () 
     <div className={'tl' + (done ? ' done' : '') + (open ? ' open' : '')}>
       <div className="tl-top">
         <div className="tl-l">
-          <button className="gb-click tl-title" onClick={onDetails} aria-label="Open detailed view">
-            <span className={done ? 'tl-t done' : 'tl-t'}>{done ? 'Reasoning completed' : 'Reasoning'}</span>
-            <Icon n="right" size={16} className="gb-chev" />
-          </button>
+          <div className="gb-click tl-title static">
+            <span className={done ? 'tl-t done' : 'tl-t'}>{done ? 'Thinking completed' : 'Thinking'}</span>
+          </div>
           <div className="tl-sub" key={sub}>{sub}</div>
         </div>
         <div className="tl-r">
@@ -84,7 +83,7 @@ export function TimelineCard({ run, onDetails }: { run: RunState; onDetails: () 
         </div>
       </div>
 
-      <AgentSteps run={run} open={open} onToggle={() => setOpen(!open)} onTrace={onDetails} bars />
+      <AgentSteps run={run} open={open} onToggle={() => setOpen(!open)} onTrace={onDetails} bars iconActs />
     </div>
   )
 }

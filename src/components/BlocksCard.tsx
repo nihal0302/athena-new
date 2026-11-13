@@ -406,19 +406,17 @@ export function BlocksCard({ run, onDetails }: { run: RunState; onDetails: () =>
       <div className={'gb bl' + (done ? ' done' : '')}>
         <div className="gb-left">
           <div className="gb-pane run" aria-hidden={done}>
-            <button className="gb-click gb-step" key={run.idx} onClick={onDetails} aria-label="Open detailed view" tabIndex={done ? -1 : 0}>
+            <div className="gb-click gb-step static" key={run.idx}>
               <span className="gb-stepname">{run.sc.steps[run.idx].live}</span>
               <span className="gb-dots"><i /><i /><i /></span>
-              <Icon n="right" size={16} className="gb-chev" />
-            </button>
+            </div>
             <div className="gb-event" key={run.event}>{run.event}</div>
             <div className="gb-meta gm"><span className="gm-pct"><b>{run.pct}</b>%</span><span className="gm-time">{Math.round(run.t)}s elapsed</span></div>
           </div>
           <div className="gb-pane fin" aria-hidden={!done}>
-            <button className="gb-click" onClick={onDetails} aria-label="Open detailed view" tabIndex={done ? 0 : -1}>
-              <span className="gb-done-title">Reasoning completed</span>
-              <Icon n="right" size={16} className="gb-chev" />
-            </button>
+            <div className="gb-click static">
+              <span className="gb-done-title">Thinking completed</span>
+            </div>
             <div className="gb-facts">{run.sc.chips.map((c) => <span key={c}>{c}</span>)}</div>
           </div>
         </div>

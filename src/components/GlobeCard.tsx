@@ -299,7 +299,7 @@ export function GlobeCard({ run, onDetails }: { run: RunState; onDetails: () => 
         </div>
         <div className="gb-pane fin" aria-hidden={!done}>
           <button className="gb-click" onClick={onDetails} aria-label="Open detailed view" tabIndex={done ? 0 : -1}>
-            <span className="gb-done-title">Reasoning completed</span>
+            <span className="gb-done-title">Thinking completed</span>
             <Icon n="right" size={16} className="gb-chev" />
           </button>
           <div className="gb-facts">{run.sc.chips.map((c) => <span key={c}>{c}</span>)}</div>
