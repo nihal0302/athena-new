@@ -77,7 +77,7 @@ export function RecentsMenu({ open, onToggle, title, meta }: { open: boolean; on
   const openMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation()
     const r = e.currentTarget.getBoundingClientRect()
-    const z = parseFloat(getComputedStyle(document.body).zoom) || 1 // the page is scaled, fixed positions are in scaled units
+    const z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1 // the page is scaled, fixed positions are in scaled units
     setMenu({ x: r.right / z, y: (r.bottom + 6) / z })
   }
   return (

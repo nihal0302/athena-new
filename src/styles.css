@@ -14,7 +14,9 @@
 @property --ang{syntax:'<angle>';initial-value:0deg;inherits:false}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body,#root{height:100%}
-body{zoom:.8;font-family:'Poppins',system-ui,sans-serif;color:var(--ink);font-size:14px;line-height:1.5;background:var(--warm);-webkit-font-smoothing:antialiased;overflow:auto}
+/* the 80% page scale lives on <html>: with zoom on <body>, Chrome does not draw backdrop blur */
+html{zoom:.8}
+body{font-family:'Poppins',system-ui,sans-serif;color:var(--ink);font-size:14px;line-height:1.5;background:var(--warm);-webkit-font-smoothing:antialiased;overflow:auto}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .i{stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .app{position:relative;height:100%;min-width:1100px;min-height:700px;overflow:hidden}
