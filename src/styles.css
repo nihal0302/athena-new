@@ -2367,3 +2367,47 @@ ul.tech li::before{content:"";position:absolute;left:2px;top:.62em;width:4px;hei
 /* open Recent Chats: no chat icon in front of the title (the closed square still uses it) */
 .recents:not(.collapsed) .rc-ic{display:none}
 .recents:not(.collapsed) .rc-tx{margin-left:2px}
+
+
+
+
+/* ---------- Layout: Right panel ----------
+   like Compact (chat name in the Recent Chats pill, conversation runs to the top), but the agent, date and download sit in
+   the empty right-hand space; when the reasoning pane opens it simply comes over them */
+.chat.lay-rail .rrail{position:absolute;z-index:5;top:84px;right:24px;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.rr{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.rr.ro{height:32px;padding:0 14px;border-radius:99px;border:1px solid #cfcfcf;background:transparent;color:#252525;font-size:13px;cursor:default}
+.rr.dl{height:38px;padding:0 20px;border-radius:99px;background:#fff;border:1px solid #2f245c;color:#2f245c;font-size:13.5px;font-weight:500;box-shadow:0 1px 2px rgba(0,0,0,.05);cursor:pointer;transition:background .2s,transform .2s}
+.rr.dl:hover{background:#edf1f8;transform:translateY(-1px)}
+
+/* the agent and date chips are as tall as the Download button */
+.rr.ro{height:38px;padding:0 18px}
+.chat.lay-compact .rc-meta>.ro{height:36px;padding:0 16px}
+
+/* Right panel: the three items in a single row, right-aligned */
+.chat.lay-rail .rrail{flex-direction:row;align-items:center;gap:10px}
+/* the row is wider than the reasoning pane, so it steps aside (fades) while the pane is open */
+.rrail{transition:opacity .3s ease}
+.chat.panel-open .rrail{opacity:0;pointer-events:none}
+
+/* Right panel row: smaller, so it stays in the margin and never reaches the conversation */
+.chat.lay-rail .rrail{gap:8px}
+.rr{gap:6px}
+.rr.ro{height:34px;padding:0 12px;font-size:12px}
+.rr.dl{height:34px;padding:0 14px;font-size:12.5px}
+.rr svg{width:13px;height:13px}
+@media (max-width:1250px){.chat.lay-rail .rr.ro:nth-child(2){display:none}}
+@media (max-width:1050px){.chat.lay-rail .rr.ro{display:none}}
+
+/* Right panel row: sizes as before (38px), and Download is just an icon */
+.chat.lay-rail .rrail{gap:10px}
+.rr{gap:8px}
+.rr.ro{height:38px;padding:0 18px;font-size:13px}
+.rr.dl{width:38px;height:38px;padding:0;justify-content:center;border-radius:50%}
+.rr svg{width:14px;height:14px}
+.rr.dl svg{width:16px;height:16px}
+
+/* Download icon tooltip: same dark bubble as the mic button, opening below (the button sits at the top of the page) */
+.rr.dl{position:relative}
+.rr.dl::after{content:attr(data-tip);position:absolute;left:50%;top:calc(100% + 10px);padding:7px 11px;border-radius:10px;background:#252525;color:#fff;font-size:12px;font-weight:400;line-height:1.2;white-space:nowrap;opacity:0;transform:translate(-50%,-4px);pointer-events:none;transition:opacity .2s,transform .2s;z-index:6}
+.rr.dl:hover::after,.rr.dl:focus-visible::after{opacity:1;transform:translate(-50%,0)}

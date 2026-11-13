@@ -135,7 +135,7 @@ export function ChatScreen({
   }, [runKey])
 
   const open = () => setPanelOpen(true)
-  const cls = 'chat view' + (menuOpen ? ' menu-open' : '') + (panelOpen ? ' panel-open' : '') + (wide ? ' panel-wide' : '') + (variants.layout === 'compact' ? ' lay-compact' : '')
+  const cls = 'chat view' + (menuOpen ? ' menu-open' : '') + (panelOpen ? ' panel-open' : '') + (wide ? ' panel-wide' : '') + (variants.layout === 'compact' || variants.layout === 'rail' ? ' lay-compact' : '') + (variants.layout === 'rail' ? ' lay-rail' : '')
   return (
     <section className={cls}>
       <TopBar onNew={onNew} />
@@ -146,7 +146,7 @@ export function ChatScreen({
         <button className="tag dl" onClick={() => onToast('Brief exported as PDF')}><Icon n="dl" size={14} />Download</button>
       </div>
       <div className="hr" />
-      <RecentsMenu open={menuOpen} onToggle={onMenu} title={variants.layout === 'compact' ? sc.chatTitle : undefined} meta={variants.layout === 'compact' ? (
+      <RecentsMenu open={menuOpen} onToggle={onMenu} title={variants.layout === 'compact' || variants.layout === 'rail' ? sc.chatTitle : undefined} meta={variants.layout === 'compact' ? (
         <>
           <span className="rm ro"><AldarLogo size={13} />Aldar X</span>
           <span className="rm ro"><Icon n="cal" size={14} />06-11-26 07:46:24 PM</span>
@@ -184,6 +184,14 @@ export function ChatScreen({
         </div>
         <Composer files={3} locked lockMode={variants.agentLock} value={text} onChange={setText} onSend={() => { onAsk(text.trim()); setText('') }} />
       </div>
+
+      {variants.layout === 'rail' && (
+        <div className="rrail">
+          <span className="rr ro"><AldarLogo size={13} />Aldar X</span>
+          <span className="rr ro"><Icon n="cal" size={14} />06-11-26 07:46:24 PM</span>
+          <button className="rr dl" data-tip="Download chat" aria-label="Download chat" onClick={() => onToast('Brief exported as PDF')}><Icon n="dl" size={16} /></button>
+        </div>
+      )}
 
       {variants.pane === 'trace' || variants.pane === 'ai' || variants.pane === 'bento' ? (
         <TracePanel run={run} open={panelOpen} wide={wide} onClose={() => setPanelOpen(false)} onWide={() => setWide(!wide)} ai={variants.pane === 'ai'} bento={variants.pane === 'bento'} dark={variants.glass === 'black'} />

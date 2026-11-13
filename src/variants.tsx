@@ -14,7 +14,7 @@ export type VariantState = {
   glass: 'white' | 'black'
   spacing: 'off' | 'on'
   agentLock: 'menu' | 'chip' | 'inline'
-  layout: 'classic' | 'compact'
+  layout: 'classic' | 'compact' | 'rail'
 }
 
 export const DEFAULT_VARIANTS: VariantState = { thinking: 'blocks', speed: 'standard', agents: '5', pane: 'cards', glass: 'black', spacing: 'off', agentLock: 'menu', layout: 'compact' }
@@ -30,8 +30,10 @@ export const CONTROLS: ControlDef[] = [
     key: 'layout',
     label: 'Layout',
     options: [
-      { id: 'classic', label: 'Classic' },
+      // 'classic' is hidden for now; its code stays so it can come back
       { id: 'compact', label: 'Compact' },
+      { id: 'rail', label: 'Right panel' },
+      // (a variant that put the details into the top nav was dropped: the top nav has to look the same everywhere)
     ],
   },
   {
@@ -102,7 +104,7 @@ function withRules(v: VariantState): VariantState {
 }
 
 // a new key, so earlier saved choices do not hide the new defaults (Bento pane, Globe variation)
-const STORAGE_KEY = 'athena-v2-variants-v10'
+const STORAGE_KEY = 'athena-v2-variants-v14'
 
 /** keep only values that still exist (older saved settings may name a variation that was removed) */
 function sanitize(raw: Partial<Record<string, string>>): VariantState {
