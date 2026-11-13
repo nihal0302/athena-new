@@ -5,6 +5,7 @@ import type { RunState } from '../hooks'
 import { Icon } from './Icon'
 import { AgentIcon } from './AgentIcon'
 import { useSmoothT } from './GraphCard'
+import { Mega } from './MegaSteps'
 
 const clamp = (v: number) => Math.max(0, Math.min(1, v))
 
@@ -66,7 +67,7 @@ function SubFlow({ subs, i, fin = false }: { subs: string[]; i: number; fin?: bo
 
 /** "Show steps" / "Agent trace" text actions, plus the per-agent rows (name, what it is doing now, and a slim bar that starts
  *  when the agent was triggered and ends when it finished, on the run's own time axis). Shared by the thinking cards. */
-export function AgentSteps({ run, open, onToggle, onTrace, variant = 'rows', bars = false, iconActs = false }: { run: RunState; open: boolean; onToggle: () => void; onTrace: () => void; variant?: 'rows' | 'blocks' | 'globe'; bars?: boolean; iconActs?: boolean }) {
+export function AgentSteps({ run, open, onToggle, onTrace, variant = 'rows', bars = false, iconActs = false }: { run: RunState; open: boolean; onToggle: () => void; onTrace: () => void; variant?: 'rows' | 'blocks' | 'globe' | 'mega'; bars?: boolean; iconActs?: boolean }) {
   const sc = run.sc
   const tt = useSmoothT(run)
   const nAg = sc.agents.length
@@ -104,7 +105,7 @@ export function AgentSteps({ run, open, onToggle, onTrace, variant = 'rows', bar
       )}
       {stages ? (
         <StageList run={run} open={open} tt={tt} variant={variant} bars={bars} />
-      ) : variant === 'globe' ? (
+      ) : variant === 'globe' || variant === 'mega' ? (
         <Journey
           open={open}
           items={sc.agents.map((a, k) => {
@@ -197,7 +198,7 @@ export function AgentSteps({ run, open, onToggle, onTrace, variant = 'rows', bar
 }
 
 /** Serial steps: each step with its name, what it is doing (or its result) and how long it took. */
-function StageList({ run, open, tt, variant, bars }: { run: RunState; open: boolean; tt: number; variant: 'rows' | 'blocks' | 'globe'; bars: boolean }) {
+function StageList({ run, open, tt, variant, bars }: { run: RunState; open: boolean; tt: number; variant: 'rows' | 'blocks' | 'globe' | 'mega'; bars: boolean }) {
   const sc = run.sc
   const info = sc.steps.map((st, i) => {
     const start = sc.t0[i]
@@ -217,6 +218,14 @@ function StageList({ run, open, tt, variant, bars }: { run: RunState; open: bool
   })
   const subCls = (r: { sub: boolean; first: boolean; last: boolean }) => (r.sub ? ' sub' + (r.first ? ' first' : '') + (r.last ? ' last' : '') : '')
   const finished = info.filter((r) => r.state === 'd').length
+  if (variant === 'mega') {
+    return (
+      <Mega
+        open={open}
+        items={info.map((r) => ({ key: r.st.id, icon: r.st.icon, color: r.color, title: r.st.agent ? r.st.agent.name : r.st.short, live: r.st.live, note: r.st.note ?? '', subs: r.st.sub, q: r.q, state: r.state, time: r.time }))}
+      />
+    )
+  }
   if (variant === 'globe') {
     return (
       <Journey

@@ -394,11 +394,10 @@ export function ReasoningPanel({
         <button onClick={onClose} aria-label="Close"><Icon n="x" size={18} /></button>
       </div>
 
-      <div className="rz-time">
-        <div className="rz-t1"><small>Overall time</small><b>{run.done ? fmt(sc.total) : fmt(run.t)}</b></div>
-        <div className="rz-t2"><span>{run.pct}%</span></div>
+      <div className="rz-bar2">
+        <div className="rz-bar"><div style={{ width: run.pct + '%' }} /></div>
+        <span className="rz-pct">{run.pct}%</span>
       </div>
-      <div className="rz-bar"><div style={{ width: run.pct + '%' }} /></div>
       <div className="rz-chips">{chips.map((c) => <span key={c}>{c}</span>)}</div>
 
       <div className="rz-tabs" role="tablist">

@@ -428,7 +428,7 @@ export function BlocksCard2({ run, onDetails, field = 'waves' }: { run: RunState
           {field === 'pixels' ? <PixelField done={done} /> : <Waves done={done} />}
         </div>
       </div>
-      <AgentSteps run={run} open={open} onToggle={() => setOpen(!open)} onTrace={onDetails} variant="globe" />
+      <AgentSteps run={run} open={open} onToggle={() => setOpen(!open)} onTrace={onDetails} variant={field === 'pixels' ? 'mega' : 'globe'} />
       </div>
     </div>
   )

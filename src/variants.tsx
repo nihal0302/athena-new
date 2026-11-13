@@ -27,14 +27,7 @@ export type ControlDef = {
 }
 
 export const CONTROLS: ControlDef[] = [
-  {
-    key: 'format',
-    label: 'Response format',
-    options: [
-      { id: 'standard', label: 'Current' },
-      { id: 'editorial', label: 'Editorial' },
-    ],
-  },
+  // Response format (Current / Editorial) is hidden for now; the Editorial code stays so it can come back
   {
     key: 'layout',
     label: 'Layout',
@@ -81,11 +74,11 @@ export const CONTROLS: ControlDef[] = [
   },
   {
     key: 'thinking',
-    label: 'Variation',
+    label: 'Thinking section',
     options: [
       { id: 'blocks', label: 'Blocks' },
-      { id: 'timeline', label: 'Timeline' },
       { id: 'pixels', label: 'Pixels' },
+      { id: 'timeline', label: 'Timeline' },
       // Waves ('blocks2') is hidden for now; its code stays so it can come back
       // Globe and Graph are retired; their code stays in the project
     ],

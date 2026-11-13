@@ -1661,9 +1661,9 @@ ul.b{margin:0 0 10px 18px;font-size:13px}
 
 /* ---------- response + question type scale: one step up (12→14, 14→16) ---------- */
 .ubub{font-size:15px}
-.rcard .sec h3{font-size:18px}
+.rcard .sec h3{font-size:20px}
 .rcard .sec h3 .ht{width:32px;height:32px}
-.rcard .sec p{font-size:15px}
+.rcard .sec p{font-size:16px}
 .rcard .sec p.lead{font-size:16px}
 .rcard .nums li p{font-size:16px}
 .rcard .nums li>span{font-size:13px}
@@ -2338,9 +2338,7 @@ ul.tech li::before{content:"";position:absolute;left:2px;top:.62em;width:4px;hei
 
 /* Prototype controls: just a small floating icon in the bottom-left corner, above everything (Recent Chats included) */
 .pc{left:10px;bottom:10px;z-index:2147483000}
-.pc-pill{width:34px;height:34px;padding:0;gap:0;justify-content:center}
-.pc-pill>span{display:none}
-.pc-panel{bottom:44px}
+.pc-panel{bottom:60px}
 
 /* active chat: no side accent; a soft light rising from the bottom edge of the glass */
 .rc-i.cur,.rc-i.cur:hover{background:radial-gradient(120% 90% at 50% 130%,rgba(255,255,255,.42) 0%,rgba(255,255,255,.14) 48%,rgba(255,255,255,0) 78%),linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.07));box-shadow:inset 0 0 0 1px rgba(255,255,255,.16),inset 0 1px 0 rgba(255,255,255,.2),inset 0 -14px 18px -14px rgba(255,255,255,.35)}
@@ -2461,3 +2459,52 @@ ul.tech li::before{content:"";position:absolute;left:2px;top:.62em;width:4px;hei
 /* Pixels stay after thinking: the field keeps its place on the right of the finished card, very faint */
 .gb.bl.wave.done .gb-globe{width:290px}
 .gb.bl.wave.done .pf{inset:auto;right:0;top:50%;width:290px;height:90px;margin-top:-45px}
+
+/* Mega menu for the stages (Pixels variation): stages on the left (30%), the detail of the active stage on the right (70%) */
+.mg{display:grid;grid-template-columns:30% 1fr;margin-top:6px;border:0;border-top:1px solid #e7e7e7;border-radius:0;background:transparent;overflow:hidden;min-height:210px}
+.mg-nav{list-style:none;margin:0;padding:8px;background:#f5f5f5;display:flex;flex-direction:column;gap:2px;min-width:0}
+.mg-it{display:flex;align-items:center;gap:6px;width:100%;padding:9px 14px 9px 8px;border:0;border-radius:9px;background:none;font:inherit;font-size:13px;color:#878787;text-align:left;cursor:pointer;min-width:0;transition:background .2s,color .2s}
+.mg-it:hover{background:rgba(47,36,92,.05)}
+.mg-it.mg-d{color:#3c3c3c}
+.mg-it.on{background:#fff;color:#2f245c;font-weight:600;box-shadow:0 0 0 1px #e1ddf0,0 4px 12px -8px rgba(47,36,92,.4)}
+.mg-it:disabled{cursor:default;opacity:.55}
+.mg-it:disabled:hover{background:none}
+.mg-sub{animation:gbIn .4s cubic-bezier(.2,.8,.2,1) both}
+.mg-ic{flex:none;display:grid;place-items:center;width:20px;height:20px;border-radius:7px;color:var(--c,#2f245c);background:rgba(47,36,92,.07)}
+.mg-nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mg-ok{flex:none;display:grid;place-items:center;width:13px;height:13px;border-radius:50%;background:#12b76a;color:#fff}
+.mg-live{flex:none;width:6px;height:6px;border-radius:2px;background:#2f245c;box-shadow:0 0 6px rgba(47,36,92,.6);animation:mgPulse 1.1s ease-in-out infinite}
+@keyframes mgPulse{50%{opacity:.25}}
+.mg-body{padding:14px 22px 10px 18px;min-width:0;display:flex;flex-direction:column;gap:10px;animation:gbIn .35s ease both}
+.mg-hd{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mg-t{font-size:14px;font-weight:600;color:#252525;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mg-pill{flex:none;font-size:12px;padding:3px 9px;border-radius:99px;background:#f0f0f0;color:#878787}
+.mg-pill.mg-w{background:#ece9f7;color:#2f245c}
+.mg-pill.mg-d{background:#e7f6ee;color:#0d7a48}
+.mg-bar{display:flex;align-items:center;gap:2px}
+.mg-bar i{flex:1;height:8px;border-radius:2px;background:rgba(47,36,92,.1);transition:background .3s}
+.mg-bar i.on{background:#2f245c}
+.mg-bar b{margin-left:8px;font-size:12px;font-weight:600;color:#2f245c;min-width:34px;text-align:right}
+.mg-subs{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}
+.mg-sub{display:flex;align-items:center;gap:9px;font-size:13px;color:#a3a3a3;line-height:1.35}
+.mg-sub.mg-sd{color:#3c3c3c}
+.mg-sub.mg-sw{color:#2f245c;font-weight:500}
+.mg-sdot{flex:none;display:grid;place-items:center;width:15px;height:15px;border-radius:50%}
+.mg-sub.mg-sd .mg-sdot{background:#12b76a;color:#fff}
+.mg-sub.mg-sw .mg-sdot i{width:7px;height:7px;border-radius:2px;background:#2f245c;animation:mgPulse 1.1s ease-in-out infinite}
+.mg-sub.mg-sp .mg-sdot i{width:7px;height:7px;border-radius:2px;background:#d4d4d4}
+.mg-ft{margin-top:auto;padding-top:8px;border-top:1px solid #efefef;font-size:12px;color:#878787}
+
+
+/* Reasoning pane: tighter. The percentage sits at the right of the progress bar and the "Overall time" row is gone */
+.rz-bar2{display:flex;align-items:center;gap:12px;margin:18px 24px 0}
+.rz:not(.rz-bento) .rz-bar2 .rz-bar{flex:1;margin:0}
+.rz-pct{flex:none;font-size:13px;font-weight:600;color:#49658b;font-variant-numeric:tabular-nums;min-width:34px;text-align:right}
+.rz:not(.rz-bento) .rz-h{padding:18px 24px 0}
+.rz:not(.rz-bento) .rz-chips{margin:18px 24px 0;gap:6px}
+.rz:not(.rz-bento) .rz-tabs{margin:18px 24px 0}
+.rz:not(.rz-bento) .rz-b{padding:18px 24px 4px}
+.rz:not(.rz-bento) .stp{margin-bottom:18px}
+.rz .stp .hd{padding:9px 12px}
+.rz .stp .tt b{font-size:14px}
+.rz .stp .tt small{font-size:12px}
