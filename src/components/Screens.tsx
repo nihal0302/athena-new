@@ -170,7 +170,7 @@ export function ChatScreen({
             <div className="arow">
               <div className={'spark' + (run.done ? '' : ' busy')}><GoldSparkle size={22} /></div>
               <div className="acol">
-                {variants.thinking === 'timeline' ? <TimelineCard run={run} onDetails={open} /> : variants.thinking === 'blocks2' ? <BlocksCard2 run={run} onDetails={open} /> : <BlocksCard run={run} onDetails={open} />}
+                {variants.thinking === 'timeline' ? <TimelineCard run={run} onDetails={open} /> : variants.thinking === 'blocks2' || variants.thinking === 'pixels' ? <BlocksCard2 field={variants.thinking === 'pixels' ? 'pixels' : 'waves'} run={run} onDetails={open} /> : <BlocksCard run={run} onDetails={open} />}
                 <div className="ans-anchor" ref={anchorRef}>
                   {(live ? visible > 0 : run.done && shown > 0) &&
                     (sc.id === 'standard' ? (

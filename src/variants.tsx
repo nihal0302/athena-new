@@ -7,7 +7,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
  * To add a variation: add an option below and branch on it in ChatScreen.
  */
 export type VariantState = {
-  thinking: 'globe' | 'blocks' | 'blocks2' | 'graph' | 'timeline'
+  thinking: 'globe' | 'blocks' | 'blocks2' | 'pixels' | 'graph' | 'timeline'
   speed: 'quick' | 'standard'
   agents: '3' | '5' | '10' | 'mix'
   pane: 'cards' | 'trace' | 'ai' | 'bento'
@@ -85,7 +85,8 @@ export const CONTROLS: ControlDef[] = [
     options: [
       { id: 'blocks', label: 'Blocks' },
       { id: 'timeline', label: 'Timeline' },
-      { id: 'blocks2', label: 'Waves' },
+      { id: 'pixels', label: 'Pixels' },
+      // Waves ('blocks2') is hidden for now; its code stays so it can come back
       // Globe and Graph are retired; their code stays in the project
     ],
   },

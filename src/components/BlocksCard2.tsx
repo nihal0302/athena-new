@@ -5,6 +5,7 @@ import { Icon } from './Icon'
 import { AgentSteps } from './AgentSteps'
 import { PixelLoader } from './PixelLoader'
 import { Waves } from "./Waves"
+import { PixelField } from "./PixelField"
 
 /* ------------------------------------------------------------------ */
 /*  Building blocks.                                                   */
@@ -389,7 +390,7 @@ function Blocks({ run, w, h }: { run: RunState; w: number; h: number }) {
 /* ------------------------------------------------------------------ */
 /*  Card (same text layout as the globe)                               */
 /* ------------------------------------------------------------------ */
-export function BlocksCard2({ run, onDetails }: { run: RunState; onDetails: () => void }) {
+export function BlocksCard2({ run, onDetails, field = 'waves' }: { run: RunState; onDetails: () => void; field?: 'waves' | 'pixels' }) {
   const done = run.done
   // the per-agent steps share the card; open by default, and open again for every new run
   const [open, setOpen] = useState(true)
@@ -424,7 +425,7 @@ export function BlocksCard2({ run, onDetails }: { run: RunState; onDetails: () =
           </div>
         </div>
         <div className="gb-globe">
-          <Waves done={done} idx={run.idx} />
+          {field === 'pixels' ? <PixelField done={done} /> : <Waves done={done} />}
         </div>
       </div>
       <AgentSteps run={run} open={open} onToggle={() => setOpen(!open)} onTrace={onDetails} variant="globe" />
