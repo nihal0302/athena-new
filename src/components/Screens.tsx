@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import type { Agent } from '../data/agents'
 import { QUICK_STARTERS, STARTERS, buildScenario, sourcesFor, type AgentCount } from '../data/scenario'
 import { deriveRun, useRun } from '../hooks'
 import { useVariants } from '../variants'
@@ -18,11 +19,17 @@ export function HomeScreen({
   onMenu,
   onNew,
   onAsk,
+  onRepo,
+  agent,
+  onClearAgent,
 }: {
   menuOpen: boolean
   onMenu: () => void
   onNew: () => void
   onAsk: (q: string) => void
+  onRepo: () => void
+  agent?: Agent | null
+  onClearAgent?: () => void
 }) {
   const [text, setText] = useState('')
   const { variants } = useVariants()
@@ -30,16 +37,32 @@ export function HomeScreen({
   const starters = variants.speed === 'quick' ? QUICK_STARTERS : STARTERS
   return (
     <section className="view home">
-      <TopBar onNew={onNew} />
+      <TopBar onNew={onNew} onRepo={onRepo} />
       <RecentsMenu open={menuOpen} onToggle={onMenu} />
       <div className="hero">
-        <h1>Welcome to Aldar AI</h1>
-        <p>A centralized system control for multiple AI agents</p>
-        <div className="chips">
-          {starters.map((s) => (
-            <button key={s.label} className="chip" onClick={() => setText(s.prompt)}>{s.label}</button>
-          ))}
-        </div>
+        {agent ? (
+          <>
+            <span className="hero-ag">
+              <Icon n="chip" size={14} />Chatting with {agent.name}
+              <button aria-label="Choose a different agent" onClick={onClearAgent}><Icon n="x" size={12} /></button>
+            </span>
+            <h1>{agent.name}</h1>
+            <p>{agent.desc}</p>
+            <div className="chips">
+              <button className="chip" onClick={() => setText(agent.prompt)}>{agent.prompt}</button>
+            </div>
+          </>
+        ) : (
+          <>
+            <h1>Welcome to Aldar AI</h1>
+            <p>A centralized system control for multiple AI agents</p>
+            <div className="chips">
+              {starters.map((s) => (
+                <button key={s.label} className="chip" onClick={() => setText(s.prompt)}>{s.label}</button>
+              ))}
+            </div>
+          </>
+        )}
       </div>
       <Composer value={text} onChange={setText} onSend={() => onAsk(text.trim())} />
     </section>
@@ -54,6 +77,7 @@ export function ChatScreen({
   onNew,
   onAsk,
   onToast,
+  onRepo,
 }: {
   question: string
   runId: number
@@ -62,6 +86,7 @@ export function ChatScreen({
   onNew: () => void
   onAsk: (q: string) => void
   onToast: (m: string) => void
+  onRepo: () => void
 }) {
   const [text, setText] = useState('')
   const { variants } = useVariants()
@@ -139,7 +164,7 @@ export function ChatScreen({
   const cls = 'chat view' + (menuOpen ? ' menu-open' : '') + (panelOpen ? ' panel-open' : '') + (wide ? ' panel-wide' : '') + (variants.layout === 'compact' || variants.layout === 'rail' ? ' lay-compact' : '') + (variants.layout === 'rail' ? ' lay-rail' : '')
   return (
     <section className={cls}>
-      <TopBar onNew={onNew} />
+      <TopBar onNew={onNew} onRepo={onRepo} />
       <div className="ctitle">
         <h2>{sc.chatTitle}</h2>
         <span className="tag"><Sparkle size={14} />Aldar X</span>

@@ -16,9 +16,10 @@ export type VariantState = {
   agentLock: 'menu' | 'chip' | 'inline'
   layout: 'classic' | 'compact' | 'rail'
   format: 'standard' | 'editorial'
+  repo: 'v1' | 'v2'
 }
 
-export const DEFAULT_VARIANTS: VariantState = { thinking: 'blocks', speed: 'standard', agents: '5', pane: 'cards', glass: 'black', spacing: 'off', agentLock: 'menu', layout: 'compact', format: 'standard' }
+export const DEFAULT_VARIANTS: VariantState = { thinking: 'blocks', speed: 'standard', agents: '5', pane: 'cards', glass: 'black', spacing: 'off', agentLock: 'menu', layout: 'compact', format: 'standard', repo: 'v2' }
 
 export type ControlDef = {
   key: keyof VariantState
@@ -27,6 +28,8 @@ export type ControlDef = {
 }
 
 export const CONTROLS: ControlDef[] = [
+  // Agent repository Variation 1 (card grid, 'v1') is hidden for now; its code stays so it can come back.
+  // Variation 2 (left pane, tabs, vertical cards) is the repository now.
   // Response format (Current / Editorial) is hidden for now; the Editorial code stays so it can come back
   {
     key: 'layout',

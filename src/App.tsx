@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import { ControlsPanel } from './components/ControlsPanel'
 import { ChatScreen, HomeScreen } from './components/Screens'
+import { Repository } from './components/Repository'
+import { RepositoryV2 } from './components/RepositoryV2'
 import { useToast } from './hooks'
-import { VariantsProvider } from './variants'
+import { VariantsProvider, useVariants } from './variants'
+import type { Agent } from './data/agents'
 
 export default function App() {
-  const [view, setView] = useState<'home' | 'chat'>('home')
+  const [view, setView] = useState<'home' | 'chat' | 'repo'>('home')
   const [question, setQuestion] = useState('')
   const [runId, setRunId] = useState(0)
   const [menuOpen, setMenuOpen] = useState(true) // open on home, collapsed once a chat starts
@@ -18,7 +21,15 @@ export default function App() {
     setMenuOpen(false) // recent chats collapse as soon as the user sends
     setView('chat')
   }
+  const [agent, setAgent] = useState<Agent | null>(null) // agent picked in the repository; shown on the new-chat screen
+  const openRepo = () => setView('repo')
+  const startWith = (a: Agent) => {
+    setAgent(a)
+    setView('home')
+    setMenuOpen(true)
+  }
   const newChat = () => {
+    setAgent(null)
     setView('home')
     setMenuOpen(true)
   }
@@ -26,8 +37,10 @@ export default function App() {
   return (
     <VariantsProvider>
     <div className="app">
-      {view === 'home' ? (
-        <HomeScreen menuOpen={menuOpen} onMenu={() => setMenuOpen(!menuOpen)} onNew={newChat} onAsk={ask} />
+      {view === 'repo' ? (
+        <RepoSwitch onNew={newChat} onRepo={openRepo} onAsk={ask} onStart={startWith} onToast={toast.show} />
+      ) : view === 'home' ? (
+        <HomeScreen menuOpen={menuOpen} onMenu={() => setMenuOpen(!menuOpen)} onNew={newChat} onAsk={ask} onRepo={openRepo} agent={agent} onClearAgent={() => setAgent(null)} />
       ) : (
         <ChatScreen
           question={question}
@@ -37,6 +50,7 @@ export default function App() {
           onNew={newChat}
           onAsk={ask}
           onToast={toast.show}
+          onRepo={openRepo}
         />
       )}
       <ControlsPanel onReplay={view === 'chat' ? () => ask(question) : undefined} />
@@ -44,4 +58,10 @@ export default function App() {
     </div>
     </VariantsProvider>
   )
+}
+
+/** picks the repository layout from the prototype settings */
+function RepoSwitch(p: { onNew: () => void; onRepo: () => void; onAsk: (q: string) => void; onStart: (a: Agent) => void; onToast: (m: string) => void }) {
+  const { variants } = useVariants()
+  return variants.repo === 'v2' ? <RepositoryV2 {...p} /> : <Repository {...p} />
 }

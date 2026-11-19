@@ -7,7 +7,7 @@ import { PlusSignIcon, Mic01Icon, File01Icon, Attachment01Icon, ArrowDown01Icon,
 
 const Hi = ({ i, size = 18 }: { i: typeof PlusSignIcon; size?: number }) => <HugeiconsIcon icon={i} size={size} strokeWidth={1.7} />
 
-export function TopBar({ onNew }: { onNew: () => void }) {
+export function TopBar({ onNew, onRepo, repo }: { onNew: () => void; onRepo?: () => void; repo?: boolean }) {
   return (
     <div className="top">
       <div className="l">
@@ -15,8 +15,17 @@ export function TopBar({ onNew }: { onNew: () => void }) {
         <div className="avatar" role="img" aria-label="Profile" />
       </div>
       <div className="dock">
-        <button className="nc" onClick={onNew}><Icon n="plus" size={16} />New Chat</button>
-        <div className="ch"><Icon n="chip" size={16} /></div>
+        {repo ? (
+          <>
+            <button className="ch" aria-label="New chat" onClick={onNew}><Icon n="plus" size={16} /><span className="lbl">New Chat</span></button>
+            <button className="nc on"><Icon n="chip" size={16} />Agent Repository</button>
+          </>
+        ) : (
+          <>
+            <button className="nc" onClick={onNew}><Icon n="plus" size={16} />New Chat</button>
+            <button className="ch" aria-label="Agent repository" onClick={onRepo}><Icon n="chip" size={16} /><span className="lbl">Agent Repository</span></button>
+          </>
+        )}
       </div>
       <div className="r">
         <div className="round"><Icon n="search" size={16} /></div>

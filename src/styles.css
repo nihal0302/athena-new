@@ -2508,3 +2508,483 @@ ul.tech li::before{content:"";position:absolute;left:2px;top:.62em;width:4px;hei
 .rz .stp .hd{padding:9px 12px}
 .rz .stp .tt b{font-size:14px}
 .rz .stp .tt small{font-size:12px}
+
+/* ===== Agent repository ===== */
+.dock .ch{cursor:pointer;color:#fff}
+.dock .ch:hover{background:rgba(255,255,255,.12)}
+.dock .nc.on{background:rgba(255,255,255,.22)}
+.repo .rp-scroll{position:absolute;left:0;right:0;top:96px;bottom:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent;z-index:2}
+.rp-col{width:min(1040px,calc(100% - 64px));margin:0 auto;padding:12px 0 72px}
+.rp-hero{text-align:center;padding:8px 0 28px}
+.rp-hero h1{font-size:32px;font-weight:500;letter-spacing:-.01em;line-height:1.2}
+.rp-hero p{margin:10px auto 0;max-width:560px;font-size:14px;line-height:1.55;color:rgba(255,255,255,.72)}
+.rp-search{display:flex;align-items:center;gap:12px;height:56px;max-width:720px;margin:24px auto 0;padding:0 20px;border-radius:99px;background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.07));border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 10px 30px -12px rgba(0,0,0,.5);color:rgba(255,255,255,.7);transition:border-color .2s,background .2s}
+.rp-search:focus-within{border-color:rgba(255,255,255,.5);background:linear-gradient(135deg,rgba(255,255,255,.2),rgba(255,255,255,.1))}
+.rp-search input{flex:1;min-width:0;background:none;border:0;outline:0;color:#fff;font:inherit;font-size:14px}
+.rp-search input::placeholder{color:rgba(255,255,255,.55)}
+.rp-search button{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;color:#fff;background:rgba(255,255,255,.14)}
+.rp-try{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;margin-top:16px;font-size:12px;color:rgba(255,255,255,.55)}
+.rp-try button{padding:6px 14px;border-radius:99px;font-size:12px;color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);transition:.2s}
+.rp-try button:hover{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.34)}
+
+.rp-sec{margin-top:36px}
+.rp-sec>header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px}
+.rp-sec h2{font-size:16px;font-weight:500;display:flex;align-items:baseline;gap:12px}
+.rp-sec h2 small{font-size:12px;font-weight:400;color:rgba(255,255,255,.55)}
+.rp-all{display:flex;align-items:center;gap:4px;font-size:12px;color:rgba(255,255,255,.75);padding:4px 0}
+.rp-all:hover{color:#fff}
+.rp-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.rp-card{display:flex;flex-direction:column;gap:12px;padding:18px;border-radius:18px;background:linear-gradient(135deg,rgba(255,255,255,.11),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px -18px rgba(0,0,0,.6);transition:transform .2s,border-color .2s,background .2s}
+.rp-card:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.3);background:linear-gradient(135deg,rgba(255,255,255,.15),rgba(255,255,255,.06))}
+.rp-card.s-locked .rp-ds,.rp-card.s-soon .rp-ds{color:rgba(255,255,255,.55)}
+.rp-ch{display:flex;align-items:center;gap:12px}
+.rp-logo{position:relative;flex:none;display:grid;place-items:center;border-radius:14px;background:#fff;color:#2f245c}
+.rp-logo.lk{opacity:.7}
+.rp-lockdot{position:absolute;right:-4px;bottom:-4px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:#0a1829;border:1px solid rgba(255,255,255,.3);color:#fff}
+.rp-nm{flex:1;min-width:0}
+.rp-nm h3{font-size:14px;font-weight:600;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rp-nm span{display:block;font-size:12px;color:rgba(255,255,255,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rp-pin{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:rgba(255,255,255,.45);transition:.2s}
+.rp-pin:hover{background:rgba(255,255,255,.12);color:#fff}
+.rp-pin.on{color:#fff;background:rgba(255,255,255,.14)}
+.rp-pin.on svg{fill:currentColor}
+.rp-bd{display:flex;gap:6px;flex-wrap:wrap}
+.rp-b{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 9px;border-radius:99px;font-size:12px;color:rgba(255,255,255,.8);background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.12)}
+.rp-b.cert{color:#9ee8c4;background:rgba(18,183,106,.14);border-color:rgba(18,183,106,.3)}
+.rp-ds{font-size:14px;line-height:1.5;color:rgba(255,255,255,.82);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:42px}
+.rp-ft{margin-top:auto;padding-top:12px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.rp-meta{display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.62);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.rp-meta svg{flex:none}
+.rp-act{flex:none;display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;border-radius:99px;font-size:12px;font-weight:500;transition:.2s;white-space:nowrap}
+.rp-act.a-available{background:#fff;color:#2f245c}
+.rp-act.a-available:hover{background:#ece8ff}
+.rp-act.a-locked,.rp-act.a-soon{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4)}
+.rp-act.a-locked:hover,.rp-act.a-soon:hover{background:rgba(255,255,255,.14)}
+.rp-act.a-requested{background:rgba(255,196,0,.14);color:#ffd35c;border:1px solid rgba(255,196,0,.35);cursor:default}
+
+.rp-minis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.rp-mini{display:flex;align-items:center;gap:12px;padding:10px 14px 10px 10px;border-radius:14px;text-align:left;color:#fff;background:linear-gradient(135deg,rgba(255,255,255,.1),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.12);transition:.2s}
+.rp-mini:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.3);background:linear-gradient(135deg,rgba(255,255,255,.14),rgba(255,255,255,.06))}
+.rp-mn{flex:1;min-width:0;display:flex;flex-direction:column}
+.rp-mn b{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rp-mn small{font-size:12px;color:rgba(255,255,255,.6)}
+
+.rp-depts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.rp-dept{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:16px;border-radius:16px;text-align:left;color:#fff;background:linear-gradient(135deg,rgba(255,255,255,.1),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.12);transition:.2s}
+.rp-dept:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.3);background:linear-gradient(135deg,rgba(255,255,255,.15),rgba(255,255,255,.06))}
+.rp-di{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:rgba(255,255,255,.12);margin-bottom:8px}
+.rp-dept b{font-size:14px;font-weight:500}
+.rp-dept small{font-size:12px;color:rgba(255,255,255,.6)}
+
+.rp-lh{flex-direction:column;align-items:flex-start!important;gap:10px}
+.rp-back{display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.75)}
+.rp-back:hover{color:#fff}
+.rp-filters{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.rp-seg{display:flex;padding:3px;border-radius:99px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)}
+.rp-seg button{height:30px;padding:0 14px;border-radius:99px;font-size:12px;color:rgba(255,255,255,.75);transition:.2s}
+.rp-seg button.on{background:#fff;color:#2f245c;font-weight:500}
+.rp-tg{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:99px;font-size:12px;color:rgba(255,255,255,.8);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);transition:.2s}
+.rp-tg.on{background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.45)}
+.rp-empty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:64px 0;color:rgba(255,255,255,.7);text-align:center}
+.rp-empty h3{font-size:16px;font-weight:500;color:#fff;margin-top:6px}
+.rp-empty p{font-size:14px;margin-bottom:12px}
+
+/* dock chip expands on hover to name the repository */
+.dock .ch{display:flex;align-items:center;justify-content:center;width:auto;min-width:64px;padding:0 20px;transition:background .25s}
+.dock .ch .lbl{max-width:0;margin-left:0;opacity:0;overflow:hidden;white-space:nowrap;font-size:12px;letter-spacing:.03px;transition:max-width .38s cubic-bezier(.2,.7,.2,1),margin-left .38s cubic-bezier(.2,.7,.2,1),opacity .25s}
+.dock .ch:hover .lbl,.dock .ch:focus-visible .lbl{max-width:130px;margin-left:8px;opacity:1}
+.dock .ch[aria-label="New chat"]{padding:0 16px;min-width:48px}
+
+/* ===== Agent repository, variation 2: floating browse pane + category tabs + vertical cards ===== */
+.rv-pane{position:absolute;left:12px;top:106px;width:317px;height:calc(100% - 106px - 33px);z-index:15;display:flex;flex-direction:column;padding:12px 16px 16px;border-radius:20px;background:rgba(5,9,16,.82);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.rv-ph{font-size:14px;font-weight:500;padding:0 6px 12px}
+.rv-ps{display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:rgba(255,255,255,.65);transition:border-color .2s}
+.rv-ps:focus-within{border-color:rgba(255,255,255,.4)}
+.rv-ps input{flex:1;min-width:0;background:none;border:0;outline:0;color:#fff;font:inherit;font-size:14px}
+.rv-ps input::placeholder{color:rgba(255,255,255,.5)}
+.rv-ps button{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff}
+.rv-pl{flex:1;min-height:0;overflow-y:auto;margin-top:12px;padding-right:2px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
+.rv-gt{font-size:12px;color:rgba(255,255,255,.5);padding:16px 8px 6px;letter-spacing:.02em}
+.rv-i{width:100%;display:flex;align-items:center;gap:10px;height:38px;padding:0 10px;border-radius:12px;text-align:left;color:rgba(255,255,255,.85);font-size:14px;transition:background .2s,color .2s}
+.rv-i span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rv-i em{font-style:normal;font-size:12px;color:rgba(255,255,255,.5)}
+.rv-i:hover{background:rgba(255,255,255,.08);color:#fff}
+.rv-i.on{background:rgba(255,255,255,.16);color:#fff;font-weight:500}
+.rv-i.on em{color:rgba(255,255,255,.8)}
+
+.rv-scroll{position:absolute;left:341px;right:0;top:96px;bottom:0;overflow-y:auto;z-index:2;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
+.rv-main{padding:16px 56px 96px 24px;max-width:1140px}
+.rv-h h1{font-size:26px;font-weight:500;letter-spacing:-.01em;display:flex;align-items:baseline;gap:14px}
+.rv-h h1 small{font-size:12px;font-weight:400;color:rgba(255,255,255,.55);letter-spacing:0}
+.rv-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px}
+
+
+/* v2: status tabs + text-first vertical cards */
+.rv-tabs{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:24px 0 40px;border-bottom:1px solid rgba(255,255,255,.12)}
+.rv-tl{display:flex;gap:28px;overflow-x:auto;scrollbar-width:none}
+.rv-tl::-webkit-scrollbar{display:none}
+.rv-tl button{position:relative;flex:none;display:inline-flex;align-items:center;gap:8px;padding:0 0 12px;font-size:14px;color:rgba(255,255,255,.6);transition:color .2s}
+.rv-tl button em{font-style:normal;font-size:12px;padding:1px 7px;border-radius:99px;background:rgba(255,255,255,.09);color:rgba(255,255,255,.7)}
+.rv-tl button:hover{color:#fff}
+.rv-tl button.on{color:#fff;font-weight:500}
+.rv-tl button.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;border-radius:2px;background:#fff}
+.rv-tl button.on em{background:rgba(255,255,255,.2);color:#fff}
+
+.vc{container-type:inline-size;display:flex;flex-direction:column;gap:14px;padding:18px;border-radius:20px;background:linear-gradient(135deg,rgba(255,255,255,.1),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.13);transition:transform .2s,border-color .2s,background .2s}
+.vc:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.3);background:linear-gradient(135deg,rgba(255,255,255,.14),rgba(255,255,255,.06))}
+.vc-top{display:flex;align-items:center;gap:14px}
+.vc-ic{flex:none;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:#fff;box-shadow:0 6px 16px -8px rgba(0,0,0,.5)}
+.vc.s-locked .vc-ic,.vc.s-soon .vc-ic{opacity:.65}
+.vc-nm{flex:1;min-width:0}
+.vc-nm h3{display:flex;align-items:flex-start;gap:6px;font-size:14px;font-weight:600;line-height:1.35;min-width:0}
+.vc-nm h3>span{min-width:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.vc-cert{flex:none;display:grid;place-items:center;color:#5fe0a6;margin-top:2px}
+.vc-own{display:block;font-size:12px;color:rgba(255,255,255,.58);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vc-pin{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:rgba(255,255,255,.4);transition:.2s}
+.vc-pin:hover{background:rgba(255,255,255,.12);color:#fff}
+.vc-pin.on{color:#fff}
+.vc-pin.on svg{fill:currentColor}
+.vc-ds{font-size:14px;line-height:1.5;color:rgba(255,255,255,.82);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:42px;margin-top:4px}
+.vc.s-locked .vc-ds,.vc.s-soon .vc-ds{color:rgba(255,255,255,.55)}
+.vc-state{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.65);white-space:nowrap}
+.vc-state i{width:6px;height:6px;border-radius:50%;background:#2fd58a}
+.vc-state.s-available{color:#9ee8c4}
+.vc-state.s-requested{color:#ffd35c}
+
+/* pin icon (Figma tilted push-pin): quiet when unpinned, solid when pinned */
+.vc-pin,.rp-pin{color:rgba(255,255,255,.38)}
+.vc-pin:hover,.rp-pin:hover{color:#fff}
+.vc-pin.on,.rp-pin.on{color:#fff}
+.vc-pin.on svg,.rp-pin.on svg{fill:currentColor}
+.pinic{display:block}
+.vc-lk{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:#ffc659;background:rgba(255,184,77,.14);border:1px solid rgba(255,184,77,.4)}
+
+/* card footer: quiet meta by default, the action appears on hover */
+.vc{cursor:default}
+.vc:hover{box-shadow:0 18px 40px -20px rgba(0,0,0,.65)}
+
+/* new chat with a chosen agent */
+.hero-ag{display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 6px 0 12px;margin-bottom:18px;border-radius:99px;font-size:12px;color:rgba(255,255,255,.85);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)}
+.hero-ag button{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;color:#fff;background:rgba(255,255,255,.14)}
+.hero-ag button:hover{background:rgba(255,255,255,.28)}
+
+/* v2 card footer: rating + monthly users always visible, Start chat on the right (appears on hover) */
+.vc-ft{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto;padding-top:6px;min-height:36px}
+.vc-stats{display:flex;align-items:center;gap:12px;min-width:0;font-size:12px;color:rgba(255,255,255,.7)}
+.vc-rate{position:relative}
+.vc-rv{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;margin:-5px -8px;border-radius:99px;cursor:pointer;transition:background .2s,color .2s}
+.vc-rv svg{fill:rgba(255,255,255,.18);stroke:#f5c04a;transition:fill .2s}
+.vc-rate:hover .vc-rv,.vc-rate:focus-within .vc-rv,.vc-rate:focus .vc-rv{background:rgba(255,255,255,.12);color:#fff}
+.vc-rate.rated .vc-rv svg{fill:#f5c04a}
+.vc-pop{position:absolute;left:-14px;bottom:calc(100% + 10px);z-index:6;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 14px 8px;border-radius:14px;white-space:nowrap;background:rgba(20,22,34,.96);border:1px solid rgba(255,255,255,.16);box-shadow:0 14px 30px -10px rgba(0,0,0,.7);opacity:0;transform:translateY(4px);pointer-events:none;transition:opacity .18s ease,transform .18s ease}
+.vc-pop::after{content:"";position:absolute;left:24px;bottom:-5px;width:10px;height:10px;background:rgba(20,22,34,.96);border-right:1px solid rgba(255,255,255,.16);border-bottom:1px solid rgba(255,255,255,.16);transform:rotate(45deg)}
+.vc-rate:hover .vc-pop,.vc-rate:focus-within .vc-pop,.vc-rate:focus .vc-pop{opacity:1;transform:none;pointer-events:auto}
+.vc-pop small{font-size:12px;color:rgba(255,255,255,.7)}
+.vc-pop>div{display:flex;flex-direction:row-reverse;gap:2px}
+.vc-pop button{width:28px;height:28px;display:grid;place-items:center;border-radius:8px;color:rgba(255,255,255,.35);transition:color .15s,transform .15s}
+.vc-pop button svg{fill:transparent;stroke:currentColor}
+.vc-pop button.on,.vc-pop button:hover,.vc-pop button:hover~button{color:#f5c04a}
+.vc-pop button.on svg,.vc-pop button:hover svg,.vc-pop button:hover~button svg{fill:#f5c04a}
+.vc-pop button:hover{transform:scale(1.15)}
+.vc-users,.vc-soon{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.vc-users em{font-style:normal;color:rgba(255,255,255,.48)}
+.vc-cta{flex:none;height:34px;padding:0 14px;margin-left:auto;font-size:12px;opacity:0;transform:translateX(8px);pointer-events:none;transition:opacity .22s ease,transform .22s ease,background .2s}
+.vc:hover .vc-cta,.vc:focus-within .vc-cta,.vc-cta.keep{opacity:1;transform:none;pointer-events:auto}
+
+/* sort menu */
+.rv-sort{position:relative;display:flex;align-items:center;gap:10px;margin:0 0 8px;font-size:12px;color:rgba(255,255,255,.6)}
+.rv-sb{display:inline-flex;align-items:center;gap:10px;height:36px;padding:0 14px 0 16px;border-radius:99px;font-size:12px;color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);transition:background .2s,border-color .2s}
+.rv-sb:hover,.rv-sb.open{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.34)}
+.rv-sb svg{transition:transform .2s}
+.rv-sb.open svg{transform:rotate(180deg)}
+.rv-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:30;min-width:168px;padding:6px;border-radius:16px;background:rgba(20,22,34,.94);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 18px 40px -12px rgba(0,0,0,.7);animation:rvm .16s ease}
+@keyframes rvm{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.rv-menu button{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;height:38px;padding:0 12px;border-radius:10px;font-size:14px;color:rgba(255,255,255,.85);text-align:left;transition:background .15s}
+.rv-menu button:hover{background:rgba(255,255,255,.1);color:#fff}
+.rv-menu button.on{color:#fff;font-weight:500;background:rgba(255,255,255,.08)}
+
+/* v2 card refinements: pin contrast, white stars (gold only once rated), centred tooltips, verified badge */
+.vc-pin{color:rgba(255,255,255,.2)}
+.vc-pin:hover{color:rgba(255,255,255,.7)}
+.vc-pin.on{color:#fff}
+.vc-ic{position:relative}
+.vc-vf{position:absolute;left:-5px;bottom:-5px;width:18px;height:18px;display:grid;place-items:center;line-height:0}
+.vc.s-locked .vc-vf,.vc.s-soon .vc-vf{filter:saturate(.6) brightness(.9)}
+
+.vc-stats{gap:16px;font-size:14px;color:rgba(255,255,255,.88)}
+.vc-rv{gap:6px}
+.vc-rv svg{fill:none;stroke:rgba(255,255,255,.9)}
+.vc-rate.rated .vc-rv svg{fill:#f5c04a;stroke:#f5c04a}
+.vc-users{position:relative;gap:6px;padding:5px 8px;margin:-5px -8px;border-radius:99px;cursor:default;transition:background .2s}
+.vc-users:hover,.vc-users:focus{background:rgba(255,255,255,.12);outline:0}
+.vc-users svg{opacity:.9}
+.vc-users em{font-size:13px}
+
+/* tooltips centred over what they describe */
+.vc-pop{left:50%;transform:translate(-50%,4px)}
+.vc-pop::after{left:calc(50% - 5px)}
+.vc-rate:hover .vc-pop,.vc-rate:focus-within .vc-pop,.vc-rate:focus .vc-pop,.vc-users:hover .vc-pop,.vc-users:focus .vc-pop{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.vc-pop.tip{padding:8px 12px;font-size:12px;color:#fff;pointer-events:none!important}
+.vc-pop button{color:rgba(255,255,255,.4)}
+.vc-pop button svg{fill:transparent;stroke:currentColor}
+.vc-pop button.on{color:#f5c04a}
+.vc-pop button.on svg{fill:#f5c04a}
+.vc-pop button:hover,.vc-pop button:hover~button{color:#fff}
+.vc-pop button:hover svg,.vc-pop button:hover~button svg{fill:#fff}
+.vc-pop button.on:hover,.vc-pop button.on:hover~button{color:#f5c04a}
+.vc-pop button.on:hover svg,.vc-pop button.on:hover~button svg{fill:#f5c04a}
+
+@container (max-width:268px){.vc-cta .lg{display:none}}
+@container (max-width:268px){.vc-cta.keep svg{display:none}.vc-cta{padding:0 11px}.vc-stats{gap:12px}}
+
+/* v2: search lives in the main content, prominent */
+.rv-h{display:flex;align-items:center;justify-content:space-between;gap:24px}
+.rv-main .rv-search{margin:0;flex:0 1 420px;min-width:260px;height:48px;padding:0 18px}
+
+/* v2: collapsible left pane (same behaviour as Recent Chats) */
+.rv-pane{transition:width .55s cubic-bezier(.22,.8,.24,1),height .55s cubic-bezier(.22,.8,.24,1),padding .55s cubic-bezier(.22,.8,.24,1),border-radius .55s cubic-bezier(.22,.8,.24,1)}
+.rv-pane.collapsed{width:60px;height:60px;padding:12px;border-radius:18px}
+.rv-ph{display:flex;align-items:center;height:36px;padding:0 0 0 2px;margin-bottom:12px}
+.rv-pane.collapsed .rv-ph{cursor:pointer;margin:0;padding:0}
+.rv-pic{flex:none;width:36px;height:36px;display:grid;place-items:center;border-radius:10px;color:#fff}
+.rv-ptx{flex:1;min-width:0;margin-left:8px;font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;transition:opacity .3s ease}
+.rv-pane.collapsed .rv-ptx{opacity:0;flex:0;width:0;margin:0}
+.rv-pcol{flex:none;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;color:#fff;opacity:.85;transition:background .15s,opacity .25s ease .15s}
+.rv-pcol:hover{background:rgba(255,255,255,.12);opacity:1}
+.rv-pane.collapsed .rv-pcol{opacity:0;pointer-events:none;transition-delay:0s;width:0}
+.rv-pl{opacity:1;transform:none;transition:opacity .35s ease .22s,transform .5s cubic-bezier(.22,.8,.24,1) .18s}
+.rv-pane.collapsed .rv-pl{opacity:0;transform:translateY(10px);pointer-events:none;transition-delay:0s;transition-duration:.2s}
+.rv-scroll{transition:left .55s cubic-bezier(.22,.8,.24,1)}
+.rv.pane-closed .rv-scroll{left:0}
+.rv-main{margin:0 auto}
+.rv.pane-closed .rv-main{max-width:1280px;padding:16px 88px 96px}
+
+.rv-more{width:100%;display:flex;align-items:center;justify-content:center;gap:6px;height:34px;padding:0 10px;border-radius:12px;font-size:12px;color:rgba(255,255,255,.7);transition:background .2s,color .2s}
+.rv-more:hover{background:rgba(255,255,255,.08);color:#fff}
+.rv-more svg{transition:transform .2s}
+.rv-more[aria-expanded=true] svg{transform:rotate(180deg)}
+
+/* filters (DES-04: filter by language or status; status is the tab row) */
+.rv-fl{position:relative;display:flex;align-items:center;gap:10px;margin:0 0 8px}
+.rv-fb{padding:0 16px}
+.rv-fb em{font-style:normal;font-size:11px;min-width:18px;height:18px;display:grid;place-items:center;border-radius:99px;background:#fff;color:#2f245c}
+.rv-fb.act{border-color:rgba(255,255,255,.4)}
+.rv-chip{display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 6px 0 12px;border-radius:99px;font-size:12px;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22)}
+.rv-chip button{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;color:#fff;background:rgba(255,255,255,.14)}
+.rv-chip button:hover{background:rgba(255,255,255,.28)}
+.rv-fp{min-width:260px;padding:14px}
+.rv-fh{font-size:12px;color:rgba(255,255,255,.55);margin-bottom:10px}
+.rv-fo{display:flex;flex-wrap:wrap;gap:8px}
+.rv-fp .rv-fo button{width:auto;height:34px;padding:0 14px;border-radius:99px;font-size:13px;color:rgba(255,255,255,.85);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);justify-content:center}
+.rv-fp .rv-fo button:hover{background:rgba(255,255,255,.14)}
+.rv-fp .rv-fo button.on{background:#fff;color:#2f245c;border-color:#fff;font-weight:500}
+.rv-ff{display:flex;justify-content:flex-end;margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.1)}
+.rv-fp .rv-ff button{width:auto;height:30px;padding:0 10px;font-size:12px;color:rgba(255,255,255,.75);background:none}
+.rv-fp .rv-ff button:disabled{opacity:.4;pointer-events:none}
+
+/* build route in the card footer */
+.vc-route{position:relative;display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:99px;font-size:12px;white-space:nowrap;color:rgba(255,255,255,.8);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);cursor:default;transition:background .2s}
+.vc-route:hover,.vc-route:focus{background:rgba(255,255,255,.14);outline:0}
+.vc-route:hover .vc-pop,.vc-route:focus .vc-pop{opacity:1;transform:translate(-50%,0)}
+
+/* ===== department hub (DES-02) ===== */
+.vc{cursor:pointer}
+.vc-nm h3>span{cursor:pointer}
+.rv-bc{display:flex;align-items:center;gap:8px;margin:0 0 14px;font-size:12px;color:rgba(255,255,255,.55)}
+.rv-bc button{color:rgba(255,255,255,.75);transition:color .2s}
+.rv-bc button:hover{color:#fff}
+.rv-bc b{font-weight:500;color:#fff}
+.rv-hubh{align-items:flex-start}
+.rv-hm{margin-top:6px;font-size:14px;color:rgba(255,255,255,.65)}
+.rv-hm i{font-style:normal;margin:0 10px;color:rgba(255,255,255,.35)}
+.rv-ask{margin:24px 0 8px;padding:22px 24px;border-radius:20px;background:linear-gradient(135deg,rgba(255,255,255,.11),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.14)}
+.rv-ask-h{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
+.rv-ask-h h2{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:500}
+.rv-ask-h p{margin-top:6px;max-width:520px;font-size:14px;line-height:1.5;color:rgba(255,255,255,.65)}
+.rv-sug{flex:none;display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:99px;font-size:12px;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.35);transition:background .2s}
+.rv-sug:hover{background:rgba(255,255,255,.14)}
+.rv-askf{display:flex;align-items:center;gap:10px;height:52px;margin-top:18px;padding:0 8px 0 20px;border-radius:99px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);transition:border-color .2s}
+.rv-askf:focus-within{border-color:rgba(255,255,255,.5)}
+.rv-askf input{flex:1;min-width:0;background:none;border:0;outline:0;color:#fff;font:inherit;font-size:14px}
+.rv-askf input::placeholder{color:rgba(255,255,255,.55)}
+.rv-askf button{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#2f245c;transition:opacity .2s}
+.rv-askf button:disabled{opacity:.4}
+.rv-askp{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.rv-askp button{padding:7px 14px;border-radius:99px;font-size:12px;color:rgba(255,255,255,.88);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);text-align:left;transition:background .2s,border-color .2s}
+.rv-askp button:hover{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.34)}
+
+/* ===== agent detail drawer (DES-06) ===== */
+.rv-scrim{position:absolute;inset:0;z-index:38;background:rgba(2,6,14,.45)}
+.rv-dr{position:absolute;right:12px;top:12px;bottom:12px;width:480px;max-width:calc(100% - 24px);z-index:40;display:flex;flex-direction:column;border-radius:24px;background:rgba(12,16,28,.96);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 30px 60px -20px rgba(0,0,0,.7);animation:drIn .38s cubic-bezier(.22,.8,.24,1) both}
+@keyframes drIn{from{transform:translateX(110%)}to{transform:none}}
+.rv-dh{display:flex;align-items:center;gap:14px;padding:22px 20px 18px 24px;border-bottom:1px solid rgba(255,255,255,.1)}
+.rv-dlogo{flex:none;width:56px;height:56px;border-radius:16px;display:grid;place-items:center;background:#fff}
+.rv-dt{flex:1;min-width:0}
+.rv-dt h2{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:600;line-height:1.3}
+.rv-dt h2 i{display:grid;place-items:center;line-height:0}
+.rv-dt span{display:block;margin-top:2px;font-size:12px;color:rgba(255,255,255,.6)}
+.rv-dbtn{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:rgba(255,255,255,.55);border:1px solid transparent;transition:.2s}
+.rv-dbtn:hover{background:rgba(255,255,255,.12);color:#fff}
+.rv-dbtn.on{color:#fff}
+.rv-db{flex:1;min-height:0;overflow-y:auto;padding:20px 24px 24px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
+.rv-db section{margin-top:24px}
+.rv-db h3{font-size:12px;font-weight:500;color:rgba(255,255,255,.5);margin-bottom:10px;letter-spacing:.02em}
+.rv-db p{font-size:14px;line-height:1.6;color:rgba(255,255,255,.85)}
+.rv-db .rv-dm{color:rgba(255,255,255,.55)}
+.rv-dst{display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 12px;border-radius:99px;font-size:12px;color:rgba(255,255,255,.85);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14)}
+.rv-dst i{width:7px;height:7px;border-radius:50%;background:#2fd58a}
+.rv-dst.s-available{color:#9ee8c4}
+.rv-dst.s-locked{color:#ffc659;background:rgba(255,184,77,.12);border-color:rgba(255,184,77,.4)}
+.rv-dst.s-requested{color:#ffd35c}
+.rv-db section:first-of-type{margin-top:18px}
+.rv-dg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.rv-dg>div{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)}
+.rv-dg small{display:block;font-size:12px;color:rgba(255,255,255,.5)}
+.rv-dg b{display:block;margin-top:2px;font-size:14px;font-weight:500}
+.rv-dg em{display:block;font-style:normal;margin-top:2px;font-size:12px;color:rgba(255,255,255,.55)}
+.rv-dl,.rv-ds{list-style:none;display:flex;flex-direction:column;gap:10px}
+.rv-dl li,.rv-ds li{display:flex;align-items:flex-start;gap:10px;font-size:14px;line-height:1.5;color:rgba(255,255,255,.85)}
+.rv-dl li svg{flex:none;margin-top:3px;color:#5fe0a6}
+.rv-ds li svg{flex:none;margin-top:3px;color:rgba(255,255,255,.55)}
+.rv-dp{display:flex;flex-direction:column;gap:8px}
+.rv-dp button{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:14px;font-size:14px;text-align:left;color:#fff;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);transition:background .2s,border-color .2s}
+.rv-dp button:hover:not(:disabled){background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.3)}
+.rv-dp button:disabled{color:rgba(255,255,255,.5);cursor:not-allowed}
+.rv-dv{list-style:none;display:flex;flex-direction:column}
+.rv-dv li{display:grid;grid-template-columns:48px 1fr auto;gap:12px;align-items:baseline;padding:10px 0;border-top:1px solid rgba(255,255,255,.08);font-size:14px}
+.rv-dv li:first-child{border-top:0}
+.rv-dv b{font-weight:500}
+.rv-dv span{color:rgba(255,255,255,.75)}
+.rv-dv time{font-size:12px;color:rgba(255,255,255,.5)}
+.rv-df{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)}
+.rv-dscore{display:flex;align-items:baseline;gap:8px}
+.rv-dscore svg{align-self:center;color:#fff}
+.rv-dscore b{font-size:22px;font-weight:600}
+.rv-dscore small{font-size:12px;color:rgba(255,255,255,.55)}
+.rv-dvotes{display:flex;gap:18px;font-size:14px;color:rgba(255,255,255,.85)}
+.rv-dvotes span{display:inline-flex;align-items:center;gap:6px}
+.rv-dfoot{padding:16px 24px 20px;border-top:1px solid rgba(255,255,255,.1)}
+.rv-dfoot .rp-act{width:100%;justify-content:center;height:46px;font-size:14px}
+
+/* hub: input and Suggest a new agent side by side */
+.rv-askrow{display:flex;align-items:center;gap:12px;margin-top:18px}
+.rv-askrow .rv-askf{flex:1;margin-top:0}
+.rv-askrow .rv-sug{height:52px;padding:0 20px;font-size:13px}
+.rv-ask-h{display:block}
+
+/* department prompt box reuses the new-chat composer look */
+.rv-composer{position:static;transform:none;width:auto;flex:1;min-width:0;bottom:auto}
+.rv-askrow{align-items:center}
+.rv-composer .cbox textarea{min-height:36px;height:36px}
+.rv-askrow .rv-sug{align-self:center}
+
+/* search and filters share the tab row; filters is an icon button */
+.rv-tabs{align-items:center}
+.rv-tools{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.rv-tools .rv-search{margin:0;flex:none;width:300px;min-width:0;height:40px;padding:0 14px;gap:10px}
+.rv-tools .rv-search input{font-size:13px}
+.rv-tools .rv-fl{margin:0}
+.rv-fb{position:relative;width:40px;height:40px;padding:0;justify-content:center}
+.rv-fb em{position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;font-size:10px}
+.rv-tl{min-width:0;flex:1 1 auto}
+.rv-tools{flex:0 1 auto;min-width:0}
+.rv-tools .rv-search{flex:0 1 260px;width:auto;min-width:170px}
+.rv-tools .rv-search{flex:0 1 420px;width:auto;min-width:260px}
+.rv-tl{flex:0 1 auto;min-width:0}
+.rv-tools{flex:none}
+.rv-tools .rv-search{flex:none;width:420px;min-width:0}
+.rv-tl{flex:0 0 auto}
+.rv-tools{flex:0 1 auto;min-width:0}
+.rv-tools .rv-search{flex:0 1 420px;width:auto;min-width:300px}
+/* tab underline sits on the divider line */
+.rv-tabs{align-items:flex-end;padding-bottom:0}
+.rv-tl button{padding-bottom:14px}
+.rv-tools{margin-bottom:4px}
+.rv-tl button.on::after{bottom:-1px;height:2px}
+
+/* drawer footer: rating on the left, action on the right, always visible */
+.rv-dfoot{display:flex;align-items:center;gap:16px}
+.rv-dfoot .rp-act{flex:1;width:auto}
+.rv-dfoot .vc-rate{flex:none;font-size:15px;color:rgba(255,255,255,.9)}
+.rv-dfoot .vc-rv{gap:8px;padding:8px 12px;margin:-8px -12px}
+.rv-dfoot .vc-pop{left:-12px;transform:translateY(4px)}
+.rv-dfoot .vc-pop::after{left:30px}
+.rv-dfoot .vc-rate:hover .vc-pop,.rv-dfoot .vc-rate:focus-within .vc-pop,.rv-dfoot .vc-rate:focus .vc-pop{transform:none}
+/* drawer footer: roomier rating with a divider before the action */
+.rv-dfoot{gap:24px;padding:18px 24px 22px}
+.rv-dfoot .vc-rate{align-self:stretch;display:flex;align-items:center;padding:0 24px 0 4px;border-right:1px solid rgba(255,255,255,.16);font-size:16px}
+.rv-dfoot .vc-rv{gap:10px;padding:10px 14px;margin:0 0 0 -10px}
+.rv-dfoot .vc-rv svg{width:22px;height:22px}
+.rv-dfoot .vc-pop{left:-10px}
+.rv-dfoot .vc-pop::after{left:34px}
+
+/* info icon next to a detail label, tooltip on hover */
+.rv-dg small{display:flex;align-items:center;gap:6px}
+.rv-info{position:relative;display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;color:rgba(255,255,255,.55);cursor:default;transition:color .2s,background .2s}
+.rv-info:hover,.rv-info:focus{color:#fff;background:rgba(255,255,255,.12);outline:0}
+.rv-info:hover .vc-pop,.rv-info:focus .vc-pop{opacity:1;transform:translate(-50%,0)}
+
+.rv-dpt{display:flex;align-items:center;gap:12px;min-width:0}
+.rv-dpt svg{flex:none;color:rgba(255,255,255,.6)}
+.rv-dp button:hover:not(:disabled) .rv-dpt svg{color:#fff}
+/* rating popover: invisible bridge so the cursor can travel from the star into the popover without it closing */
+.vc-pop:not(.tip)::before{content:"";position:absolute;left:-10px;right:-10px;top:100%;height:18px}
+.vc-rate .vc-pop{transition:opacity .18s ease .1s,transform .18s ease .1s}
+.vc-rate:hover .vc-pop,.vc-rate:focus-within .vc-pop,.vc-rate:focus .vc-pop{transition-delay:0s}
+
+/* hub: owner on the title row, far right */
+.rv-hubh{align-items:center}
+.rv-hubh .rv-hm{margin:0;text-align:right;white-space:nowrap}
+/* hub: Suggest a new agent matches the prompt box height */
+.rv-askrow{align-items:stretch}
+.rv-askrow .rv-sug{align-self:stretch;height:auto}
+/* hub: title and owner share a bottom line; Ask box sits closer to the title row */
+.rv-hubh{align-items:baseline}
+.rv-ask{margin-top:12px}
+.rv-ask{margin-bottom:24px}
+.rv-ask{margin-bottom:40px}
+
+/* coming soon marker, sits where the lock sits on locked cards */
+.vc-cs{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:#7cc4ff;background:rgba(80,160,255,.14);border:1px solid rgba(80,160,255,.4)}
+
+/* Ask container: experiment (solid, no glass). Remove the rv-ask--solid class to get the glass version back; see design-backups/ask-box-glassmorphic.md */
+.rv-ask--solid{background:#0d1727;border:1px solid rgba(255,255,255,.08);box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.rv-ask--solid .rv-ask-h h2{color:#fff}
+
+/* Ask row without a container or title */
+.rv-askrow--bare{margin:20px 0 40px}
+
+
+/* Ask row: shorter input box and button */
+.rv-composer .cbox{padding:5px 6px 5px 20px;align-items:center}
+.rv-composer .cbox textarea{padding:6px 4px}
+.rv-askrow--bare{margin:20px 0 28px}
+
+
+
+/* Tabs: original text tabs with count badges; the active tab keeps its own underline, no long divider line */
+.rv-tabs{border-bottom:0}
+.rv-tl button.on::after{display:block;bottom:0}
+.rv-tl button.on{color:#fff;font-weight:500}
+.rv-tl button.on em{background:rgba(255,255,255,.2);color:#fff}
+/* keep the layout still when the number of cards changes (the scrollbar appears and disappears otherwise) */
+.rv-scroll{scrollbar-gutter:stable}
+.rv-tl button em{min-width:26px;text-align:center}
+.rv-tl button{font-weight:500}
+.rv-tools{margin-left:auto}
+
+/* Ask container back (solid, no title): wraps the prompt box and Suggest a new agent */
+.rv-ask--tight{padding:16px 20px;margin:20px 0 28px}
+.rv-ask--tight .rv-askrow{margin:0}
+/* Ask container, subtle: no outline, just a faint tint that blends into the background */
+.rv-ask--solid{background:rgba(255,255,255,.035);border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.rv-ask--solid{background:rgba(0,0,0,.22)}
+
+/* content scrolls behind the top navigation and is cut at the very top edge of the screen;
+   the right side is kept clear of the search and settings buttons */
+.rv-scroll{top:0}
+.rv-main{padding:112px 160px 96px 24px}
+.rv.pane-closed .rv-main{padding:112px 160px 96px}
+/* a little wider: the content now ends closer to the search and settings buttons */
+.rv-main{padding-right:136px}
+.rv.pane-closed .rv-main{padding-left:136px;padding-right:136px}
