@@ -131,11 +131,11 @@ export function KpiIcon({ k, size = 20 }: { k: 'steps' | 'agents' | 'sources' | 
 }
 
 /** Solid reasoning mark: two nodes joined by a path (sun node + white node). Sits on the dark gradient badge. */
-export function ReasoningIcon({ size = 22 }: { size?: number }) {
+export function ReasoningIcon({ size = 22, white = false }: { size?: number; white?: boolean }) {
   return (
     <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true">
-      <path d="M7.2 7.2H15a3.4 3.4 0 010 6.8H9a3.4 3.4 0 000 6.8h6.8" fill="none" stroke="#fff" strokeOpacity=".55" strokeWidth="2.2" strokeLinecap="round" />
-      <circle cx="6.2" cy="6.8" r="3.6" fill="#FFD059" />
+      <path d="M7.2 7.2H15a3.4 3.4 0 010 6.8H9a3.4 3.4 0 000 6.8h6.8" fill="none" stroke="#fff" strokeOpacity={white ? 1 : 0.55} strokeWidth="2.2" strokeLinecap="round" />
+      <circle cx="6.2" cy="6.8" r="3.6" fill={white ? '#fff' : '#FFD059'} />
       <circle cx="17.8" cy="19.8" r="3.2" fill="#fff" />
     </svg>
   )

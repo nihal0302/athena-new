@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { pal } from './palette'
 import { techStages, techStatus, type TechStage } from '../data/trace'
 import { KpiIcon, ReasoningIcon, SpokeLoader } from './AgentIcon'
@@ -8,7 +8,7 @@ import { fmt, type RunState } from '../hooks'
 import { AgentIcon } from './AgentIcon'
 import { Icon } from './Icon'
 import { wrapWords } from './Thinking'
-import { useFollow } from './useFollow'
+import { useAutoScroll, useFollow } from './useFollow'
 
 /* ------------------------------------------------------------------ */
 /*  Reasoning pane, variation 2: "Story".                              */
@@ -21,7 +21,7 @@ import { useFollow } from './useFollow'
 const clamp = (v: number) => Math.max(0, Math.min(1, v))
 
 /** Text whose words arrive one by one when it first appears. */
-function Streamed({ text, live }: { text: string; live: boolean }) {
+function Streamed({ text, live, children }: { text: string; live: boolean; children?: ReactNode }) {
   const ref = useRef<HTMLSpanElement>(null)
   useLayoutEffect(() => {
     const el = ref.current
@@ -34,7 +34,81 @@ function Streamed({ text, live }: { text: string; live: boolean }) {
     }, 46)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-  return <span ref={ref}>{text}</span>
+  return <span ref={ref}>{children ?? text}</span>
+}
+
+/** Flow shows one thing at a time, so the stage texts that talk about parallel work are worded in sequence. */
+function flowWords(ts: TechStage): TechStage {
+  if (ts.id === 'scope')
+    return {
+      ...ts,
+      note: '3 launch cycles · 3 branches',
+      lines: ts.lines.map((l) =>
+        l.startsWith('No branch depends') ? 'The branches run one after another, in order, so each result can be checked before the next one starts.'
+        : l.startsWith('Estimated critical path') ? 'Estimated time for the three branches together is about 21 s.'
+        : l
+      ),
+    }
+  if (ts.id === 'execute')
+    return {
+      ...ts,
+      title: 'Run the agents',
+      live: 'Running the agents one by one',
+      lines: ts.lines.map((l) => (l.startsWith('Dispatched') ? 'Runs the three agents one after another; each completes its own retrieval loop and reports back before the next one starts.' : l)),
+    }
+  return ts
+}
+
+/** Flow keeps two or three lines per stage (the ones that say the most), so the quiet visual at the end of the stage gets the eye. */
+const FLOW_KEEP: Record<string, number[]> = {
+  understand: [1, 2],
+  scope: [0, 1],
+  authorise: [0, 2],
+  execute: [],
+  merge: [0],
+  validate: [0],
+  ground: [0],
+  compose: [0],
+}
+function flowTs(ts: TechStage): TechStage {
+  const w = flowWords(ts)
+  const keep = FLOW_KEEP[w.id]
+  return keep ? { ...w, lines: keep.map((i) => w.lines[i]).filter(Boolean) } : w
+}
+
+/** One line at a time: the new line rolls up from below while the old one rolls out the top, then it holds still until the next arrives. */
+function Ticker({ text }: { text: string }) {
+  const [pair, setPair] = useState<{ cur: string; prev: string | null }>({ cur: text, prev: null })
+  useEffect(() => {
+    setPair((p) => (p.cur === text ? p : { cur: text, prev: p.cur }))
+  }, [text])
+  return (
+    <span className="fl-tick">
+      {pair.prev && <span key={'o' + pair.prev} className="out">{pair.prev}</span>}
+      <span key={'i' + pair.cur} className="in">{pair.cur}</span>
+    </span>
+  )
+}
+
+/** A clean loader: a faint track with a short arc that turns round it, and a small dot in the middle that breathes. */
+function Spinner({ r = 9, dot = true }: { r?: number; dot?: boolean }) {
+  return (
+    <svg className="fl-spin" viewBox="0 0 24 24" aria-hidden="true">
+      <circle className="fl-trk" cx="12" cy="12" r={r} />
+      <circle className="fl-arc" cx="12" cy="12" r={r} pathLength={100} />
+      {dot && <circle className="fl-dot" cx="12" cy="12" r="2.6" />}
+    </svg>
+  )
+}
+
+/** The node on the timeline. While the stage runs it shows the loader; when the stage is done the loader gives way to a
+ *  green check that lands with a small pop. */
+function FlowNode({ done }: { done: boolean }) {
+  return (
+    <span className={'fl-n' + (done ? ' done' : '')}>
+      {done ? <Icon n="check" size={12} /> : <Spinner />}
+    </span>
+  )
 }
 
 export function TracePanel({
@@ -44,6 +118,7 @@ export function TracePanel({
   onClose,
   onWide,
   ai = false,
+  flow = false,
   bento = false,
   dark = false,
 }: {
@@ -53,6 +128,7 @@ export function TracePanel({
   onClose: () => void
   onWide: () => void
   ai?: boolean // the livelier "Aurora" look: glow, orb, gradients, glass cards
+  flow?: boolean // "Flow": Aurora plus an agents strip, ringed check nodes joined by a line that draws down, and highlighted key terms
   bento?: boolean // widget tiles: frosted glass tiles with solid white cards inside, no panel behind them
   dark?: boolean // Bento in black glass instead of white glass
 }) {
@@ -65,6 +141,8 @@ export function TracePanel({
   const agStage = sc.agents.length ? sc.agentStep : sc.steps.findIndex((x) => x.id === 'agents' && x.agents && x.agents.length)
   const agList: AgentDef[] = sc.agents.length ? sc.agents : agStage >= 0 ? (sc.steps[agStage].agents as AgentDef[]) : []
   const agStart = (ag: AgentDef) => (sc.agents.length ? sc.gs : agStage >= 0 ? sc.t0[agStage] : 0) + ag.start
+  const aur = ai || flow
+  const txt = (t: string) => <Streamed text={t} live={live} />
 
   // numbered sources, in the order the agents brought them back
   const order: { name: string; at: number }[] = []
@@ -100,8 +178,19 @@ export function TracePanel({
     window.setTimeout(() => setFlash((f) => (f === name ? null : f)), 1800)
   }
 
-  const say = (text: string) => <p key={text}><Streamed text={text} live={live} /></p>
-  const cite = (a: AgentDef) => (
+  const say = (text: string) => <p key={text}>{txt(text)}</p>
+  /** Flow: the sources a step used, as small chips at the end of that step */
+  const srcChips = (names: string[]) => (
+    <div className="fl-srcs">
+      {names.map((n) => (
+        <span key={n} className="fl-src" title={noteOf(n) ?? n}>
+          <Icon n="doc" size={12} />
+          {n}
+        </span>
+      ))}
+    </div>
+  )
+  const cite = (a: AgentDef) => flow ? srcChips(a.src) : (
     <span className="st-cites"><em>Sources</em>{a.src.map((n) => (
       <button key={n} type="button" className="st-c" title={'Go to ' + n} onClick={() => jump(n)}>{numOf(n)}</button>
     ))}</span>
@@ -151,7 +240,7 @@ export function TracePanel({
                   <div className="st-at">
                     {fin ? (
                       <>
-                        <p key="f"><Streamed text={ag.finding ?? `Brought back ${ag.pass} passages from ${ag.src.join(', ')}.`} live={live} /></p>
+                        <p key="f">{txt(ag.finding ?? `Brought back ${ag.pass} passages from ${ag.src.join(', ')}.`)}</p>
                         {cite(ag)}
                       </>
                     ) : (
@@ -170,7 +259,7 @@ export function TracePanel({
             {say(`Cross-checked every figure against ${sc.checks.length} rules.`)}
             <ul className="st-checks">
               {sc.checks.slice(0, run.done ? sc.checks.length : run.checks).map((c) => (
-                <li key={c}><span><Icon n="check" size={9} /></span><Streamed text={c} live={live} /></li>
+                <li key={c}><span><Icon n="check" size={9} /></span>{txt(c)}</li>
               ))}
             </ul>
             {s.id === 'wrap' && (run.done || run.checks >= sc.checks.length) && say('Writing the answer with the chart, caveats and sources.')}
@@ -191,21 +280,33 @@ export function TracePanel({
     const agI = sc.steps.findIndex((x) => x.id === 'agents')
     return (
       <>
-        <div className="st-called">
-          {ts.kind === 'agents' && agList.length > 0
-            ? agList.map((ag) => <span key={ag.name} className="st-chip" style={{ ['--c' as string]: pal(ag.color) }}><AgentIcon n={ag.icon} size={13} />{ag.short}</span>)
-            : <span className="st-chip" style={{ ['--c' as string]: '#F66B00' }}><AldarLogo size={12} />Aldar X</span>}
-        </div>
+        {flow && ts.kind === 'agents' ? null : flow ? (
+          <div className="as">{ts.kind === 'agents' ? 'Agents used:' : 'Agent used:'}
+            <div className="as-list">
+              {ts.kind === 'agents' && agList.length > 0
+                ? agList.map((ag) => <span key={ag.name} className="ch" style={{ ['--c' as string]: pal(ag.color) }}><AgentIcon n={ag.icon} size={14} />{ag.name.replace(/ Agent$/, '')}</span>)
+                : <span className="ch"><AldarLogo size={13} />Aldar X</span>}
+            </div>
+          </div>
+        ) : (
+          <div className="st-called">
+            {ts.kind === 'agents' && agList.length > 0
+              ? agList.map((ag) => <span key={ag.name} className="st-chip" style={{ ['--c' as string]: pal(ag.color) }}><AgentIcon n={ag.icon} size={13} />{ag.short}</span>)
+              : <span className="st-chip" style={{ ['--c' as string]: '#F66B00' }}><AldarLogo size={12} />Aldar X</span>}
+          </div>
+        )}
         <ul className="tech">
           {ts.lines.map((l) => (
-            <li key={l}><Streamed text={l} live={live} /></li>
+            <li key={l}>{txt(l)}</li>
           ))}
+          {flow && techStatus(ts, run.t, run.done) === 'done' && flowConclusion(ts).map((c, i) => <li key={'concl' + i} className="fl-cl">{c}</li>)}
         </ul>
-        {ts.kind === 'agents' && agI >= 0 && story(agI)}
+        {ts.kind === 'agents' && agI >= 0 && (flow ? flowRuns() : story(agI))}
+        {flow && (ts.id === 'merge' || ts.id === 'ground') && foundNow.length > 0 && srcChips(order.map((o) => o.name))}
         {ts.kind === 'checks' && (
           <ul className="st-checks">
             {sc.checks.slice(0, run.done ? sc.checks.length : run.checks).map((c) => (
-              <li key={c}><span><Icon n="check" size={9} /></span><Streamed text={c} live={live} /></li>
+              <li key={c}><span><Icon n="check" size={9} /></span>{txt(c)}</li>
             ))}
           </ul>
         )}
@@ -217,9 +318,13 @@ export function TracePanel({
   const [tileOpen, setTileOpen] = useState<Record<string, boolean>>({}) // the reader's own open / fold choices
   const [folded, setFolded] = useState<string[]>([]) // stages that have finished their turn
   const [revealed, setRevealed] = useState(0) // how many stage tiles are on show
+  const [flowOpen, setFlowOpen] = useState<Record<string, boolean>>({}) // Flow: stages the reader opened or folded themselves
+  const [agOpen, setAgOpen] = useState<Record<string, boolean>>({}) // Flow: agent sections the reader opened
   const freshRun = run.t < 0.3
   useEffect(() => {
     if (freshRun) {
+      setFlowOpen({})
+      setAgOpen({})
       setTileOpen({})
       setFolded([])
       setRevealed(0)
@@ -241,7 +346,8 @@ export function TracePanel({
   const seen = sc.steps.filter((_, i) => run.stepStatus[i] !== 'pend').length
   const techSeen = tech ? tech.filter((ts) => techStatus(ts, run.t, run.done) !== 'pend').length : 0
   const lastShown = tech ? techSeen - 1 : seen - 1 // stages start in order, so the last started one is the end of the line
-  useFollow(ref, live || (bento && !allShown), bento ? [revealed, allShown].join(',') : [seen, foundNow.length, run.checks, agList.filter((ag) => run.t >= agStart(ag)).length].join(','), run.t < 0.3)
+  useAutoScroll(ref, flow && live, run.t < 0.3) // Flow follows the growing content frame by frame, so it never lands short
+  useFollow(ref, !flow && (live || (bento && !allShown)), bento ? [revealed, allShown].join(',') : [seen, foundNow.length, run.checks, agList.filter((ag) => run.t >= agStart(ag)).length].join(','), run.t < 0.3)
 
   // ---- Bento: no panel, just frosted widget tiles; each tile holds a solid white card ----
   if (bento) {
@@ -332,18 +438,219 @@ export function TracePanel({
     )
   }
 
+  // ---- Flow: four live numbers with icons and one overall progress line, then the agents at work ----
+  const flowStats = () => (
+    <div className="fl-stats">
+      {([
+        ['steps', stats[0][0], stats[0][1]],
+        ['agents', stats[1][0], 'agents'],
+        ['sources', execStage ? String(new Set(agList.filter((ag, k) => run.done || agProg(ag, k) >= 1).flatMap((ag) => ag.src)).size) : stats[2][0], 'sources'],
+        ['checks', stats[3][0], 'checks passed'],
+      ] as ['steps' | 'agents' | 'sources' | 'checks', string, string][]).map(([k, v, l]) => (
+        <div key={k} className="fl-stat">
+          <span className="fl-si"><KpiIcon k={k} size={17} /></span>
+          <span className="fl-sv">
+            <b>{v}</b>
+            <span className="fl-sl">{l}</span>
+          </span>
+        </div>
+      ))}
+      <div className="fl-bar2">
+        <span className="fl-plbl">Progress</span>
+        <div className="fl-bar"><i style={{ width: (run.done ? 100 : run.pct) + '%' }} /></div>
+        <span className="fl-pct">{run.done ? 100 : run.pct}%</span>
+      </div>
+    </div>
+  )
+  // Flow runs one thing at a time: the agents take turns inside the "run the agents" stage instead of overlapping
+  const execStage = tech?.find((x) => x.kind === 'agents')
+  const agProg = (ag: AgentDef, k: number) => {
+    if (!execStage) return clamp((run.t - agStart(ag)) / ag.dur)
+    const len = (execStage.end - execStage.start) / Math.max(1, agList.length)
+    return clamp((run.t - (execStage.start + k * len)) / len)
+  }
+  /** Flow, "Run the agents": one small section per agent, appearing as that agent starts. By default a section shows only the
+   *  agent, a small visual and a loader (a different one for each agent); opening it lists the steps and actions it took. */
+  const AG_TOOL: Record<string, string> = {
+    'Buyer profiles': 'vector_search · buyer_profiles',
+    Transactions: 'sql_runner · gold.sales_transactions (read-only)',
+    'Policy signals': 'vector_search · policy_tracker',
+  }
+  const loader = (k: number) =>
+    k % 3 === 0 ? (
+      <span className="fl-ld dots"><i /><i /><i /></span>
+    ) : k % 3 === 1 ? (
+      <span className="fl-ld bars"><i /><i /><i /><i /></span>
+    ) : (
+      <span className="fl-ld sweep"><i /></span>
+    )
+  const flowRuns = () => (
+    <div className="fl-agsec">
+      {agList.map((ag, k) => {
+        const p = agProg(ag, k)
+        if (!run.done && p <= 0) return null
+        const fin = run.done || p >= 1
+        const isOpen = agOpen[ag.name] ?? false
+        const now = fin ? ag.subs.length : Math.min(ag.subs.length - 1, Math.floor(p * ag.subs.length))
+        return (
+          <div
+            key={ag.name}
+            className={'fl-agent' + (fin ? ' fin' : ' work') + (isOpen ? ' open' : '')}
+            style={{ ['--c' as string]: pal(ag.color) } as CSSProperties}
+            onClick={() => setAgOpen((m) => ({ ...m, [ag.name]: !isOpen }))}
+          >
+            <div className="fl-agh">
+              <span className="fl-agi">
+                <AgentIcon n={ag.icon} size={16} />
+                {fin && <em className="fl-ok"><Icon n="check" size={8} /></em>}
+              </span>
+              <span className="fl-agn">
+                <b>{ag.name.replace(/ Agent$/, '')}</b>
+                <small>{fin ? `${ag.pass} passages · ${ag.src.length} ${ag.src.length === 1 ? 'source' : 'sources'}` : <Ticker text={ag.subs[now] + '…'} />}</small>
+              </span>
+              <Icon n="chev" size={14} className="fl-chv" />
+            </div>
+            <div className="fl-agd">
+              <div>
+                <ol className="fl-steps">
+                  {ag.subs.map((s, i) => {
+                    const st = i < now ? 'done' : i === now ? 'now' : 'pend'
+                    return (
+                      <li key={s} className={st}>
+                        <span className="fl-sd">{st === 'now' ? <Spinner r={9} dot={false} /> : null}</span>
+                        {s}
+                      </li>
+                    )
+                  })}
+                </ol>
+                <span className="fl-mono">{AG_TOOL[ag.short] ?? ag.task}</span>
+                {fin && <span className="fl-find">{ag.finding}</span>}
+                {fin && srcChips(ag.src)}
+              </div>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+  /** Flow: what a stage concluded, as the last bullet of the stage (seen when it is opened): a short sentence and a small,
+   *  quiet visual that suits what was found. The visuals differ from stage to stage. */
+  const chips = (names: string[]) => <span className="fl-chips">{names.map((n) => <span key={n} className="fl-chip">{n}</span>)}</span>
+  const meter = (label: string, value: string, pct: number) => (
+    <span className="fl-meter">
+      <span className="fl-mh"><em>{label}</em><b>{value}</b></span>
+      <span className="fl-mbar"><i style={{ width: pct + '%' }} /></span>
+    </span>
+  )
+  const seg = (n: number, on: number, label: string) => (
+    <span className="fl-seg">
+      <span className="fl-segs">{Array.from({ length: n }, (_, i) => <i key={i} className={i < on ? 'on' : ''} />)}</span>
+      <em>{label}</em>
+    </span>
+  )
+  const cells = (items: [string, string][]) => (
+    <span className="fl-cells">{items.map(([v, l]) => <span key={l}><b>{v}</b><em>{l}</em></span>)}</span>
+  )
+  const flowConclusion = (ts: TechStage): ReactNode[] => {
+    switch (ts.id) {
+      case 'understand':
+        return [
+          <>Found 4 entities{chips(['Q1', 'nationality', 'reservations', 'market_drivers'])}</>,
+          <>Treated as a buyer-targeting brief on the detailed path{meter('confidence', '0.94', 94)}</>,
+        ]
+      case 'scope':
+        return [
+          <>
+            Scoped to three launch cycles and four data domains
+            <span className="fl-tl3">{['Q1-25', 'Q3-25', 'Q1-26'].map((c) => <span key={c}><i />{c}</span>)}</span>
+            <span className="fl-mono">buyer_profiles · sales_transactions · policy_tracker · launch_calendar</span>
+          </>,
+          <>
+            Planned three retrieval branches that merge, then validate and compose
+            <span className="fl-dag">
+              <span className="fl-br"><b>Profiles</b><b>Transactions</b><b>Policy</b></span>
+              <span className="fl-tail"><i>↳</i><b>Merge</b><i>→</i><b>Validate</b><i>→</i><b>Compose</b></span>
+            </span>
+          </>,
+        ]
+      case 'authorise':
+        return [
+          <>
+            Authorised three agents, all read-only
+            <span className="fl-stack">
+              {agList.map((ag) => (
+                <span key={ag.name} className="fl-av" title={ag.short} style={{ ['--c' as string]: pal(ag.color) } as CSSProperties}><AgentIcon n={ag.icon} size={14} /></span>
+              ))}
+              <em>{agList.map((ag) => ag.short).join(' · ')}</em>
+            </span>
+          </>,
+          <>
+            Bound three tools with a 24,000-token budget
+            <span className="fl-rows">
+              <span><b>sql_runner</b>reads the ledger</span>
+              <span><b>vector_search</b>finds profile and policy passages</span>
+              <span><b>doc_reader</b>opens source pages</span>
+            </span>
+          </>,
+        ]
+      case 'merge':
+        return [<>Merged the agents' reports; two gaps remain{cells([['9', 'passages'], ['4', 'sources'], ['0', 'conflicts'], ['2', 'gaps']])}<span className="fl-mono">Gaps: off-plan resale, agent-channel data</span></>]
+      case 'validate':
+        return [<>Checked every figure against the raw rows{seg(sc.checks.length, sc.checks.length, sc.checks.length + ' of ' + sc.checks.length + ' checks passed')}</>]
+      case 'ground':
+        return [<>Tied every claim to a source{seg(14, 14, '14 of 14 claims grounded in 4 sources')}</>]
+      case 'compose':
+        return [
+          <>
+            Outlined the answer in 7 sections
+            <ol className="fl-ol">
+              {['Summary', 'Buyer mix', 'Launch plan', 'Drivers', 'Caveats', 'Follow-ups', 'Sources'].map((s) => <li key={s}>{s}</li>)}
+            </ol>
+          </>,
+          <>Streamed about 620 tokens{seg(7, 2, '2 of 7 sections went out before the reasoning finished')}</>,
+        ]
+      default:
+        return []
+    }
+  }
+  /** Flow: a stage that has just finished stays open for a few seconds, so its conclusion visual is seen before it folds */
+  const [hold, setHold] = useState<Record<string, boolean>>({})
+  const doneIds = flow && live ? (tech ? tech.filter((ts) => techStatus(ts, run.t, run.done) === 'done').map((ts) => ts.id) : sc.steps.map((s, i) => (run.stepStatus[i] === 'done' ? s.id + i : ''))).filter(Boolean).join(',') : ''
+  // one at a time: a stage opens by itself only once the one before it has shown its visual and folded
+  const openDef = (id: string, st: string) => !!hold[id] || (st === 'act' && !Object.entries(hold).some(([k, v]) => v && k !== id))
+  const seenDone = useRef<string[]>([])
+  useEffect(() => {
+    if (!flow) return
+    const ids = doneIds ? doneIds.split(',') : []
+    if (!live || run.t < 0.3) { seenDone.current = ids; return }
+    ids.filter((id) => !seenDone.current.includes(id)).forEach((id) => {
+      setHold((h) => ({ ...h, [id]: true }))
+      window.setTimeout(() => setHold((h) => ({ ...h, [id]: false })), 1000)
+    })
+    seenDone.current = ids
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [doneIds])
+  /** Flow: a click anywhere on a folded card opens it; an opened card folds only when its top part (title and summary line) is clicked */
+  const flowToggle = (e: { target: EventTarget }, id: string, st: string) => {
+    const isOpen = flowOpen[id] ?? openDef(id, st)
+    if (isOpen && !(e.target as HTMLElement).closest('.fl-h, .sy-sub')) return
+    setFlowOpen((m) => ({ ...m, [id]: !isOpen }))
+  }
+  /** how far a stage has got (0 to 1); in Flow the line under its node draws down by this much */
+  const lineP = (start: number, end: number, st: string) => (st === 'done' ? 1 : clamp((run.t - start) / Math.max(0.1, end - start)))
+
   return (
-    <aside ref={ref} className={'rz rz-story' + (ai ? ' rz-ai' : '') + (open ? '' : ' closed') + (wide ? ' wide' : '') + (run.done ? ' done' : '')} aria-label="Reasoning trace">
-      {ai && (
+    <aside ref={ref} className={'rz rz-story' + (aur ? ' rz-ai' : '') + (flow ? ' rz-flow' : '') + (open ? '' : ' closed') + (wide ? ' wide' : '') + (run.done ? ' done' : '')} aria-label="Reasoning trace">
+      {aur && (
         <>
           <div className="au-bg" aria-hidden="true"><i /><i /><i /></div>
         </>
       )}
       <div className="sy-top">
-        {ai ? (
+        {aur ? (
           <span className={'au-orb' + (live ? ' live' : '')}>
             <i />
-            <ReasoningIcon size={20} />
+            <ReasoningIcon size={20} white={flow} />
             <em className="sp s1">✦</em>
             <em className="sp s2">✦</em>
             <em className="sp s3">✦</em>
@@ -352,14 +659,18 @@ export function TracePanel({
           <span className="sy-mark"><ReasoningIcon size={22} /></span>
         )}
         <div className="sy-ttl">
-          <b className={ai && live ? 'au-live' : ''}>Reasoning trace</b>
-          <small>{live ? (ai ? 'Live · ' + fmt(run.t) : fmt(run.t) + ' · ' + (tech && techSeen > 0 ? tech[techSeen - 1].live : sc.steps[run.idx].live).toLowerCase()) : 'Completed in ' + fmt(sc.total)}</small>
+          <b className={aur && live ? 'au-live' : ''}>Reasoning trace</b>
+          <small>{live ? (aur ? 'Live · ' + fmt(run.t) : fmt(run.t) + ' · ' + (tech && techSeen > 0 ? tech[techSeen - 1].live : sc.steps[run.idx].live).toLowerCase()) : 'Completed in ' + fmt(sc.total)}</small>
         </div>
         <button aria-label="Expand" aria-disabled="true" tabIndex={-1} style={{ pointerEvents: "none" }}><Icon n="expand" size={17} /></button>
         <button onClick={onClose} aria-label="Close"><Icon n="x" size={17} /></button>
       </div>
 
-      {ai ? (
+      {flow ? (
+        <>
+          {flowStats()}
+        </>
+      ) : aur ? (
         <div className="sy-stats">
           {stats.map(([v, l]) => (
             <div key={l}><b>{v}</b><span>{l}</span></div>
@@ -382,16 +693,21 @@ export function TracePanel({
       )}
 
       <div className="sy-body">
-        {tech && tech.map((ts, i) => {
+        {tech && tech.map((ts0, i) => {
+          const ts = flow ? flowTs(ts0) : ts0
           const st = techStatus(ts, run.t, run.done)
           if (st === 'pend') return null
           return (
-            <section key={ts.id} className={'sy-sec ' + st + (i === lastShown ? ' last' : '')}>
-              <div className={'sy-dot' + (st === 'act' ? ' ld' : '')}>{st === 'done' ? <Icon n="check" size={11} /> : <SpokeLoader size={22} />}</div>
-              <div className="sy-c">
-                <h6>{ts.title}</h6>
+            <section key={ts.id} className={'sy-sec ' + st + (i === lastShown ? ' last' : '') + (flow && (flowOpen[ts.id] ?? openDef(ts.id, st)) ? ' open' : '')} style={flow ? ({ ['--lp' as string]: lineP(ts.start, ts.end, st) } as CSSProperties) : undefined}>
+              <div className={'sy-dot' + (st === 'act' ? ' ld' : '')}>{flow ? <FlowNode done={st === 'done'} /> : st === 'done' ? <Icon n="check" size={11} /> : <SpokeLoader size={22} />}</div>
+              <div className="sy-c" onClick={flow ? (e) => flowToggle(e, ts.id, st) : undefined}>
+                {flow ? (
+                  <h6 className="fl-h">{ts.title}<Icon n="chev" size={14} className="fl-chv" /></h6>
+                ) : (
+                  <h6>{ts.title}</h6>
+                )}
                 <small className="sy-sub">{st === 'done' ? ts.note : ts.live + '…'}</small>
-                {techDetail(ts)}
+                {flow ? <div className="fl-det"><div>{techDetail(ts)}</div></div> : techDetail(ts)}
               </div>
             </section>
           )
@@ -400,17 +716,22 @@ export function TracePanel({
           const st = run.stepStatus[i]
           if (st === 'pend') return null
           return (
-            <section key={s.id + i} className={'sy-sec ' + st + (i === lastShown ? ' last' : '')}>
-              <div className="sy-dot">{st === 'done' ? <Icon n="check" size={11} /> : <i />}</div>
-              <div className="sy-c">
-                <h6>{s.title}</h6>
-                {story(i)}
+            <section key={s.id + i} className={'sy-sec ' + st + (i === lastShown ? ' last' : '') + (flow && (flowOpen[s.id + i] ?? openDef(s.id + i, st)) ? ' open' : '')} style={flow ? ({ ['--lp' as string]: lineP(sc.t0[i], sc.t0[i] + s.dur, st) } as CSSProperties) : undefined}>
+              <div className="sy-dot">{flow ? <FlowNode done={st === 'done'} /> : st === 'done' ? <Icon n="check" size={11} /> : <i />}</div>
+              <div className="sy-c" onClick={flow ? (e) => flowToggle(e, s.id + i, st) : undefined}>
+                {flow ? (
+                  <h6 className="fl-h">{s.title}<Icon n="chev" size={14} className="fl-chv" /></h6>
+                ) : (
+                  <h6>{s.title}</h6>
+                )}
+                {flow ? <div className="fl-det"><div>{story(i)}</div></div> : story(i)}
               </div>
             </section>
           )
         })}
 
-        {foundNow.length > 0 && (
+        {flow && <i className="fl-glare" aria-hidden="true"><b /></i>}
+        {!flow && foundNow.length > 0 && (
           <section className="sy-src">
             <h6>Sources</h6>
             <ol>

@@ -295,15 +295,20 @@ function makeSerial(n: 3 | 5 | 10): Scenario {
     validateStep = 2
     sourceStep = 1
   } else if (n === 5) {
+    // The run is paced for the reasoning trace: a short start, then most of the time (about 60%) goes on the agents.
+    const DUR5 = [3.5, 3.5, 36, 5, 5]
+    const K5 = 35 / 9 // the agents' own timings, stretched to fill their longer stage
+    const AG5 = AGENTS.map((a) => ({ ...a, start: a.start * K5, dur: a.dur * K5 }))
     steps = STEPS.map((st, i) => ({
       ...st,
+      dur: DUR5[i],
       style: i === 2 ? ('scatter' as StepStyle) : STD_STYLE[i],
       sub: i === 2 ? ['Reading sources', 'Collecting evidence', 'Cross-checking findings', 'Handing findings back'] : STD_SUB[i],
       node: STD_NODE[i],
-      agents: i === 1 || i === 2 ? AGENTS : undefined,
+      agents: i === 1 || i === 2 ? AG5 : undefined,
       note: ['Buyer brief · Q1 launches', '3 agents selected', '3 agents · 4 sources · 9 passages', '5 of 5 checks passed', 'Brief ready'][i],
     }))
-    E.push([0, 0.2, 'Intent received'], [0, 1.6, brief], [1, 0.2, 'Planning three lines of enquiry'], [1, 2, routed3], [2, 0.3, 'Three agents are gathering evidence in parallel'], [2, 6.5, 'Most agents have finished, the last one is still reading'])
+    E.push([0, 0.2, 'Intent received'], [0, 1.6, brief], [1, 0.2, 'Planning three lines of enquiry'], [1, 2, routed3], [2, 0.3, 'Three agents are gathering evidence in parallel'], [2, 6.5 * K5, 'Most agents have finished, the last one is still reading'])
     E.push([3, 0.8, 'Validation: ' + CHECKS[0]], [3, 2.4, 'Validation: ' + CHECKS[1]], [4, 0.3, 'Composing the executive summary'], [4, 2.4, 'Adding the chart, caveats and sources'])
     validateStep = 3
     sourceStep = 2

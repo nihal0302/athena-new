@@ -1,8 +1,21 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { CONTROLS, useVariants } from '../variants'
 import { Icon } from './Icon'
 
 const SEEN_KEY = 'athena-v2-controls-seen'
+
+/** Which part of the screen each setting changes. After a change, that part is outlined for three seconds so it is clear what moved. */
+const TARGETS: Record<string, string> = {
+  layout: '.chat .ctitle, .chat .recents, .chat .rrail',
+  agentLock: '.chat .composer',
+  spacing: '.chat .ans-anchor',
+  glass: '.rz-bento',
+  pane: '.rz',
+  thinking: '.chat .acol > :first-child',
+  speed: '.chat .acol',
+  agents: '.chat .acol > :first-child, .rz',
+}
+const HL_MS = 3000
 
 /** Floating prototype controls: a prominent pill that opens a compact toggle for each setting. */
 export function ControlsPanel({ onReplay }: { onReplay?: () => void }) {
@@ -16,6 +29,22 @@ export function ControlsPanel({ onReplay }: { onReplay?: () => void }) {
     }
   })
   const { variants, set, reset } = useVariants()
+  const timer = useRef<number>(0)
+  /** outline whatever the change touched (and the chosen button) for three seconds */
+  const flash = (key: string, button: HTMLElement) => {
+    window.clearTimeout(timer.current)
+    document.querySelectorAll('.hl-flash').forEach((e) => e.classList.remove('hl-flash'))
+    button.classList.add('hl-flash')
+    // give the screen a moment to re-render with the new setting before looking for what changed
+    window.setTimeout(() => {
+      document.querySelectorAll(TARGETS[key] ?? '').forEach((e) => {
+        e.classList.remove('hl-flash')
+        void (e as HTMLElement).offsetWidth
+        e.classList.add('hl-flash')
+      })
+    }, 140)
+    timer.current = window.setTimeout(() => document.querySelectorAll('.hl-flash').forEach((e) => e.classList.remove('hl-flash')), HL_MS + 140)
+  }
   const current = CONTROLS[0].options.find((o) => o.id === variants[CONTROLS[0].key])?.label
 
   const toggle = () => {
@@ -38,6 +67,7 @@ export function ControlsPanel({ onReplay }: { onReplay?: () => void }) {
             <b>Prototype controls</b>
             <button onClick={() => setOpen(false)} aria-label="Close"><Icon n="x" size={14} /></button>
           </div>
+          <p className="pc-note">Switch any setting and the part of the screen it changes is highlighted for a few seconds, so you can see what moved.</p>
           {CONTROLS.filter((c) => !(c.key === 'glass' && variants.pane !== 'bento')).map((c) => (
             <div key={c.key} className="pc-g">
               <div className="pc-l">{c.label}</div>
@@ -48,7 +78,11 @@ export function ControlsPanel({ onReplay }: { onReplay?: () => void }) {
                     role="radio"
                     aria-checked={variants[c.key] === o.id}
                     className={variants[c.key] === o.id ? 'on' : ''}
-                    onClick={() => set(c.key, o.id as never)}
+                    onClick={(e) => {
+                      if (variants[c.key] === o.id) return
+                      set(c.key, o.id as never)
+                      flash(c.key, e.currentTarget)
+                    }}
                   >
                     {o.label}
                   </button>

@@ -388,7 +388,7 @@ export function ReasoningPanel({
         <span className="rz-ic"><ReasoningIcon size={24} /></span>
         <div className="rz-ttl">
           <h4>Reasoning trace</h4>
-          <div className="rz-st"><span className="dot" /><span>{run.done ? 'Completed' : 'Live · ' + (tech && techCur >= 0 ? tech[techCur].live : sc.steps[run.idx].live).toLowerCase()}</span></div>
+          <div className="rz-st"><span className="dot" /><span>{run.done ? 'Completed' : 'Live'}</span></div>
         </div>
         <button aria-label="Expand" aria-disabled="true" tabIndex={-1} style={{ pointerEvents: "none" }}><Icon n="expand" size={18} /></button>
         <button onClick={onClose} aria-label="Close"><Icon n="x" size={18} /></button>

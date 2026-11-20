@@ -54,83 +54,51 @@ export function techStages(sc: Scenario): TechStage[] | null {
       return [s, at] as [number, number]
     })
   }
-  const pre = cut(0, a1, [14, 16, 16, 20, 18, 16])
-  const run2 = cut(a1, a2, [82, 18])
+  const pre = cut(0, a1, [28, 40, 32])
+  const run2 = cut(a1, a2, [92, 8])
   const val = cut(v1, v2, [68, 32])
-  const comp = cut(v2, total, [56, 44])
+  const comp = cut(v2, total, [100])
   const nAg = sc.agentTotal ?? sc.agents.length ?? 3
 
+  // eight stages: the first three and the last are each two of the earlier engineering stages put together
   const defs: Omit<TechStage, 'start' | 'end'>[] = [
     {
-      id: 'parse',
-      title: 'Parse request · extract entities',
-      live: 'Tokenising the request and extracting entities',
-      note: '4 entities · 31 tokens',
+      id: 'understand',
+      title: 'Parse request · classify intent',
+      live: 'Parsing the request and classifying the intent',
+      note: 'buyer_targeting_brief · 0.94',
       lines: [
         "Tokenised the request into 31 tokens (language: en) and normalised the casing of 'Q1'.",
         'Entity pass found launch_cycle = Q1, dimension = nationality, metric = reservations and an open ask for market_drivers.',
-        "Resolved 'buyers' to the buyer_profile entity and 'prioritise' to a ranking task (top-n by reservation share).",
-        'No personal data detected in the prompt, so the request is forwarded unmodified.',
-      ],
-    },
-    {
-      id: 'classify',
-      title: 'Classify intent · select template',
-      live: 'Classifying the intent and choosing a response template',
-      note: 'buyer_targeting_brief · 0.94',
-      lines: [
         'Intent classifier scored buyer_targeting_brief at 0.94; the runner-up, market_overview, scored 0.04.',
-        'Selected response template brief.buyer_mix.v3 (summary, buyer mix, launch plan, drivers, caveats).',
-        'Response mode set to detailed, which enables the multi-agent path; the quick-lookup path was rejected.',
+        'Selected response template brief.buyer_mix.v3 and set the response mode to detailed, which enables the multi-agent path.',
         'Guardrails: pii_scan = pass, data scope = internal sales data, no external web access requested.',
       ],
     },
     {
       id: 'scope',
-      title: 'Resolve scope · data domains',
-      live: 'Resolving the time window and data domains',
-      note: '3 launch cycles · 4 data domains',
+      title: 'Resolve scope · build query plan',
+      live: 'Resolving the scope and building the plan',
+      note: '3 launch cycles · 3 branches',
       lines: [
         "Expanded 'Q1 launches' to the last three launch cycles: Q1-25, Q3-25 and Q1-26.",
         'Mapped the request to four data domains: buyer_profiles, sales_transactions, policy_tracker and launch_calendar.',
-        'Fixed the grain at nationality × launch_cycle, with ticket size and inquiry conversion as secondary metrics.',
-        'Checked freshness: the newest partition is 2026-10-31, inside the 7-day SLA for every domain.',
-      ],
-    },
-    {
-      id: 'plan',
-      title: 'Build query plan (DAG)',
-      live: 'Building the execution plan',
-      note: '3 parallel branches · 1 join',
-      lines: [
         'Decomposed the request into three independent retrieval branches: profiles, transactions and policy.',
         'A merge node joins the branches on nationality, followed by a validation node and a composition node (7 nodes in all).',
         'No branch depends on another, so all three are scheduled together with max_concurrency = 3.',
-        'Estimated critical path is 21 s, set by the transactions branch (SQL over gold.sales_transactions).',
       ],
     },
     {
       id: 'authorise',
-      title: 'Select & authorise agents',
-      live: 'Selecting agents and checking access',
-      note: `${nAg || 3} agents · RBAC passed`,
+      title: 'Authorise agents · bind tools',
+      live: 'Authorising the agents and binding tools',
+      note: `${nAg || 3} agents · 3 tools · RBAC passed`,
       lines: [
         'Mapped each branch to a specialist: Buyer Profile Analysis, Market Transaction Data and Policy & Macro Signals.',
         "Checked the caller's role against each agent's scope: buyer_profiles:read, sales_transactions:read, policy_tracker:read. All granted.",
         'No write scopes were requested, so every agent runs read-only.',
-        'Opened an audit record with correlation id trace-7f3a for the whole run.',
-      ],
-    },
-    {
-      id: 'bind',
-      title: 'Bind tools · set budgets',
-      live: 'Binding tools and setting budgets',
-      note: '3 tools · 24k token budget',
-      lines: [
         'Bound three tools: sql_runner for the ledger, vector_search for profile and policy passages, doc_reader for source pages.',
         'Set a shared budget of 24,000 tokens and a 20 s timeout per agent, with at most one retry.',
-        'The retrieval cache is warm: 62% of the planned lookups were served from cache.',
-        'SQL sandbox configured as read-only with a 5,000-row result cap.',
       ],
     },
     {
@@ -182,26 +150,15 @@ export function techStages(sc: Scenario): TechStage[] | null {
     },
     {
       id: 'compose',
-      title: 'Compose structured answer',
-      live: 'Composing the structured answer',
-      note: '7 sections · 1 chart',
+      title: 'Compose answer · stream response',
+      live: 'Composing and streaming the answer',
+      note: '7 sections · ~620 tokens',
       lines: [
         'Built the outline from template brief.buyer_mix.v3: summary, buyer mix, launch plan, drivers, caveats, follow-ups, sources.',
         'Chart spec: bar chart of share_pct by nationality (top 10), with a table view for accessibility.',
         'Wrote four key points under the summary, each with one number and its change on the last cycle.',
-        'Applied the response format protocol section.v1 (header, lead, pointers, visual, note).',
-      ],
-    },
-    {
-      id: 'stream',
-      title: 'Render & stream response',
-      live: 'Rendering and streaming the response',
-      note: '~620 tokens · streamed',
-      lines: [
-        'Rendered the structured answer to about 620 output tokens.',
         'Streaming is on: sections are emitted in order and the first two go out before the reasoning has finished.',
-        'Inline citations resolved to the numbered source list; feedback actions attached below the answer.',
-        'Run closed: audit record trace-7f3a stored with 12 stages and every check passed.',
+        'Run closed: audit record trace-7f3a stored with 8 stages and every check passed.',
       ],
     },
   ]

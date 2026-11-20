@@ -2,7 +2,7 @@
   --brand:#2f245c; --brand-2:#49658b; --sec:#eeedf7; --ink:#252525; --ink2:#4a4a4a; --ink3:#878787;
   --line:#e7e7e7; --line2:#d4d4d4; --warm:#f7f6f4; --ok:#12b76a; --ok-bg:#e3f7ee; --sun:#a0b7de;
   --g1:#8b5cf6; --g2:#2bb8d6; --warn:#b54708; --warn-bg:#fff4e5;
-  --rp:398px;
+  --rp:380px; /* reasoning pane width (Recent Chats is 317px) */
   /* conversation column and input box share this width (442px + 15% = 508px) */
   /* conversation thread and input box share one width */
   --thread:584px;
@@ -108,7 +108,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 /* stage follows the two panes: menu (left) and reasoning (right) */
 /* The conversation never moves: the stage spans the full width and the column is centred on the
    viewport. The menu (left) and reasoning pane (right) overlay the side gutters. */
-.stage{--thread:min(clamp(584px,calc(584px + (100cqw - 1232px) / 2),1500px),calc(100cqw - 892px));--col:var(--thread);container-type:inline-size;position:absolute;top:119px;bottom:0;left:0;right:0;transform:translateX(var(--shift))}
+/* conversation column: 20% wider than before; it stops short of the two panes (Recent Chats 28+317, reasoning 24+317, plus a gap each side) */
+.stage{--thread:min(calc(clamp(584px,calc(584px + (100cqw - 1232px) / 2),1500px) * 1.15),calc(100cqw - 2 * (var(--rp) + 52px)));--col:var(--thread);container-type:inline-size;position:absolute;top:119px;bottom:0;left:0;right:0;transform:translateX(var(--shift))}
 .chat.panel-wide{--rp:520px}
 .scroll{position:absolute;inset:0;overflow-y:auto;padding:33px 24px 150px;scrollbar-width:none}
 .scroll::-webkit-scrollbar{display:none}
@@ -1694,7 +1695,8 @@ ul.b{margin:0 0 10px 18px;font-size:13px}
 .pm-t{font-size:14px}
 .home .pm-i{background:none;color:#fff}
 /* home input box: same position and width as the conversation screen */
-.home .composer{bottom:8px;width:min(calc(100% - 48px),min(clamp(584px,calc(584px + (100% - 1232px) / 2),1500px),calc(100% - 892px)))}
+/* same width as the input box in a conversation */
+.home .composer{bottom:8px;width:min(calc(100% - 48px),min(calc(clamp(584px,calc(584px + (100% - 1232px) / 2),1500px) * 1.15),calc(100% - 2 * (var(--rp) + 52px))))}
 
 /* glass outline: Figma "Glass/Outline" = linear gradient, white → transparent (49%) → white, 24% opacity */
 .dock,.round,.avatar{position:relative;border-color:transparent}
@@ -3015,3 +3017,345 @@ ul.tech li::before{content:"";position:absolute;left:2px;top:.62em;width:4px;hei
 /* radios: no box, no background in any state (they were inheriting the menu-row styles) */
 .rv-fp .rv-radios button,.rv-fp .rv-radios button:hover,.rv-fp .rv-radios button.on{width:auto;height:auto;padding:4px 0;border-radius:0;background:none;justify-content:flex-start;font-weight:400;box-shadow:none}
 .rv-fp .rv-radios button.on{color:#fff}
+
+/* reasoning pane summary chips: smaller so all four sit on one line */
+.rz-chips,.rz:not(.rz-bento) .rz-chips{gap:5px;flex-wrap:nowrap}
+.rz-chips span{font-size:10px;padding:3px 8px;white-space:nowrap;flex:none}
+
+/* ===== Reasoning pane, variation "Flow": the Aurora look, one step at a time. Colour is kept for the agent that is working;
+   small ringed check nodes sit level with each title, joined by a line that draws down. ===== */
+@keyframes flPop{0%{transform:scale(.55)}60%{transform:scale(1.18)}100%{transform:scale(1)}}
+@keyframes flPulse{0%,100%{box-shadow:0 0 0 0 rgba(141,123,255,0)}50%{box-shadow:0 0 0 4px rgba(141,123,255,.18)}}
+
+/* the four live numbers, plain, with one overall progress line */
+.fl-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:18px 20px 0;flex:none}
+.fl-stat{display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:9px 10px 8px;border-radius:12px;background:#f4f3f9;border:1px solid #ebe9f4}
+.fl-si{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;color:#2f245c;background:#e9e6f7;margin-bottom:4px}
+.fl-stat b{font-size:16px;font-weight:600;line-height:1.1;color:#2f245c;font-variant-numeric:tabular-nums}
+.fl-sl{font-size:10px;line-height:1.2;color:#878787;white-space:nowrap}
+.fl-bar{grid-column:1/-1;height:3px;border-radius:3px;background:#e9e6f3;overflow:hidden}
+.fl-bar i{display:block;height:100%;border-radius:3px;background:#6a5bd6;transition:width .3s linear}
+
+/* the agents: Aldar X on top, branching down to each agent. They take turns; the one that is working is lit in its own colour. */
+.fl-ags{position:relative;margin:12px 20px 0;padding:12px 10px 10px;border-radius:14px;flex:none;background:#faf9fd;border:1px solid #ebe9f4}
+.fl-orch{position:relative;z-index:1;display:flex;align-items:center;gap:8px;width:max-content;max-width:100%;margin:0 auto;padding:4px 12px 4px 5px;border-radius:99px;background:#fff;box-shadow:inset 0 0 0 1px #e1ddf2}
+.fl-orch::after{content:"";position:absolute;left:calc(50% - 1px);top:100%;width:2px;height:10px;background:#d9d4ee}
+.fl-ob{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#fff3e8;box-shadow:inset 0 0 0 1px #ffd7b8}
+.fl-orch.live .fl-ob{animation:flPulse 2s ease-in-out infinite}
+.fl-orch b{font-size:12px;font-weight:600;color:#2f245c}
+.fl-orch small{font-size:10.5px;color:#878787;white-space:nowrap}
+.fl-grid{position:relative;display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:8px;margin-top:20px}
+.fl-grid::before{content:"";position:absolute;top:-10px;left:calc(50% / var(--n));right:calc(50% / var(--n));height:2px;border-radius:2px;background:#d9d4ee}
+.fl-ag{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;padding:10px 6px 9px;border-radius:14px;background:#fff;box-shadow:inset 0 0 0 1px #ebe9f4;opacity:.65;transition:opacity .3s,box-shadow .3s,transform .3s}
+.fl-ag::before{content:"";position:absolute;left:calc(50% - 1px);top:-10px;width:2px;height:10px;background:#d9d4ee;transition:background .3s,box-shadow .3s}
+.fl-ag.work{opacity:1;transform:translateY(-1px);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--c) 65%,#fff),0 10px 22px -10px color-mix(in srgb,var(--c) 85%,transparent)}
+.fl-ag.work::before{background:var(--c);box-shadow:0 0 6px var(--c)}
+.fl-ag.fin{opacity:1}
+.fl-ag.fin::before{background:#c4bde6}
+.fl-ai{position:relative;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#f1f0f6;transition:background .3s}
+.fl-ag.work .fl-ai{background:color-mix(in srgb,var(--c) 14%,#fff)}
+.fl-ai .fl-ring,.fl-n .fl-ring{position:absolute;inset:-3px;border-radius:50%;opacity:0;background:conic-gradient(from var(--ang),transparent 0%,var(--c,#8d7bff) 45%,transparent 85%);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 2.5px),#000 calc(100% - 2px));mask:radial-gradient(farthest-side,transparent calc(100% - 2.5px),#000 calc(100% - 2px))}
+.fl-ag.work .fl-ring{opacity:1;animation:spin 1.2s linear infinite}
+.fl-ok{position:absolute;right:-4px;bottom:-4px;width:15px;height:15px;border-radius:50%;display:grid;place-items:center;font-style:normal;color:#fff;background:#12b76a;box-shadow:0 0 0 2px #fff;animation:flPop .45s cubic-bezier(.2,1.4,.4,1) both}
+.fl-ag b{font-size:11.5px;font-weight:600;color:#2f245c;line-height:1.25}
+.fl-ag small{font-size:10.5px;line-height:1.3;color:#878787;min-height:27px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.fl-pb{width:100%;height:3px;margin-top:2px;border-radius:3px;background:#ece9f6;overflow:hidden}
+.fl-pb i{display:block;height:100%;border-radius:3px;background:#c4bde6;transition:width .2s linear}
+.fl-ag.work .fl-pb i{background:var(--c)}
+
+/* in the "run the agents" stage the agent that is working is shown differently from the ones that have finished */
+.rz-flow .st-ag.now{padding:6px 8px;margin:2px 0;border-radius:12px;background:color-mix(in srgb,var(--c) 8%,#fff);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 42%,#fff)}
+
+/* the timeline: a small ringed check node level with each title, joined by a line that draws down as the stage runs */
+.rz-flow .sy-body{padding-top:20px}
+.rz-flow .sy-sec .sy-dot,.rz-flow .sy-sec.done .sy-dot,.rz-flow .sy-sec.act .sy-dot{width:18px;height:18px;margin:14px 0 0 3px;background:none;box-shadow:none;animation:none;border:0}
+.rz-flow .sy-sec.act .sy-dot::after{display:none}
+.fl-n{position:relative;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#b9b2e6;box-shadow:inset 0 0 0 1.5px #e1ddf2}
+.fl-n svg{width:10px;height:10px}
+.fl-n .fl-ring{inset:-2px;opacity:1;animation:spin 1.1s linear infinite;--c:#8d7bff;-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 1.5px));mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 1.5px))}
+.fl-n.done{color:#fff;background:#12b76a;box-shadow:0 0 0 3px rgba(18,183,106,.14);animation:flPop .5s cubic-bezier(.2,1.4,.4,1) both}
+.fl-n.done .fl-ring{opacity:0;animation:none}
+.rz-flow .sy-sec::before{display:block;left:11px;top:34px;bottom:-4px;width:2px;border-left:0;border-radius:2px;background:#ece9f6;animation:none;opacity:1;transform:none}
+.rz-flow .sy-sec::after{content:"";position:absolute;left:11px;top:34px;bottom:-4px;width:2px;border-radius:2px;background:#a79bff;transform-origin:top;transform:scaleY(var(--lp,1));transition:transform .2s linear}
+.rz-flow .sy-sec.act::after{filter:drop-shadow(0 0 3px rgba(106,91,214,.6))}
+.rz-flow .sy-sec.done::after{background:#b9b0f2}
+.rz-flow .sy-sec.last::before,.rz-flow .sy-sec.last::after{display:block}
+.rz-flow .sy-sec.last{padding-bottom:20px}
+.rz-flow.done .sy-sec.last::before,.rz-flow.done .sy-sec.last::after{display:none}
+.rz-flow.done .sy-sec.last{padding-bottom:6px}
+
+/* finished stages fold to a title and a summary line; the live stage is open; click a title to open or fold */
+.rz-flow .fl-h{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer}
+.rz-flow .fl-chv{flex:none;color:#8a85b0;transition:transform .25s ease}
+.rz-flow .sy-sec.open .fl-chv{transform:rotate(180deg)}
+.rz-flow .fl-det{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s cubic-bezier(.2,.8,.2,1)}
+.rz-flow .fl-det>div{overflow:hidden;min-height:0}
+.rz-flow .sy-sec.open .fl-det{grid-template-rows:1fr}
+.rz-flow .sy-sec:not(.open) .sy-c{padding-bottom:12px}
+.rz-flow .sy-sec:not(.open) .sy-c .sy-sub{margin-bottom:0}
+
+/* Flow: the line runs from the middle of one check mark to the middle of the next, behind them, in a soft green */
+.rz-flow .sy-sec .sy-dot{position:relative;z-index:1}
+.rz-flow .sy-sec::before,.rz-flow .sy-sec::after{top:23px;bottom:-23px}
+.rz-flow .sy-sec.last::before,.rz-flow .sy-sec.last::after{bottom:-4px}
+.rz-flow .sy-sec::before{background:#e1f4ea}
+.rz-flow .sy-sec::after{background:#8fdcb8}
+.rz-flow .sy-sec.done::after{background:#8fdcb8}
+.rz-flow .sy-sec.act::after{filter:drop-shadow(0 0 3px rgba(18,183,106,.45))}
+
+/* Flow loader: a faint track with a short arc turning round it (and a breathing dot for a step), no gradients */
+.fl-ring{display:none}
+.fl-spin{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.fl-spin circle{fill:none;stroke-width:2.4}
+.fl-spin .fl-trk{stroke:#e6e2f5}
+.fl-spin .fl-arc{stroke:#6a5bd6;stroke-linecap:round;stroke-dasharray:26 74;transform-origin:50% 50%;animation:flRot .9s linear infinite}
+.fl-spin .fl-dot{fill:#6a5bd6;stroke:none;transform-origin:50% 50%;animation:flBeat 1.1s ease-in-out infinite}
+@keyframes flRot{to{transform:rotate(360deg)}}
+@keyframes flBeat{0%,100%{opacity:.35;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+.fl-n:not(.done){box-shadow:none;background:#fff}
+.fl-ag .fl-spin{inset:-4px;width:calc(100% + 8px);height:calc(100% + 8px)}
+.fl-ag .fl-spin .fl-trk{stroke:color-mix(in srgb,var(--c) 16%,#fff)}
+.fl-ag .fl-spin .fl-arc{stroke:var(--c)}
+/* the soft glow on the drawn line is gone */
+.rz-flow .sy-sec.act::after{filter:none}
+/* the purple glow around the live card (it spilled over the timeline as a haze) is gone */
+.rz-flow .sy-sec .sy-c,.rz-flow .sy-sec.act .sy-c{box-shadow:0 6px 14px -12px rgba(47,36,92,.3)}
+/* Aurora draws a conic "glow" on the live stage (::after) that showed as a hill of colour beside the timeline; Flow draws
+   its own line there instead */
+.rz-flow .sy-sec.act::after{content:"";position:absolute;left:11px;top:23px;right:auto;bottom:-4px;width:2px;height:auto;border-radius:2px;background:#8fdcb8;-webkit-mask:none;mask:none;animation:none;opacity:1;transform-origin:top;transform:scaleY(var(--lp,1));filter:none}
+.rz-flow .sy-sec.act::before{background:#e1f4ea;background-size:auto;animation:none;opacity:1}
+
+/* Flow: the four numbers in a 2 by 2 grid, each with a roomier icon + number + label */
+.fl-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:16px}
+.fl-stat{flex-direction:row;align-items:center;gap:10px;padding:10px 12px;border-radius:14px}
+.fl-si{width:32px;height:32px;border-radius:10px;margin-bottom:0;flex:none}
+.fl-sv{display:flex;flex-direction:column;min-width:0}
+.fl-stat b{font-size:19px;line-height:1.1}
+.fl-sl{font-size:11px;line-height:1.3;margin-top:1px;overflow:hidden;text-overflow:ellipsis}
+
+/* Flow: the sources a step used, as small chips at the end of that step */
+.fl-srcs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 8px}
+.fl-src{display:inline-flex;align-items:center;gap:5px;max-width:100%;padding:3px 10px 3px 8px;border-radius:99px;font-size:11px;line-height:1.3;color:#4a4866;background:#f4f3f9;border:1px solid #ebe9f4}
+.fl-src i{flex:none;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:9.5px;font-weight:600;color:#2f245c;background:#e3e0f3}
+.fl-src svg{flex:none;color:#8a85b0}
+
+.rz-flow .st-ags{margin-top:10px}
+
+/* Flow: the conclusion is the last bullet of an opened stage, with subtle chips for what was found */
+@keyframes flUp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.rz-flow .tech li.fl-cl{animation:flUp .4s cubic-bezier(.2,.8,.2,1) both}
+.fl-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+.fl-chip{display:inline-block;max-width:100%;padding:2px 9px;border-radius:99px;font-size:11px;line-height:1.4;color:#4a4866;background:#f4f3f9;border:1px solid #ebe9f4;overflow-wrap:anywhere}
+
+/* Flow: a little space under the last bullet of an opened stage, and the quiet visuals used by the conclusions */
+.rz-flow .sy-sec.open .sy-c{padding-bottom:16px}
+.rz-flow .tech li.fl-cl{padding-bottom:2px}
+.fl-cl>span,.fl-cl>ol{margin-top:7px}
+.fl-cl .fl-chips{display:flex}
+.fl-meter .fl-mh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:4px}
+.fl-meter em,.fl-seg em,.fl-cells em{font-style:normal;font-size:10.5px;color:#878787}
+.fl-meter b{font-size:11.5px;font-weight:600;color:#2f245c}
+.fl-mbar{display:block;height:5px;border-radius:5px;background:#ece9f6;overflow:hidden}
+.fl-mbar i{display:block;height:100%;border-radius:5px;background:#8d83c9}
+.fl-seg .fl-segs{display:flex;gap:3px;margin-bottom:5px}
+.fl-seg .fl-segs i{flex:1;height:5px;border-radius:3px;background:#ece9f6}
+.fl-seg .fl-segs i.on{background:#8d83c9}
+.fl-cells{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.fl-cells>span{display:flex;flex-direction:column;padding:6px 8px;border-radius:10px;background:#f4f3f9;border:1px solid #ebe9f4}
+.fl-cells b{font-size:15px;font-weight:600;line-height:1.15;color:#2f245c}
+.fl-tl3{position:relative;display:flex;justify-content:space-between;padding:0 4px}
+.fl-tl3::before{content:"";position:absolute;left:10px;right:10px;top:4px;height:2px;background:#e3e0f1}
+.fl-tl3>span{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;color:#4a4866}
+.fl-tl3>span i{width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid #8d83c9}
+.fl-mono{display:block;font-size:10.5px;line-height:1.5;color:#878787}
+.fl-dag{display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:10.5px}
+.fl-dag b{padding:2px 8px;border-radius:7px;font-weight:500;color:#4a4866;background:#f4f3f9;border:1px solid #ebe9f4}
+.fl-dag i{font-style:normal;color:#a39ec6}
+.fl-dag .fl-br{display:flex;flex-direction:column;gap:3px}
+.fl-stack{display:flex;align-items:center}
+.fl-av{width:26px;height:26px;margin-right:-6px;border-radius:50%;display:grid;place-items:center;background:#fff;box-shadow:0 0 0 2px #fff,inset 0 0 0 1px #e3e0f1}
+.fl-stack em{margin-left:14px;font-style:normal;font-size:10.5px;color:#878787}
+.fl-rows{display:flex;flex-direction:column;gap:3px}
+.fl-rows>span{display:flex;gap:8px;font-size:11px;color:#6b6888}
+.fl-rows b{flex:none;min-width:92px;font-weight:500;color:#2f245c;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10.5px}
+.fl-ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:3px 12px;counter-reset:fl}
+.fl-ol li{counter-increment:fl;font-size:11px;color:#4a4866;display:flex;align-items:center;gap:6px}
+.fl-ol li::before{content:counter(fl);flex:none;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font-size:9.5px;font-weight:600;color:#2f245c;background:#ece9f6}
+/* the quiet visuals keep their own layout (the rule above must only add the gap) */
+.fl-cl>span,.fl-cl>ol{margin-top:7px}
+.fl-cl .fl-meter,.fl-cl .fl-seg,.fl-cl .fl-mono{display:block}
+.fl-cl .fl-cells{display:grid}
+.fl-cl .fl-tl3,.fl-cl .fl-dag,.fl-cl .fl-stack,.fl-cl .fl-chips{display:flex}
+.fl-cl .fl-rows{display:flex}
+.fl-cl .fl-dag .fl-br{align-items:flex-start}
+.fl-cl .fl-dag{flex-wrap:nowrap;gap:3px;font-size:10px}
+.fl-cl .fl-dag b{padding:1px 6px;white-space:nowrap}
+.fl-cl .fl-cells{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+.fl-cl .fl-cells>span{min-width:0;padding:5px 7px}
+.fl-cl .fl-cells em{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Flow: agent chips look like the Cards pane's (flat, light, no shadow) */
+.rz-flow .st-chip{padding:4px 10px;background:#edf1f8;color:#252525;font-weight:500;font-size:11.5px;box-shadow:none}
+.rz-flow .as{display:block;margin:10px 0 8px;font-size:12px;color:#878787}
+.rz-flow .as .ch{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;background:#edf1f8;color:#252525;font-weight:500;font-size:11.5px;white-space:nowrap}
+
+/* Flow: the whole folded card is the click target; an opened card folds from its top part */
+.rz-flow .sy-sec:not(.open) .sy-c{cursor:pointer}
+.rz-flow .sy-sec.open .fl-h,.rz-flow .sy-sec.open .sy-sub{cursor:pointer}
+.rz-flow .sy-sec:not(.open) .sy-c:hover{box-shadow:0 8px 18px -12px rgba(47,36,92,.35)}
+.fl-cl .fl-dag{font-size:9.5px;gap:2px}
+.fl-cl .fl-dag b{padding:1px 5px}
+.fl-cl .fl-dag i{margin:0 1px}
+.fl-cl .fl-dag{flex-direction:column;align-items:flex-start;gap:5px;font-size:10.5px}
+.fl-cl .fl-dag .fl-br{flex-direction:row;flex-wrap:wrap;gap:4px}
+.fl-cl .fl-dag .fl-tail{display:flex;align-items:center;gap:4px}
+.fl-cl .fl-dag b{padding:1px 7px}
+/* the three agent circles: fixed round shapes (they were being squeezed into ovals by the text beside them) */
+.fl-stack{gap:0}
+.fl-stack .fl-av{flex:none;box-sizing:border-box;width:28px;height:28px;min-width:28px;margin-right:-5px;border-radius:50%;display:grid;place-items:center;background:#fff;box-shadow:0 0 0 2px #fff,0 0 0 3px #e3e0f1}
+.fl-stack .fl-av svg{flex:none;display:block}
+.fl-stack em{min-width:0;margin-left:14px;line-height:1.35}
+
+/* Flow, "Run the agents": one small section per agent; steps and actions are folded away until it is opened */
+@keyframes flBounce{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-4px);opacity:1}}
+@keyframes flBars{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+@keyframes flSweep{0%{transform:translateX(-110%)}100%{transform:translateX(260%)}}
+.rz-flow .sy-c ul.tech:empty{display:none}
+.fl-agsec{display:flex;flex-direction:column;gap:8px;margin:8px 0 4px}
+.fl-agent{border-radius:14px;background:#fff;box-shadow:inset 0 0 0 1px #ebe9f4;cursor:pointer;transition:box-shadow .3s,background .3s;animation:flUp .4s cubic-bezier(.2,.8,.2,1) both}
+.fl-agent.work{background:color-mix(in srgb,var(--c) 6%,#fff);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--c) 45%,#fff),0 10px 22px -14px color-mix(in srgb,var(--c) 80%,transparent)}
+.fl-agh{display:flex;align-items:center;gap:10px;padding:10px 12px}
+.fl-agi{position:relative;flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 12%,#fff)}
+.fl-agi .fl-spin{inset:-3px;width:calc(100% + 6px);height:calc(100% + 6px)}
+.fl-agi .fl-spin .fl-trk{stroke:color-mix(in srgb,var(--c) 16%,#fff)}
+.fl-agi .fl-spin .fl-arc{stroke:var(--c)}
+.fl-agn{flex:1;min-width:0;display:flex;flex-direction:column}
+.fl-agn b{font-size:12.5px;font-weight:600;line-height:1.3;color:#2f245c}
+.fl-agn small{font-size:10.5px;line-height:1.3;color:#878787}
+.fl-agent .fl-chv{flex:none;color:#8a85b0;transition:transform .25s ease}
+.fl-agent.open .fl-chv{transform:rotate(180deg)}
+.fl-ld{flex:none;display:inline-flex;align-items:center;gap:3px;margin-right:2px}
+.fl-ld.dots i{width:5px;height:5px;border-radius:50%;background:var(--c);animation:flBounce 1s ease-in-out infinite}
+.fl-ld.dots i:nth-child(2){animation-delay:.15s}.fl-ld.dots i:nth-child(3){animation-delay:.3s}
+.fl-ld.bars{height:14px;align-items:flex-end}
+.fl-ld.bars i{width:3px;height:14px;border-radius:2px;background:var(--c);transform-origin:bottom;animation:flBars .9s ease-in-out infinite}
+.fl-ld.bars i:nth-child(2){animation-delay:.12s}.fl-ld.bars i:nth-child(3){animation-delay:.24s}.fl-ld.bars i:nth-child(4){animation-delay:.36s}
+.fl-ld.sweep{display:block;width:42px;height:4px;border-radius:4px;overflow:hidden;background:color-mix(in srgb,var(--c) 16%,#fff)}
+.fl-ld.sweep i{display:block;width:40%;height:100%;border-radius:4px;background:var(--c);animation:flSweep 1.1s ease-in-out infinite}
+.fl-agd{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s cubic-bezier(.2,.8,.2,1)}
+.fl-agd>div{overflow:hidden;min-height:0;padding:0 12px}
+.fl-agent.open .fl-agd{grid-template-rows:1fr}
+.fl-agent.open .fl-agd>div{padding-bottom:12px}
+.fl-steps{list-style:none;margin:0 0 8px;padding:0;display:flex;flex-direction:column;gap:6px}
+.fl-steps li{display:flex;align-items:center;gap:8px;font-size:11.5px;line-height:1.35;color:#4a4866}
+.fl-steps li.pend{color:#b0adc4}
+.fl-steps .fl-sd{position:relative;flex:none;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;color:#fff;background:#e6e2f5}
+.fl-steps li.done .fl-sd{background:#12b76a}
+.fl-steps li.now .fl-sd{background:#fff}
+.fl-steps .fl-spin{inset:0}
+.fl-find{display:block;margin-top:8px;font-size:11.5px;line-height:1.5;color:#4a4866}
+.fl-agent .fl-srcs{margin-top:8px;margin-bottom:0}
+
+/* Flow, "Run the agents": no boxes. The agents sit open on the card, split by thin divider lines; one loader only (the ring on the icon) */
+.fl-agsec{gap:0;margin:6px 0 0}
+.fl-agent,.fl-agent.work{background:none;box-shadow:none;border-radius:0;border-top:1px solid #ece9f5;animation:flUp .4s cubic-bezier(.2,.8,.2,1) both}
+.fl-agent:first-child{border-top:0}
+.fl-agh{padding:10px 0}
+.fl-agd>div{padding:0}
+.fl-agent.open .fl-agd>div{padding-bottom:12px}
+
+/* Flow header: white mark, no status ring; progress bar spaced from the numbers with its % beside it; top bar stays put while the rest scrolls */
+.rz-flow .au-orb:not(.live)>i{display:none}
+.rz-flow .au-orb{box-shadow:0 0 0 3px #fff,0 6px 14px -6px rgba(47,36,92,.5)}
+.fl-bar2{grid-column:1/-1;display:flex;align-items:center;gap:12px;margin-top:10px}
+.fl-bar2 .fl-bar{flex:1}
+.fl-pct{flex:none;font-size:13px;font-weight:600;color:#49658b;font-variant-numeric:tabular-nums;min-width:36px;text-align:right}
+.rz-flow .sy-top{position:sticky;top:0;z-index:20;background:rgba(250,249,255,.96);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);padding-bottom:12px;border-radius:16px 16px 0 0}
+
+/* Flow agents: the step being performed rolls in from below, holds, and rolls out upward as the next one arrives; ring no longer clipped */
+@keyframes flTick{0%{transform:translateY(120%);opacity:0}16%{transform:none;opacity:1}78%{transform:none;opacity:1}100%{transform:translateY(-120%);opacity:0}}
+@keyframes flTickIn{0%{transform:translateY(120%);opacity:0}100%{transform:none;opacity:1}}
+.fl-tick{display:block;position:relative;height:15px;overflow:hidden}
+.fl-tick>span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;animation:flTick 2.6s cubic-bezier(.3,.7,.3,1) both}
+.fl-tick>span.last{animation:flTickIn .5s cubic-bezier(.3,.7,.3,1) both}
+.fl-agsec{padding:0 6px 0 6px}
+.fl-agent .fl-agn small{min-width:0}
+
+@keyframes flOut{from{transform:none;opacity:1}to{transform:translateY(-120%);opacity:0}}
+.fl-tick>span{position:absolute;left:0;right:0;top:0;animation:none}
+.fl-tick>span.in{animation:flTickIn .5s cubic-bezier(.3,.7,.3,1) both}
+.fl-tick>span.out{animation:flOut .5s cubic-bezier(.3,.7,.3,1) both}
+.fl-plbl{flex:none;font-size:13px;font-weight:600;color:#4a4866}
+.fl-agent .fl-ok{right:-2px;bottom:-2px;width:11px;height:11px;background:rgba(18,183,106,.85);box-shadow:0 0 0 1.5px #fff}
+.fl-agent .fl-ok svg{width:7px;height:7px}
+/* step spinners are dark grey; only the agent ring keeps its colour */
+.fl-spin .fl-trk{stroke:#e4e4e7}
+.fl-spin .fl-arc{stroke:#52525b}
+.fl-spin .fl-dot{fill:#52525b}
+.fl-agi .fl-spin .fl-trk{stroke:color-mix(in srgb,var(--c) 16%,#fff)}
+.fl-agi .fl-spin .fl-arc{stroke:var(--c)}
+
+/* Flow agent, opened: breathing room, plain bullets instead of check marks, text lined up under the agent name */
+.fl-agent.open .fl-agd>div{padding:2px 2px 18px 42px}
+.fl-agent.open .fl-agh{padding-bottom:6px}
+.fl-steps{gap:11px;margin:6px 0 16px}
+.fl-steps li{gap:10px;font-size:12px;line-height:1.45;color:#3d3b57}
+.fl-steps .fl-sd,.fl-steps li.done .fl-sd,.fl-steps li.now .fl-sd{width:12px;height:12px;background:none;position:relative}
+.fl-steps li.done .fl-sd::before,.fl-steps li.pend .fl-sd::before{content:"";width:5px;height:5px;border-radius:50%;background:#8b8aa3}
+.fl-steps li.pend .fl-sd::before{background:#d6d4e3}
+.fl-steps li.now .fl-sd .fl-spin{inset:0}
+.fl-agent .fl-mono{display:block;margin:0 0 12px;font-size:11px;line-height:1.5;color:#8a8aa0}
+.fl-find{margin-top:0;font-size:12px;line-height:1.65;color:#4a4866}
+.fl-agent .fl-srcs{margin-top:14px}
+.fl-plbl{font-size:12px;font-weight:400;color:#8a8aa0}
+.fl-pct{font-size:12px;font-weight:400;color:#8a8aa0}
+.fl-n svg.fl-spin{width:100%;height:100%;inset:0}
+.rz-flow .sy-dot{display:grid;place-items:center}
+.fl-n{width:15px;height:15px}
+.fl-n.done svg{width:8px;height:8px}
+.fl-n.done{box-shadow:0 0 0 2.5px rgba(18,183,106,.14)}
+.fl-n.done svg{width:10px;height:10px}
+
+/* Flow: the green line shimmers, softer and lighter greens flowing continuously from top to bottom */
+@keyframes flShim{from{background-position:0 200%}to{background-position:0 -100%}}
+.rz-flow .sy-sec::after,.rz-flow .sy-sec.done::after,.rz-flow .sy-sec.act::after{background:linear-gradient(180deg,#8fdcb8 0%,#6fd0a3 22%,#c4f0dc 40%,#8fdcb8 58%,#4fc690 80%,#8fdcb8 100%);background-size:100% 220%;animation:flShim 2.8s linear infinite}
+
+/* Flow agent, opened: everything starts from the centre of the agent icon */
+.fl-agent.open .fl-agd>div{padding-left:16px}
+.fl-steps .fl-sd,.fl-steps li.done .fl-sd,.fl-steps li.now .fl-sd{width:6px;height:6px;flex:none}
+.fl-steps li.now .fl-sd .fl-spin{inset:-3px;width:12px;height:12px}
+.fl-steps li{gap:10px}
+
+/* Flow agents are boxed again. The running one has no spinner: its outline itself turns in the agent's colour. */
+.fl-agsec{gap:8px;margin:8px 0 4px;padding:0}
+.fl-agent,.fl-agent.work{position:relative;border:0;border-radius:14px;background:#fff;box-shadow:inset 0 0 0 1px #ebe9f4}
+.fl-agent:first-child{border:0}
+.fl-agent.work{background:color-mix(in srgb,var(--c) 5%,#fff);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 14%,#fff)}
+.fl-agent.work::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.8px;pointer-events:none;background:conic-gradient(from var(--ang),transparent 0 45%,color-mix(in srgb,var(--c) 35%,transparent) 65%,var(--c) 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);animation:spin 1.6s linear infinite}
+.fl-agh{padding:11px 12px}
+.fl-agent.open .fl-agh{padding-bottom:6px}
+.fl-agn{gap:4px}
+.fl-agent .fl-agd>div,.fl-agent.open .fl-agd>div{padding-left:12px;padding-right:12px}
+.fl-agent.open .fl-agd>div{padding-bottom:14px}
+
+/* Flow: one long, soft glare travels the whole line from end to end and back again (replaces the per-segment shimmer) */
+.rz-flow .sy-sec::after,.rz-flow .sy-sec.done::after,.rz-flow .sy-sec.act::after{background:#8fdcb8;background-size:auto;animation:none}
+.rz-flow .sy-body{position:relative}
+.fl-glare{position:absolute;left:31px;top:43px;bottom:22px;width:2px;border-radius:2px;overflow:hidden;pointer-events:none;z-index:0}
+.fl-glare b{position:absolute;left:0;right:0;top:0;height:150px;background:linear-gradient(180deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.55) 50%,rgba(255,255,255,0) 100%);animation:flGlare 4.4s ease-in-out infinite alternate}
+@keyframes flGlare{from{top:-150px}to{top:100%}}
+
+/* glare passes behind the check marks, and moves slower */
+.rz-flow .sy-sec{animation-fill-mode:backwards}
+.fl-glare{z-index:0}
+.fl-glare b{animation-duration:8.5s}
+
+/* first two agents: a lighter, shinier outline in their own palette (the third stays as it is) */
+.fl-agent.work:nth-child(-n+2)::before{background:conic-gradient(from var(--ang),transparent 0 45%,color-mix(in srgb,var(--c) 30%,transparent) 65%,color-mix(in srgb,var(--c) 52%,#fff) 100%);filter:drop-shadow(0 0 2.5px color-mix(in srgb,var(--c) 45%,#fff))}
+
+/* Prototype settings: what a change touched is outlined for three seconds */
+@keyframes hlFlash{0%{outline-color:rgba(106,91,214,0);box-shadow:0 0 0 0 rgba(106,91,214,0)}10%{outline-color:#6a5bd6;box-shadow:0 0 0 6px rgba(106,91,214,.18)}70%{outline-color:#6a5bd6;box-shadow:0 0 0 6px rgba(106,91,214,.12)}100%{outline-color:rgba(106,91,214,0);box-shadow:0 0 0 0 rgba(106,91,214,0)}}
+.hl-flash{outline:2px solid #6a5bd6;outline-offset:-2px;border-radius:inherit;animation:hlFlash 3s ease-out both}
+.pc-seg button.hl-flash{outline-offset:1px;border-radius:8px}
+
+.pc-note{margin:-4px 0 10px;font-size:11.5px;line-height:1.45;color:#7a7a8c}

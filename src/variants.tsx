@@ -10,7 +10,7 @@ export type VariantState = {
   thinking: 'globe' | 'blocks' | 'blocks2' | 'pixels' | 'graph' | 'timeline'
   speed: 'quick' | 'standard'
   agents: '3' | '5' | '10' | 'mix'
-  pane: 'cards' | 'trace' | 'ai' | 'bento'
+  pane: 'cards' | 'trace' | 'ai' | 'bento' | 'flow'
   glass: 'white' | 'black'
   spacing: 'off' | 'on'
   agentLock: 'menu' | 'chip' | 'inline'
@@ -72,6 +72,7 @@ export const CONTROLS: ControlDef[] = [
     options: [
       { id: 'cards', label: 'Cards' },
       { id: 'ai', label: 'Aurora' },
+      { id: 'flow', label: 'Flow' },
       // Story ('trace') and Bento ('bento') are hidden for now; their code is kept so they can come back
     ],
   },
