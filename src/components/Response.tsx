@@ -247,7 +247,7 @@ export function Response({
   const finished = !pending && shown >= secs.length
   return (
     <>
-    <div ref={root} className={'rcard' + (bare ? ' bare' : '') + (glass ? ' glass' : '') + (variants.format === 'editorial' ? ' fmt-ed' : '')}>
+    <div ref={root} className={'rcard' + (bare ? ' bare' : '') + (glass ? ' glass' : '') + (variants.answer === 'flat' ? ' flat' : '') + (variants.format === 'editorial' ? ' fmt-ed' : '')}>
       <FlowCtx.Provider value={{ stream, onStreamed, onGrow }}>{secs.slice(0, shown)}</FlowCtx.Provider>
       {pending && (
         <div className="resp-pend" role="status">

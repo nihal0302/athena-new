@@ -92,7 +92,7 @@ export function RecentsMenu({ open, onToggle, title, meta }: { open: boolean; on
   return (
     <aside style={title ? ({ ['--tx-h' as string]: txH + 'px' } as React.CSSProperties) : undefined} className={'recents' + (open ? '' : ' collapsed') + (title ? ' withtitle' : '')} aria-label="Recent chats">
       <div className="rc-h" onClick={open ? undefined : onToggle} role={open ? undefined : 'button'} tabIndex={open ? undefined : 0} aria-label={open ? undefined : 'Expand recent chats'} onKeyDown={(e) => { if (!open && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onToggle() } }}>
-        <span className="rc-ic"><Hi i={BubbleChatIcon} size={19} /></span>
+        <span className="rc-ic"><span className="ic-a"><Hi i={BubbleChatIcon} size={19} /></span><span className="ic-b"><Icon n="panel" size={18} /></span></span>
         <span className="rc-tx">
           <span className="t1">Recent Chats</span>
           {title && <span className="t2" ref={t2} title={title}>{title}</span>}

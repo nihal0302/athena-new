@@ -90,7 +90,7 @@ export function ChatScreen({
 }) {
   const [text, setText] = useState('')
   const { variants } = useVariants()
-  const [panelOpen, setPanelOpen] = useState(false) // right pane collapsed by default
+  const [panelOpen, setPanelOpen] = useState(true) // the reasoning trace opens by itself for every new question
   const [wide, setWide] = useState(false)
   const [fs, setFs] = useState(false)
   const [shown, setShown] = useState(0)
@@ -154,13 +154,13 @@ export function ChatScreen({
     return () => clearInterval(id)
   }, [run.done, runKey, sc.sectionCount, sc.id, live])
 
-  // reset the pane state for a fresh question
+  // every new question opens the reasoning trace (it can still be closed)
   useEffect(() => {
-    setPanelOpen(false)
+    setPanelOpen(true)
     setWide(false)
   }, [runKey])
 
-  const open = () => setPanelOpen(true)
+  const open = () => setPanelOpen((p) => !p) // the "Reasoning trace" buttons open the pane, and close it if it is already open
   const cls = 'chat view' + (menuOpen ? ' menu-open' : '') + (panelOpen ? ' panel-open' : '') + (wide ? ' panel-wide' : '') + (variants.layout === 'compact' || variants.layout === 'rail' ? ' lay-compact' : '') + (variants.layout === 'rail' ? ' lay-rail' : '')
   return (
     <section className={cls}>

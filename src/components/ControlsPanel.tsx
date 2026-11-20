@@ -9,6 +9,7 @@ const TARGETS: Record<string, string> = {
   layout: '.chat .ctitle, .chat .recents, .chat .rrail',
   agentLock: '.chat .composer',
   spacing: '.chat .ans-anchor',
+  answer: '.chat .ans-anchor',
   glass: '.rz-bento',
   pane: '.rz',
   thinking: '.chat .acol > :first-child',

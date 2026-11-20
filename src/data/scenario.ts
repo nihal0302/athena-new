@@ -296,8 +296,8 @@ function makeSerial(n: 3 | 5 | 10): Scenario {
     sourceStep = 1
   } else if (n === 5) {
     // The run is paced for the reasoning trace: a short start, then most of the time (about 60%) goes on the agents.
-    const DUR5 = [3.5, 3.5, 36, 5, 5]
-    const K5 = 35 / 9 // the agents' own timings, stretched to fill their longer stage
+    const DUR5 = [3, 3, 22, 4, 4]
+    const K5 = 21 / 9 // the agents' own timings, stretched to fill their longer stage
     const AG5 = AGENTS.map((a) => ({ ...a, start: a.start * K5, dur: a.dur * K5 }))
     steps = STEPS.map((st, i) => ({
       ...st,

@@ -250,7 +250,7 @@ export function RepositoryV2({ onNew, onRepo, onAsk, onStart, onToast }: { onNew
 
       <aside className={'rv-pane' + (paneOpen ? '' : ' collapsed')} aria-label="Agent repository menu">
         <div className="rv-ph" onClick={paneOpen ? undefined : () => setPaneOpen(true)} role={paneOpen ? undefined : 'button'} tabIndex={paneOpen ? undefined : 0} aria-label={paneOpen ? undefined : 'Expand agent repository menu'} onKeyDown={(e) => { if (!paneOpen && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); setPaneOpen(true) } }}>
-          <span className="rv-pic"><Icon n="chip" size={19} /></span>
+          <span className="rv-pic"><span className="ic-a"><Icon n="chip" size={19} /></span><span className="ic-b"><Icon n="panel" size={18} /></span></span>
           <span className="rv-ptx">Agent repository</span>
           <button className="rv-pcol" aria-label="Collapse agent repository menu" tabIndex={paneOpen ? 0 : -1} onClick={() => setPaneOpen(false)}><Icon n="panel" size={18} /></button>
         </div>

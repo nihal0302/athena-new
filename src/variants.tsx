@@ -16,10 +16,11 @@ export type VariantState = {
   agentLock: 'menu' | 'chip' | 'inline'
   layout: 'classic' | 'compact' | 'rail'
   format: 'standard' | 'editorial'
+  answer: 'flat' | 'card'
   repo: 'v1' | 'v2'
 }
 
-export const DEFAULT_VARIANTS: VariantState = { thinking: 'blocks', speed: 'standard', agents: '5', pane: 'cards', glass: 'black', spacing: 'off', agentLock: 'menu', layout: 'compact', format: 'standard', repo: 'v2' }
+export const DEFAULT_VARIANTS: VariantState = { thinking: 'timeline', speed: 'standard', agents: '5', pane: 'cards', glass: 'black', spacing: 'off', agentLock: 'menu', layout: 'compact', format: 'standard', answer: 'flat', repo: 'v2' }
 
 export type ControlDef = {
   key: keyof VariantState
@@ -39,6 +40,14 @@ export const CONTROLS: ControlDef[] = [
       { id: 'compact', label: 'Compact' },
       { id: 'rail', label: 'Right panel' },
       // (a variant that put the details into the top nav was dropped: the top nav has to look the same everywhere)
+    ],
+  },
+  {
+    key: 'answer',
+    label: 'Answer layout',
+    options: [
+      { id: 'flat', label: 'Flat' },
+      { id: 'card', label: 'Card' },
     ],
   },
   {
@@ -71,7 +80,7 @@ export const CONTROLS: ControlDef[] = [
     label: 'Reasoning pane',
     options: [
       { id: 'cards', label: 'Cards' },
-      { id: 'ai', label: 'Aurora' },
+      // Aurora ('ai') is hidden for now; its code stays so it can come back
       { id: 'flow', label: 'Flow' },
       // Story ('trace') and Bento ('bento') are hidden for now; their code is kept so they can come back
     ],
@@ -80,9 +89,9 @@ export const CONTROLS: ControlDef[] = [
     key: 'thinking',
     label: 'Thinking section',
     options: [
-      { id: 'blocks', label: 'Blocks' },
-      { id: 'pixels', label: 'Pixels' },
       { id: 'timeline', label: 'Timeline' },
+      { id: 'pixels', label: 'Pixels' },
+      { id: 'blocks', label: 'Blocks' },
       // Waves ('blocks2') is hidden for now; its code stays so it can come back
       // Globe and Graph are retired; their code stays in the project
     ],
@@ -112,7 +121,8 @@ function withRules(v: VariantState): VariantState {
 }
 
 // a new key, so earlier saved choices do not hide the new defaults (Bento pane, Globe variation)
-const STORAGE_KEY = 'athena-v2-variants-v17'
+const STORAGE_KEY = 'athena-v2-variants-v18'
+const OLD_KEY = 'athena-v2-variants-v17'
 
 /** keep only values that still exist (older saved settings may name a variation that was removed) */
 function sanitize(raw: Partial<Record<string, string>>): VariantState {
@@ -128,6 +138,9 @@ function load(): VariantState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) return sanitize(JSON.parse(raw))
+    // earlier saved choices carry over, except the thinking section, which now starts on Timeline
+    const old = localStorage.getItem(OLD_KEY)
+    if (old) return sanitize({ ...JSON.parse(old), thinking: DEFAULT_VARIANTS.thinking })
   } catch {
     /* storage unavailable: fall back to defaults */
   }
