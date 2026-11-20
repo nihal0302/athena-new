@@ -46,16 +46,17 @@ export function PixelField({ done }: { done: boolean }) {
         const o = right[Math.floor(Math.random() * right.length)]
         for (let g = 0; g < group; g++) {
           const cell = g === 0 ? o : cells.find((x) => x.c === o.c + Math.floor(Math.random() * 3) - 1 && x.r === o.r + Math.floor(Math.random() * 3) - 1) ?? o
+          if (flashes.some((f) => f.c === cell.c && f.r === cell.r)) continue // never stack two flashes on one cell
           flashes.push({ c: cell.c, r: cell.r, t0: now + g * 40, dur: 900 + Math.random() * 900 })
         }
         next = now + 140 + Math.random() * 260
       }
       flashes = flashes.filter((f) => now - f.t0 < f.dur)
       ctx.clearRect(0, 0, W, H)
-      ctx.fillStyle = 'rgba(47,36,92,.07)'
+      ctx.fillStyle = 'rgba(47,36,92,.055)'
       for (const x of cells) ctx.fillRect(x.c * PITCH, x.r * PITCH, CELL, CELL)
       if (restA > 0.01) {
-        ctx.fillStyle = `rgba(47,36,92,${0.2 * restA})`
+        ctx.fillStyle = `rgba(47,36,92,${0.12 * restA})`
         for (const x of rest) ctx.fillRect(x.c * PITCH, x.r * PITCH, CELL, CELL)
       }
       for (const f of flashes) {
@@ -63,9 +64,9 @@ export function PixelField({ done }: { done: boolean }) {
         if (age < 0) continue
         const a = age < 0.12 ? age / 0.12 : Math.pow(1 - (age - 0.12) / 0.88, 1.6) // quick on, slow dim
         ctx.save()
-        ctx.shadowColor = `rgba(47,36,92,${0.6 * a})`
-        ctx.shadowBlur = 8
-        ctx.fillStyle = `rgba(47,36,92,${0.1 + 0.9 * a})`
+        ctx.shadowColor = `rgba(47,36,92,${0.22 * a})`
+        ctx.shadowBlur = 6
+        ctx.fillStyle = `rgba(47,36,92,${0.07 + 0.38 * a})`
         ctx.fillRect(f.c * PITCH, f.r * PITCH, CELL, CELL)
         ctx.restore()
       }
