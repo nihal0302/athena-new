@@ -1,12 +1,14 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CONTROLS, useVariants } from '../variants'
 import { Icon } from './Icon'
+import { PROTO_TOGGLE } from './Shell'
 
 const SEEN_KEY = 'athena-v2-controls-seen'
 
 /** Which part of the screen each setting changes. After a change, that part is outlined for three seconds so it is clear what moved. */
 const TARGETS: Record<string, string> = {
   layout: '.chat .ctitle, .chat .recents, .chat .rrail',
+  theme: '.chat',
   agentLock: '.chat .composer',
   spacing: '.chat .ans-anchor',
   answer: '.chat .ans-anchor',
@@ -21,6 +23,12 @@ const HL_MS = 3000
 /** Floating prototype controls: a prominent pill that opens a compact toggle for each setting. */
 export function ControlsPanel({ onReplay }: { onReplay?: () => void }) {
   const [open, setOpen] = useState(false)
+  const [shown, setShown] = useState(true) // visible by default; the profile picture in the top nav shows and hides it
+  useEffect(() => {
+    const flip = () => setShown((s) => { if (s) setOpen(false); return !s })
+    window.addEventListener(PROTO_TOGGLE, flip)
+    return () => window.removeEventListener(PROTO_TOGGLE, flip)
+  }, [])
   // the pill gently pulses until someone has opened it once in this browser session
   const [seen, setSeen] = useState(() => {
     try {
@@ -60,6 +68,7 @@ export function ControlsPanel({ onReplay }: { onReplay?: () => void }) {
     }
   }
 
+  if (!shown) return null
   return (
     <div className="pc">
       {open && (

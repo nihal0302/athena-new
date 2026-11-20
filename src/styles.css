@@ -3552,3 +3552,23 @@ ul.tech li::before{content:"";position:absolute;left:2px;top:.62em;width:4px;hei
 /* Left nav: two options at the top, then "Personal" and "Departments" as plain headings over their lists (no drop-downs) */
 .rv-pl>.rv-i,.rv-pl>.rv-i:first-child{margin-top:0}
 .rv-pl .rv-gt{margin-top:18px;padding:0 10px 8px;font-size:12px;color:rgba(255,255,255,.5)}
+
+/* ===== Theme: All dark (conversation screen) =====
+   The page takes the home screen's dark background. The content is rendered in dark by inverting its lightness (hues are kept),
+   and the things that must keep their own colours (logos, charts' accents, gradient rings, the sparkle) are turned back. */
+.chat.dark{background:radial-gradient(1200px 700px at 60% 30%,#12304f 0,#0a1829 45%,#050b14 100%);color:#fff;color-scheme:dark}
+.chat.dark .stage,.chat.dark .rz,.chat.dark .rrail,.chat.dark .ctitle{filter:invert(1) hue-rotate(180deg)}
+.chat.dark .spark,.chat.dark .cbox::before,.chat.dark img,.chat.dark .rz .au-orb,.chat.dark .rz .sy-mark,.chat.dark .rz-ic{filter:invert(1) hue-rotate(180deg)}
+.chat.dark .stage,.chat.dark .rz,.chat.dark .rrail,.chat.dark .ctitle{color:var(--ink)}
+.chat.dark .recents{background:rgba(5,9,16,.82);border:1px solid rgba(255,255,255,.1);box-shadow:none;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);--rcbg:#0a0e16}
+/* panes: dark glass (values are written pre-inversion) */
+.chat.dark .rz,.chat.dark .rz.done,.chat.dark .rz.rz-story,.chat.dark .rz.rz-story.rz-ai{background:rgba(233,237,245,.84);border:1px solid rgba(0,0,0,.1);box-shadow:0 24px 54px -22px rgba(255,255,255,.12);backdrop-filter:none;-webkit-backdrop-filter:none}
+.chat.dark .rz.rz-flow .au-bg{opacity:.5}
+/* chart bars keep their own hues, lifted so they read on dark */
+.chat.dark .chart-svg rect{filter:brightness(1.9) saturate(1.15) invert(1) hue-rotate(180deg)}
+
+/* full-screen chart: dark card */
+.chat.dark .fsbox{filter:invert(1) hue-rotate(180deg);color:var(--ink)}
+.chat.dark .fsbox{background:#e9edf5}
+
+.avatar{cursor:pointer;padding:0}

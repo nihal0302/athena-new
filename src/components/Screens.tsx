@@ -164,7 +164,7 @@ export function ChatScreen({
   }, [runKey])
 
   const open = () => setPanelOpen((p) => !p) // the "Reasoning trace" buttons open the pane, and close it if it is already open
-  const cls = 'chat view' + (menuOpen ? ' menu-open' : '') + (panelOpen ? ' panel-open' : '') + (wide ? ' panel-wide' : '') + (variants.layout === 'compact' || variants.layout === 'rail' ? ' lay-compact' : '') + (variants.layout === 'rail' ? ' lay-rail' : '')
+  const cls = 'chat view' + (menuOpen ? ' menu-open' : '') + (panelOpen ? ' panel-open' : '') + (wide ? ' panel-wide' : '') + (variants.layout === 'compact' || variants.layout === 'rail' ? ' lay-compact' : '') + (variants.layout === 'rail' ? ' lay-rail' : '') + (variants.theme === 'dark' ? ' dark' : '')
   return (
     <section className={cls}>
       <TopBar onNew={onNew} onRepo={onRepo} />

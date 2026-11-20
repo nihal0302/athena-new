@@ -15,12 +15,13 @@ export type VariantState = {
   spacing: 'off' | 'on'
   agentLock: 'menu' | 'chip' | 'inline'
   layout: 'classic' | 'compact' | 'rail'
+  theme: 'mix' | 'dark'
   format: 'standard' | 'editorial'
   answer: 'flat' | 'card'
   repo: 'v1' | 'v2'
 }
 
-export const DEFAULT_VARIANTS: VariantState = { thinking: 'timeline', speed: 'standard', agents: '5', pane: 'cards', glass: 'black', spacing: 'off', agentLock: 'menu', layout: 'compact', format: 'standard', answer: 'flat', repo: 'v2' }
+export const DEFAULT_VARIANTS: VariantState = { thinking: 'timeline', speed: 'standard', agents: '5', pane: 'cards', glass: 'black', spacing: 'off', agentLock: 'menu', layout: 'compact', theme: 'mix', format: 'standard', answer: 'flat', repo: 'v2' }
 
 export type ControlDef = {
   key: keyof VariantState
@@ -48,6 +49,14 @@ export const CONTROLS: ControlDef[] = [
     options: [
       { id: 'flat', label: 'Flat' },
       { id: 'card', label: 'Card' },
+    ],
+  },
+  {
+    key: 'theme',
+    label: 'Theme',
+    options: [
+      { id: 'mix', label: 'Mix' },
+      { id: 'dark', label: 'All dark' },
     ],
   },
   {
@@ -104,15 +113,7 @@ export const CONTROLS: ControlDef[] = [
       { id: 'standard', label: 'Detailed' },
     ],
   },
-  {
-    key: 'agents',
-    label: 'Steps',
-    options: [
-      { id: '3', label: '3 steps' },
-      { id: '5', label: '5 steps' },
-      { id: 'mix', label: 'Complex' },
-    ],
-  },
+  // Steps (3 / 5 / Complex) is hidden for now; the run uses 5 steps. Its code stays so it can come back.
 ]
 
 /** The Complex layout (agents in parallel and in series) only exists for the Graph variation. */

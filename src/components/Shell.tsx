@@ -7,12 +7,15 @@ import { PlusSignIcon, Mic01Icon, File01Icon, Attachment01Icon, ArrowDown01Icon,
 
 const Hi = ({ i, size = 18 }: { i: typeof PlusSignIcon; size?: number }) => <HugeiconsIcon icon={i} size={size} strokeWidth={1.7} />
 
+/** the profile picture shows and hides the prototype controls */
+export const PROTO_TOGGLE = 'athena-proto-toggle'
+
 export function TopBar({ onNew, onRepo, repo }: { onNew: () => void; onRepo?: () => void; repo?: boolean }) {
   return (
     <div className="top">
       <div className="l">
         <div className="pill-w"><Icon n="left" size={12} />My Harbour</div>
-        <div className="avatar" role="img" aria-label="Profile" />
+        <button className="avatar" aria-label="Profile (shows or hides the prototype controls)" title="Prototype controls" onClick={() => window.dispatchEvent(new Event(PROTO_TOGGLE))} />
       </div>
       <div className="dock">
         {repo ? (

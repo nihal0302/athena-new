@@ -13,9 +13,9 @@ type Sort = 'popular' | 'rating' | 'name'
 type Col = { id: ColId; label: string; icon: string }
 /** The agents that belong to the person: what they pinned, what they used lately, and their own department's. */
 const PERSONAL: Col[] = [
+  { id: 'mine', label: 'My department', icon: 'users' },
   { id: 'pinned', label: 'Pinned', icon: 'pin' },
   { id: 'recent', label: 'Recently used', icon: 'clock' },
-  { id: 'mine', label: 'My department', icon: 'users' },
 ]
 const GROUPS: Col[] = [
   { id: 'enterprise', label: 'Shared across Aldar', icon: 'globe' },
@@ -225,7 +225,7 @@ function FinderResults({ text, found, stateOf, onAct, onOpen, onClear, onSuggest
   } else {
     const bs = stateOf(best.agent)
     const coveredAsks = new Set(found.results.flatMap((r) => r.covers)).size
-    body = best.agent.name + ' from ' + (best.agent.dept === ENTERPRISE ? 'the shared agents' : best.agent.dept) + ' is the closest fit' + (multi && best.covers.length === found.asks.length ? ' and can handle everything you asked.' : '.')
+    body = best.agent.name + (best.agent.dept === ENTERPRISE ? '' : ' from ' + best.agent.dept) + ' is the closest fit' + (multi && best.covers.length === found.asks.length ? ' and can handle everything you asked.' : '.')
     if (n > 1) body += ' ' + found.results[1].agent.name + ' is also worth a look.'
     if (multi && best.covers.length < found.asks.length) body += ' Between them they cover ' + coveredAsks + ' of your ' + found.asks.length + ' tasks.'
     if (bs === 'locked') body += ' You don’t have access to ' + best.agent.name + ' yet, but you can request it below.'
@@ -253,7 +253,7 @@ function FinderResults({ text, found, stateOf, onAct, onOpen, onClear, onSuggest
                 <div className="fnd-fb">
                   <div className="fnd-ft">
                     <b>{r.agent.name}</b>
-                    <span className="fnd-fd">{r.agent.dept === ENTERPRISE ? 'Shared across Aldar' : r.agent.dept}</span>
+                    <span className="fnd-fd">{r.agent.dept === ENTERPRISE ? 'Everyone' : r.agent.dept}</span>
                     {k === 0 && !found.fallback && <span className="fnd-fbest">Best match</span>}
                   </div>
                   <p>{r.agent.desc}</p>
@@ -385,9 +385,6 @@ export function RepositoryV2({ onNew, onRepo, onAsk, onStart, onToast }: { onNew
         <div className="rv-pl">
           <button className={'rv-i' + (isOn({ kind: 'all' }) ? ' on' : '')} onClick={() => pick({ kind: 'all' })}>
             <Icon n="grid" size={16} /><span>All agents</span>
-          </button>
-          <button className={'rv-i' + (isOn({ kind: 'col', id: 'enterprise' }) ? ' on' : '')} onClick={() => pick({ kind: 'col', id: 'enterprise' })}>
-            <Icon n="globe" size={16} /><span>Shared across Aldar</span>
           </button>
 
           <div className="rv-gt">Personal</div>
