@@ -21,6 +21,7 @@ export function HomeScreen({
   onAsk,
   onRepo,
   agent,
+  draft,
   onClearAgent,
 }: {
   menuOpen: boolean
@@ -29,9 +30,11 @@ export function HomeScreen({
   onAsk: (q: string) => void
   onRepo: () => void
   agent?: Agent | null
+  draft?: string
   onClearAgent?: () => void
 }) {
-  const [text, setText] = useState('')
+  const [text, setText] = useState(draft ?? '')
+  useEffect(() => { if (draft) setText(draft) }, [draft])
   const { variants } = useVariants()
   // starter chips follow the response-time setting: short questions for quick, the full brief for detailed
   const starters = variants.speed === 'quick' ? QUICK_STARTERS : STARTERS

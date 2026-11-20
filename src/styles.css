@@ -3429,3 +3429,126 @@ ul.tech li::before{content:"";position:absolute;left:2px;top:.62em;width:4px;hei
 .recents.collapsed .rc-h:hover .ic-a,.rv-pane.collapsed .rv-ph:hover .ic-a{opacity:0;transform:scale(.85)}
 .recents.collapsed .rc-h:hover .ic-b,.rv-pane.collapsed .rv-ph:hover .ic-b{opacity:1;transform:none}
 .recents.collapsed .rc-h:hover .rc-ic,.rv-pane.collapsed .rv-ph:hover .rv-pic{background:rgba(255,255,255,.12)}
+
+/* Agent finder: results show right on the repository page */
+.fnd-fr{margin:0 0 28px;padding:20px 22px 22px;border-radius:20px;background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);animation:gbIn .4s ease both}
+.fnd-frh{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+.fnd-frh h2{margin:0;font-size:18px;font-weight:600;color:#fff}
+.fnd-frh p{margin:4px 0 0;font-size:13px;color:rgba(255,255,255,.6)}
+.fnd-frc{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:99px;font-size:12.5px;color:rgba(255,255,255,.8);background:rgba(255,255,255,.08)}
+.fnd-frc:hover{background:rgba(255,255,255,.14);color:#fff}
+.fnd-frl{display:flex;flex-direction:column;gap:12px}
+.fnd-fc{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:16px;align-items:center;padding:16px 18px;border-radius:16px;background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.fnd-fc:first-child{background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
+.fnd-fic{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:#fff}
+.fnd-fb{min-width:0}
+.fnd-ft{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.fnd-ft b{font-size:15px;font-weight:600;color:#fff}
+.fnd-fd{font-size:11.5px;color:rgba(255,255,255,.65);background:rgba(255,255,255,.1);border-radius:99px;padding:2px 9px}
+.fnd-fbest{font-size:11px;font-weight:600;color:#0d1727;background:#a0b7de;border-radius:99px;padding:2px 9px}
+.fnd-fb p{margin:5px 0 0;font-size:13px;line-height:1.5;color:rgba(255,255,255,.75)}
+.fnd-fw{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:9px}
+.fnd-fcov{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:#f2c14e}
+.fnd-fcov.all{color:#5fd6a0}
+.fnd-fdo{font-size:12px;color:rgba(255,255,255,.55)}
+.fnd-fnote{display:flex;align-items:center;gap:7px;margin-top:9px;font-size:12.5px;color:#f2c14e}
+.fnd-fa{display:flex;flex-direction:column;align-items:stretch;gap:8px;min-width:140px}
+.fnd-fdet{font-size:12.5px;color:rgba(255,255,255,.7);text-align:center}
+.fnd-fdet:hover{color:#fff;text-decoration:underline}
+.fnd-fnone{display:flex;flex-direction:column;align-items:center;gap:12px;padding:26px 0 8px;color:rgba(255,255,255,.7);text-align:center}
+.fnd-fnone p{margin:0;font-size:13.5px}
+.fnd-func{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:12.5px;color:#f2c14e}
+.fnd-func button{color:#fff;text-decoration:underline}
+
+/* Finder results sit inside the dark finder box, under the input (no panel of their own) */
+.rv-ask--tight{padding-bottom:20px}
+.fnd-fr{margin:20px 0 0;padding:20px 4px 0;border-radius:0;background:none;box-shadow:none;border-top:1px solid rgba(255,255,255,.1)}
+.fnd-frh{margin-bottom:18px}
+.fnd-frh h2{font-size:19px;line-height:1.35}
+.fnd-frh p{margin:8px 0 0;font-size:13.5px;line-height:1.6;color:rgba(255,255,255,.72);max-width:760px}
+.fnd-fc{cursor:pointer;transition:background .2s,box-shadow .2s}
+.fnd-fc:hover{background:rgba(255,255,255,.12);box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)}
+.fnd-fc:focus-visible{outline:2px solid #a0b7de;outline-offset:2px}
+.fnd-fa .rp-act{height:40px;padding:0 16px;font-size:13px;font-weight:600;justify-content:center;gap:6px}
+.fnd-fnone{display:flex;padding:4px 0 0}
+/* a smaller search beside the tabs */
+.rv-tools .rv-search{flex:none;width:240px;min-width:0;height:38px}
+
+/* Finder: Start chat centred (no "View details"), and a working state while it searches */
+.fnd-fa{justify-content:center}
+@keyframes spinRev{from{--ang:360deg}to{--ang:0deg}}
+.rv-ask .rv-askrow{position:relative}
+.rv-ask .rv-composer{position:relative;left:auto;top:auto;bottom:auto;transform:none;z-index:1}
+.rv-ask.thinking .rv-askrow::before{content:"";position:absolute;left:2px;right:2px;top:2px;bottom:2px;border-radius:36px;background:conic-gradient(from var(--ang),rgba(139,92,246,0) 0 18%,#8b5cf6 36%,#2bd6b0 58%,#5383db 72%,rgba(83,131,219,0) 88%);filter:blur(13px);opacity:.9;animation:spinRev 2.4s linear infinite;z-index:0;pointer-events:none}
+.rv-ask.thinking .cbox::before{animation-duration:1.8s}
+.fnd-think h2{display:flex;align-items:center;gap:10px;margin:0 0 16px;font-size:18px;font-weight:600;color:#fff}
+.fnd-dots{display:inline-flex;gap:4px}
+.fnd-dots i{width:5px;height:5px;border-radius:50%;background:#a0b7de;animation:flBounce 1s ease-in-out infinite}
+.fnd-dots i:nth-child(2){animation-delay:.15s}.fnd-dots i:nth-child(3){animation-delay:.3s}
+.fnd-steps{list-style:none;margin:0;padding:0 0 6px;display:flex;flex-direction:column;gap:12px}
+.fnd-steps li{display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,.9);transition:color .3s}
+.fnd-steps li.p{color:rgba(255,255,255,.32)}
+.fnd-steps li>span{flex:none;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;color:#fff;background:rgba(255,255,255,.1)}
+.fnd-steps li.d>span{background:#12b76a}
+.fnd-spin{width:12px;height:12px;border-radius:50%;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;animation:flRot .8s linear infinite}
+
+/* Finder: even padding around the input, and one flipping line while it works */
+.rv-ask--tight{padding:18px}
+.fnd-think{padding:0;border-top:0;margin-top:18px}
+.fnd-flip{position:relative;height:34px;overflow:hidden}
+.fnd-flip span{position:absolute;left:6px;right:0;top:0;line-height:34px;font-size:18px;font-weight:600;white-space:nowrap;background:linear-gradient(90deg,#fff 0%,#a0b7de 50%,#fff 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:fndShine 1.8s linear infinite;transition:transform .55s cubic-bezier(.3,.8,.3,1),opacity .45s ease}
+.fnd-flip span.in{transform:none;opacity:1}
+.fnd-flip span.out{transform:translateY(-110%);opacity:0}
+.fnd-flip span.next{transform:translateY(110%);opacity:0}
+@keyframes fndShine{from{background-position:200% 0}to{background-position:-200% 0}}
+
+/* Agent finder input: it looks exactly like the new-chat input at rest. Only while the finder is searching does it glow:
+   the ring spins faster and a soft bloom in the same colours sits behind it. Afterwards it goes back to rest. */
+.rv-ask .rv-askrow::before{display:none}
+.rv-ask.thinking .rv-askrow::before{content:"";display:block;position:absolute;left:-6px;right:-6px;top:-6px;bottom:-6px;border-radius:44px;background:conic-gradient(from var(--ang),#8b5cf6,#5383db,#2bd6b0,#5383db,#8b5cf6);filter:blur(18px);opacity:.45;z-index:0;pointer-events:none;animation:spin 2.2s linear infinite}
+.rv-ask.thinking .rv-composer .cbox{background:linear-gradient(rgba(10,14,30,.96),rgba(10,14,30,.96))}
+.rv-ask.thinking .rv-composer .cbox::before{animation-duration:2.2s}
+
+/* the three bouncing dots lead the flipping line */
+.fnd-think{display:flex;align-items:center;gap:14px}
+.fnd-think .fnd-dots{flex:none;padding-left:6px}
+.fnd-think .fnd-dots i{width:7px;height:7px}
+.fnd-think .fnd-flip{flex:1;min-width:0}
+.fnd-think .fnd-flip span{left:0}
+
+/* Left nav: the groups sit inside "All agents" on a thin guide line; Pinned and Recently used are a separate, personal section */
+.rv-tree{margin:2px 0 4px 17px;padding-left:6px;border-left:1px solid rgba(255,255,255,.14);display:flex;flex-direction:column;gap:2px}
+.rv-tree .rv-i{height:36px}
+
+/* Search beside the tabs: a round button like the filter one; it opens into the search field */
+.rv-tools .rv-search{flex:none;width:40px;height:40px;padding:0;gap:0;justify-content:center;overflow:hidden;cursor:pointer;transition:width .38s cubic-bezier(.3,.8,.3,1),padding .3s,gap .3s,background .2s}
+.rv-tools .rv-search input{width:0;flex:0 0 0;opacity:0;pointer-events:none;transition:opacity .25s ease .1s}
+.rv-tools .rv-search.open{width:240px;padding:0 14px;gap:10px;justify-content:flex-start;cursor:text}
+.rv-tools .rv-search.open input{flex:1;width:auto;opacity:1;pointer-events:auto}
+.rv-tools .rv-search>svg{flex:none}
+.rv-tools .rv-search:not(.open):hover{background:rgba(255,255,255,.14)}
+
+.rv-tree .rv-i{padding-left:12px}
+
+/* Left nav: rows without an icon keep their text lined up with the rows that have one (icon 16px + gap 6px) */
+.rv-i.rv-noic{padding-left:32px}
+.rv-gt0{margin-top:2px}
+
+/* Left nav drop-downs: Personal agents and Departments open into a list on a thin guide line */
+.rv-i.rv-dd{justify-content:flex-start}
+.rv-i.rv-dd .rv-chev{margin-left:auto;flex:none;transition:transform .25s ease;opacity:.7}
+.rv-i.rv-dd.open .rv-chev{transform:rotate(180deg)}
+.rv-i.rv-dd.has-on{color:#fff;font-weight:500}
+.rv-tree .rv-i{padding-left:10px}
+
+/* Left nav: no agent counts */
+.rv-pl .rv-i em{display:none}
+
+/* Left nav: more room between the main options */
+.rv-pl>.rv-i{margin-top:10px}
+.rv-pl>.rv-i:first-child{margin-top:0}
+.rv-pl>.rv-tree{margin-top:6px;margin-bottom:2px}
+
+/* Left nav: two options at the top, then "Personal" and "Departments" as plain headings over their lists (no drop-downs) */
+.rv-pl>.rv-i,.rv-pl>.rv-i:first-child{margin-top:0}
+.rv-pl .rv-gt{margin-top:18px;padding:0 10px 8px;font-size:12px;color:rgba(255,255,255,.5)}

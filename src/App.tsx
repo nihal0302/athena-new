@@ -23,13 +23,16 @@ export default function App() {
   }
   const [agent, setAgent] = useState<Agent | null>(null) // agent picked in the repository; shown on the new-chat screen
   const openRepo = () => setView('repo')
-  const startWith = (a: Agent) => {
+  const [draft, setDraft] = useState('') // a request typed in the repository finder, waiting in the composer
+  const startWith = (a: Agent, prompt?: string) => {
     setAgent(a)
+    setDraft(prompt ?? '')
     setView('home')
     setMenuOpen(true)
   }
   const newChat = () => {
     setAgent(null)
+    setDraft('')
     setView('home')
     setMenuOpen(true)
   }
@@ -40,7 +43,7 @@ export default function App() {
       {view === 'repo' ? (
         <RepoSwitch onNew={newChat} onRepo={openRepo} onAsk={ask} onStart={startWith} onToast={toast.show} />
       ) : view === 'home' ? (
-        <HomeScreen menuOpen={menuOpen} onMenu={() => setMenuOpen(!menuOpen)} onNew={newChat} onAsk={ask} onRepo={openRepo} agent={agent} onClearAgent={() => setAgent(null)} />
+        <HomeScreen menuOpen={menuOpen} onMenu={() => setMenuOpen(!menuOpen)} onNew={newChat} onAsk={ask} onRepo={openRepo} agent={agent} draft={draft} onClearAgent={() => setAgent(null)} />
       ) : (
         <ChatScreen
           question={question}
@@ -61,7 +64,7 @@ export default function App() {
 }
 
 /** picks the repository layout from the prototype settings */
-function RepoSwitch(p: { onNew: () => void; onRepo: () => void; onAsk: (q: string) => void; onStart: (a: Agent) => void; onToast: (m: string) => void }) {
+function RepoSwitch(p: { onNew: () => void; onRepo: () => void; onAsk: (q: string) => void; onStart: (a: Agent, prompt?: string) => void; onToast: (m: string) => void }) {
   const { variants } = useVariants()
   return variants.repo === 'v2' ? <RepositoryV2 {...p} /> : <Repository {...p} />
 }

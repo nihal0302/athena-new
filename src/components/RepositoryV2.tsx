@@ -1,19 +1,27 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { AGENTS, DEPTS, DEPT_ICON, DEPT_OWNER, TYPES, TYPE_ICON, TYPE_OF, ENTERPRISE, MY_DEPT, deptShort, type Access, type Agent } from '../data/agents'
+import { findAgents, topicOf, type Found } from '../data/finder'
 import { AgentDrawer } from './AgentDrawer'
 import { AldarLogo, Icon, PinIcon, VerifiedIcon } from './Icon'
 import { TopBar } from './Shell'
 import { AgentLogo } from './AgentLogos'
 
-type Sel = { kind: 'all' } | { kind: 'col'; id: 'enterprise' | 'mine' | 'pinned' | 'new' | 'recent' | 'rec' } | { kind: 'dept'; d: string } | { kind: 'type'; t: string }
+type ColId = 'enterprise' | 'mine' | 'cxo' | 'pinned' | 'new' | 'recent' | 'rec'
+type Sel = { kind: 'all' } | { kind: 'col'; id: ColId } | { kind: 'dept'; d: string } | { kind: 'type'; t: string }
 type Sort = 'popular' | 'rating' | 'name'
 
-const COLS: { id: 'enterprise' | 'mine' | 'pinned' | 'new' | 'recent' | 'rec'; label: string; icon: string }[] = [
-  { id: 'enterprise', label: 'Enterprise-wide', icon: 'globe' },
-  { id: 'mine', label: 'My department', icon: 'users' },
+type Col = { id: ColId; label: string; icon: string }
+/** The agents that belong to the person: what they pinned, what they used lately, and their own department's. */
+const PERSONAL: Col[] = [
   { id: 'pinned', label: 'Pinned', icon: 'pin' },
   { id: 'recent', label: 'Recently used', icon: 'clock' },
+  { id: 'mine', label: 'My department', icon: 'users' },
 ]
+const GROUPS: Col[] = [
+  { id: 'enterprise', label: 'Shared across Aldar', icon: 'globe' },
+  { id: 'cxo', label: 'CXO & executives', icon: 'badge' },
+]
+const COLS: Col[] = [...GROUPS, ...PERSONAL]
 
 const usageNum = (a: Agent) => parseFloat((a.usage ?? '0').replace(/[^0-9.]/g, '')) * (/k /.test(a.usage ?? '') ? 1000 : 1)
 
@@ -187,12 +195,108 @@ function AskBox({ value, onChange, onSend, placeholder }: { value: string; onCha
   )
 }
 
-export function RepositoryV2({ onNew, onRepo, onAsk, onStart, onToast }: { onNew: () => void; onRepo: () => void; onAsk: (q: string) => void; onStart: (a: Agent) => void; onToast: (m: string) => void }) {
+const FIND_STEPS = ['Understanding what you need', 'Searching the agent repository', 'Matching the best agents for your task']
+
+/** Shown under the finder box while it works: one line that flips, the old text going up and the next one rising from below. */
+function FinderThinking({ step }: { step: number }) {
+  return (
+    <div className="fnd-fr fnd-think" role="status" aria-live="polite">
+      <span className="fnd-dots" aria-hidden="true"><i /><i /><i /></span>
+      <div className="fnd-flip">
+        {FIND_STEPS.map((s, i) => (
+          <span key={s} className={i < step ? 'out' : i === step ? 'in' : 'next'}>{s}</span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/** The answer to "I need help with…": a short written reply, then the agents that can do the task, right on the repository page. */
+function FinderResults({ text, found, stateOf, onAct, onOpen, onClear, onSuggest, canSuggest }: { text: string; found: Found; stateOf: (a: Agent) => Access; onAct: (a: Agent) => void; onOpen: (a: Agent) => void; onClear: () => void; onSuggest: () => void; canSuggest: boolean }) {
+  const multi = found.asks.length > 1
+  const n = found.results.length
+  const { phrase, withHelp } = topicOf(text)
+  const best = found.results[0]
+  const list = (xs: string[]) => (xs.length <= 1 ? xs[0] ?? '' : xs.slice(0, -1).join(', ') + ' and ' + xs[xs.length - 1])
+  const title = found.fallback ? 'No exact match, but these are a good place to start' : n + ' agents can help ' + (withHelp ? 'with ' : 'you ') + phrase
+  let body = ''
+  if (found.fallback) {
+    body = 'Nothing in the repository does exactly this yet. ' + list(found.results.map((r) => r.agent.name)) + ' are the most useful agents to try first. You can also suggest a new agent to the team.'
+  } else {
+    const bs = stateOf(best.agent)
+    const coveredAsks = new Set(found.results.flatMap((r) => r.covers)).size
+    body = best.agent.name + ' from ' + (best.agent.dept === ENTERPRISE ? 'the shared agents' : best.agent.dept) + ' is the closest fit' + (multi && best.covers.length === found.asks.length ? ' and can handle everything you asked.' : '.')
+    if (n > 1) body += ' ' + found.results[1].agent.name + ' is also worth a look.'
+    if (multi && best.covers.length < found.asks.length) body += ' Between them they cover ' + coveredAsks + ' of your ' + found.asks.length + ' tasks.'
+    if (bs === 'locked') body += ' You don’t have access to ' + best.agent.name + ' yet, but you can request it below.'
+    else if (bs === 'soon') body += ' ' + best.agent.name + ' isn’t live yet, so you can ask to be notified.'
+    else if (bs === 'requested') body += ' Your access request for ' + best.agent.name + ' has been sent.'
+    else body += ' Start a chat and your request will be ready to send.'
+  }
+  return (
+    <div className="fnd-fr" aria-live="polite">
+      <header className="fnd-frh">
+        <div>
+          <h2>{title}</h2>
+          <p>{body}</p>
+        </div>
+        <button className="fnd-frc" onClick={onClear}><Icon n="x" size={14} />Clear</button>
+      </header>
+      {n > 0 ? (
+        <div className="fnd-frl">
+          {found.results.map((r, k) => {
+            const s = stateOf(r.agent)
+            const all = r.covers.length === found.asks.length
+            return (
+              <article key={r.agent.id} className={'fnd-fc s-' + s} role="button" tabIndex={0} onClick={() => onOpen(r.agent)} onKeyDown={(e) => { if (e.key === 'Enter' && e.target === e.currentTarget) onOpen(r.agent) }}>
+                <span className="fnd-fic"><AgentLogo id={r.agent.id} size={28} /></span>
+                <div className="fnd-fb">
+                  <div className="fnd-ft">
+                    <b>{r.agent.name}</b>
+                    <span className="fnd-fd">{r.agent.dept === ENTERPRISE ? 'Shared across Aldar' : r.agent.dept}</span>
+                    {k === 0 && !found.fallback && <span className="fnd-fbest">Best match</span>}
+                  </div>
+                  <p>{r.agent.desc}</p>
+                  {multi && (
+                    <div className="fnd-fw">
+                      <span className={'fnd-fcov' + (all ? ' all' : '')}>
+                        <Icon n={all ? 'check' : 'info'} size={12} />
+                        {all ? 'Can do all ' + found.asks.length + ' of your tasks' : 'Can do ' + r.covers.length + ' of your ' + found.asks.length + ' tasks'}
+                      </span>
+                    </div>
+                  )}
+                  {s === 'locked' && <div className="fnd-fnote"><Icon n="lock" size={13} />You don’t have access to this agent yet, but it can do this.</div>}
+                  {s === 'requested' && <div className="fnd-fnote"><Icon n="check" size={13} />Access requested. Your approver has been notified.</div>}
+                  {s === 'soon' && <div className="fnd-fnote"><Icon n="hourglass" size={13} />This agent isn’t live yet.</div>}
+                </div>
+                <div className="fnd-fa">
+                  <button className={'rp-act a-' + s} disabled={s === 'requested'} onClick={(e) => { e.stopPropagation(); onAct(r.agent) }}>
+                    {s === 'available' && <>Start chat<Icon n="right" size={14} /></>}
+                    {s === 'locked' && <><Icon n="lock" size={14} />Request access</>}
+                    {s === 'requested' && <><Icon n="check" size={14} />Requested</>}
+                    {s === 'soon' && <><Icon n="bell" size={14} />Notify me</>}
+                  </button>
+                </div>
+              </article>
+            )
+          })}
+        </div>
+      ) : (
+        canSuggest ? <div className="fnd-fnone"><button className="rv-sug" onClick={onSuggest}><Icon n="plus2" size={14} />Suggest a new agent</button></div> : null
+      )}
+      {found.fallback && canSuggest && <div className="fnd-fnone"><button className="rv-sug" onClick={onSuggest}><Icon n="plus2" size={14} />Suggest a new agent</button></div>}
+      {!found.fallback && found.uncovered.length > 0 && (
+        <div className="fnd-func"><Icon n="info" size={14} />No agent covers {list(found.uncovered)} yet. <button onClick={onSuggest}>Suggest one</button></div>
+      )}
+    </div>
+  )
+}
+
+export function RepositoryV2({ onNew, onRepo, onAsk, onStart, onToast }: { onNew: () => void; onRepo: () => void; onAsk: (q: string) => void; onStart: (a: Agent, prompt?: string) => void; onToast: (m: string) => void }) {
   const [paneOpen, setPaneOpen] = useState(true)
-  const [allDepts, setAllDepts] = useState(false)
   const [lang, setLang] = useState<Lang>('any')
   const [fType, setFType] = useState<string>('any')
-  const DEPT_SHOWN = 4
+  const NAV_DEPTS = ['Human Resources', 'Procurement', 'Finance', 'Legal', 'Education', 'Facilities', 'Data & AI', 'Marketing', 'Risk & Compliance'] // the departments the menu lists
   const [sel, setSel] = useState<Sel>({ kind: 'all' })
   const [q, setQ] = useState('')
   const [st, setSt] = useState<Record<string, Access>>(() => Object.fromEntries(AGENTS.map((a) => [a.id, a.state])))
@@ -202,12 +306,35 @@ export function RepositoryV2({ onNew, onRepo, onAsk, onStart, onToast }: { onNew
   const [rated, setRated] = useState<Record<string, number>>({})
   const [openId, setOpenId] = useState<string | null>(null)
   const [ask, setAsk] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false) // the search beside the tabs is a round button until it is opened
+  const searchRef = useRef<HTMLInputElement>(null)
+  const [found, setFound] = useState<{ text: string; res: Found } | null>(null) // what the finder box answered
+  const [busy, setBusy] = useState<{ text: string; step: number } | null>(null) // the finder is working on a request
+  const busyTimer = useRef(0)
+  const stopBusy = () => { window.clearInterval(busyTimer.current); setBusy(null) }
+  useEffect(() => () => window.clearInterval(busyTimer.current), [])
+  const runFinder = (raw: string) => {
+    const text = raw.trim()
+    if (!text || busy) return
+    setFound(null)
+    setBusy({ text, step: 0 })
+    let step = 0
+    window.clearInterval(busyTimer.current)
+    busyTimer.current = window.setInterval(() => {
+      step += 1
+      if (step >= FIND_STEPS.length) {
+        window.clearInterval(busyTimer.current)
+        setBusy(null)
+        setFound({ text, res: findAgents(text, AGENTS) })
+      } else setBusy({ text, step })
+    }, 950)
+  }
 
   const stateOf = (a: Agent) => st[a.id] ?? a.state
   const onPin = (id: string) => setPins((p) => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n })
-  const act = (a: Agent) => {
+  const act = (a: Agent, prompt?: string) => {
     const s = stateOf(a)
-    if (s === 'available') onStart(a)
+    if (s === 'available') onStart(a, prompt)
     else if (s === 'locked') { setSt((m) => ({ ...m, [a.id]: 'requested' })); onToast(`Access requested for ${a.name}. Your approver has been notified.`) }
     else if (s === 'soon') onToast(`We'll notify you when ${a.name} launches.`)
   }
@@ -215,6 +342,7 @@ export function RepositoryV2({ onNew, onRepo, onAsk, onStart, onToast }: { onNew
   const inCol = (a: Agent, id: string) =>
     id === 'enterprise' ? a.dept === ENTERPRISE
     : id === 'mine' ? a.dept === MY_DEPT
+    : id === 'cxo' ? !!a.cxo
     : id === 'pinned' ? pins.has(a.id)
     : id === 'new' ? !!a.isNew
     : id === 'recent' ? !!a.recent
@@ -237,7 +365,7 @@ export function RepositoryV2({ onNew, onRepo, onAsk, onStart, onToast }: { onNew
     sort === 'name' ? x.name.localeCompare(y.name) : sort === 'rating' ? (y.rating ?? 0) - (x.rating ?? 0) : usageNum(y) - usageNum(x))
 
   const title = query ? `Results for “${q.trim()}”` : sel.kind === 'all' ? 'All agents' : sel.kind === 'dept' ? sel.d : sel.kind === 'type' ? sel.t + ' agents' : COLS.find((c) => c.id === sel.id)!.label
-  const pick = (s: Sel) => { setSel(s); setQ(''); setAsk('') }
+  const pick = (s: Sel) => { setSel(s); setQ(''); setAsk(''); setFound(null); stopBusy(); setSearchOpen(false) }
   const hub = !query && sel.kind === 'dept' ? sel.d : null
   const hubAgents = hub ? AGENTS.filter((a) => a.dept === hub) : []
   const hubSoon = hubAgents.filter((a) => stateOf(a) === 'soon').length
@@ -256,25 +384,25 @@ export function RepositoryV2({ onNew, onRepo, onAsk, onStart, onToast }: { onNew
         </div>
         <div className="rv-pl">
           <button className={'rv-i' + (isOn({ kind: 'all' }) ? ' on' : '')} onClick={() => pick({ kind: 'all' })}>
-            <Icon n="grid" size={16} /><span>All agents</span><em>{AGENTS.length}</em>
+            <Icon n="grid" size={16} /><span>All agents</span>
           </button>
-          <div className="rv-gt">Browse</div>
-          {COLS.map((c) => (
+          <button className={'rv-i' + (isOn({ kind: 'col', id: 'enterprise' }) ? ' on' : '')} onClick={() => pick({ kind: 'col', id: 'enterprise' })}>
+            <Icon n="globe" size={16} /><span>Shared across Aldar</span>
+          </button>
+
+          <div className="rv-gt">Personal</div>
+          {PERSONAL.map((c) => (
             <button key={c.id} className={'rv-i' + (isOn({ kind: 'col', id: c.id }) ? ' on' : '')} onClick={() => pick({ kind: 'col', id: c.id })}>
-              <Icon n={c.icon} size={16} /><span>{c.label}</span><em>{colCount(c.id)}</em>
+              <Icon n={c.icon} size={16} /><span>{c.label}</span>
             </button>
           ))}
+
           <div className="rv-gt">Departments</div>
-          {(allDepts ? DEPTS : DEPTS.slice(0, DEPT_SHOWN)).map((d) => (
+          {NAV_DEPTS.map((d) => (
             <button key={d} className={'rv-i' + (isOn({ kind: 'dept', d }) ? ' on' : '')} onClick={() => pick({ kind: 'dept', d })}>
-              <Icon n={DEPT_ICON[d]} size={16} /><span>{d}</span><em>{AGENTS.filter((a) => a.dept === d).length}</em>
+              <Icon n={DEPT_ICON[d]} size={16} /><span>{d}</span>
             </button>
           ))}
-          {DEPTS.length > DEPT_SHOWN && (
-            <button className="rv-more" aria-expanded={allDepts} onClick={() => setAllDepts(!allDepts)}>
-              {allDepts ? 'Show less' : 'View all'}<Icon n="chev" size={14} />
-            </button>
-          )}
         </div>
       </aside>
 
@@ -286,19 +414,37 @@ export function RepositoryV2({ onNew, onRepo, onAsk, onStart, onToast }: { onNew
                 <h1>{hub}</h1>
                 <p className="rv-hm">Owner: {DEPT_OWNER[hub]}</p>
               </header>
-              <section className="rv-ask rv-ask--solid rv-ask--tight">
-                <div className="rv-askrow">
-                  <AskBox value={ask} onChange={setAsk} onSend={() => onAsk(ask.trim())} placeholder={'Ask ' + deptShort(hub) + ' anything. The right agent will answer.'} />
-                  <button className="rv-sug" onClick={() => onToast('Thanks, your suggestion has been sent to the ' + hub + ' team.')}><Icon n="plus2" size={14} />Suggest a new agent</button>
-                </div>
-              </section>
             </>
           ) : (
           <header className="rv-h">
             <h1>{title}<small>{list.length} {list.length === 1 ? 'agent' : 'agents'}</small></h1>
-            
           </header>
           )}
+
+          <section className={'rv-ask rv-ask--solid rv-ask--tight' + (busy ? ' thinking' : '')}>
+            <div className="rv-askrow">
+              <AskBox
+                value={ask}
+                onChange={setAsk}
+                onSend={() => runFinder(ask)}
+                placeholder={hub ? 'Ask any ' + deptShort(hub) + ' task and the relevant agent will appear' : 'Describe what you need, for example “I need help with my payslip”'}
+              />
+              {hub && <button className="rv-sug" onClick={() => onToast('Thanks, your suggestion has been sent to the ' + hub + ' team.')}><Icon n="plus2" size={14} />Suggest a new agent</button>}
+            </div>
+            {busy && <FinderThinking step={busy.step} />}
+            {found && !busy && (
+              <FinderResults
+                text={found.text}
+                found={found.res}
+                stateOf={stateOf}
+                onAct={(a) => act(a, found.text)}
+                onOpen={(a) => setOpenId(a.id)}
+                onClear={() => { setFound(null); setAsk(''); stopBusy() }}
+                onSuggest={() => onToast('Thanks, your suggestion has been sent to the team.')}
+                canSuggest={!hub}
+              />
+            )}
+          </section>
 
           <div className="rv-tabs">
             <div className="rv-tl" role="tablist">
@@ -307,10 +453,10 @@ export function RepositoryV2({ onNew, onRepo, onAsk, onStart, onToast }: { onNew
               ))}
             </div>
             <div className="rv-tools">
-              <label className="rp-search rv-search">
+              <label className={'rp-search rv-search' + (searchOpen || q ? ' open' : '')} onClick={() => { if (!searchOpen) { setSearchOpen(true); window.setTimeout(() => searchRef.current?.focus(), 60) } }} role={searchOpen || q ? undefined : 'button'} aria-label={searchOpen || q ? undefined : 'Search agents by name'}>
                 <Icon n="search" size={18} />
-                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by task or agent name" />
-                {q && <button aria-label="Clear search" onClick={() => setQ('')}><Icon n="x" size={14} /></button>}
+                <input ref={searchRef} value={q} tabIndex={searchOpen || q ? 0 : -1} onChange={(e) => setQ(e.target.value)} onBlur={() => { if (!q) setSearchOpen(false) }} onKeyDown={(e) => { if (e.key === 'Escape') { setQ(''); setSearchOpen(false); e.currentTarget.blur() } }} placeholder="Search agent name" />
+                {q && <button aria-label="Clear search" onMouseDown={(e) => e.preventDefault()} onClick={() => { setQ(''); searchRef.current?.focus() }}><Icon n="x" size={14} /></button>}
               </label>
               <FilterMenu lang={lang} onLang={setLang} type={fType} onType={setFType} />
             </div>
@@ -339,7 +485,7 @@ export function RepositoryV2({ onNew, onRepo, onAsk, onStart, onToast }: { onNew
           mine={rated[openAgent.id]}
           onClose={() => setOpenId(null)}
           onPin={() => onPin(openAgent.id)}
-          onAct={() => { act(openAgent); if (stateOf(openAgent) === 'available') setOpenId(null) }}
+          onAct={() => { act(openAgent, found?.text); if (stateOf(openAgent) === 'available') setOpenId(null) }}
           onPrompt={(p) => onAsk(p)}
           onRate={(n) => { setRated((x) => ({ ...x, [openAgent.id]: n })); onToast(`Thanks, you rated ${openAgent.name} ${n}/5.`) }}
         />
