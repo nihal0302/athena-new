@@ -13,8 +13,6 @@ const COLS: { id: 'enterprise' | 'mine' | 'pinned' | 'new' | 'recent' | 'rec'; l
   { id: 'mine', label: 'My department', icon: 'users' },
   { id: 'pinned', label: 'Pinned', icon: 'pin' },
   { id: 'recent', label: 'Recently used', icon: 'clock' },
-  { id: 'new', label: 'New this month', icon: 'star' },
-  { id: 'rec', label: 'Recommended for my role', icon: 'badge' },
 ]
 
 const usageNum = (a: Agent) => parseFloat((a.usage ?? '0').replace(/[^0-9.]/g, '')) * (/k /.test(a.usage ?? '') ? 1000 : 1)
@@ -60,9 +58,9 @@ function VCard({ a, st, pinned, mine, onOpen, onPin, onRate, onAct }: { a: Agent
           )}
           <span className="vc-route" tabIndex={0}>{a.route}<span className="vc-pop tip" role="tooltip">{ROUTE_TIP[a.route]}</span></span>
         </div>
-        <button className={'rp-act vc-cta a-' + st + (st === 'requested' ? ' keep' : '')} onClick={onAct} disabled={st === 'requested'} title={st === 'locked' ? "You don't have access to this agent. Send a request to your approver." : undefined}>
+        <button className={'rp-act vc-cta a-' + st + (st === 'requested' ? ' keep' : '')} onClick={onAct} disabled={st === 'requested'} title={st === 'locked' ? "You don't have access to this agent. Get access by sending a request to your approver." : undefined}>
           {st === 'available' && <>Start chat</>}
-          {st === 'locked' && <><Icon n="lock" size={13} />Request<span className="lg"> access</span></>}
+          {st === 'locked' && <>Get access</>}
           {st === 'requested' && <><Icon n="check" size={14} />Requested</>}
           {st === 'soon' && <><Icon n="bell" size={14} />Notify me</>}
         </button>
@@ -114,7 +112,7 @@ const LANGS: { id: Lang; label: string }[] = [
   { id: 'en', label: 'English only' },
 ]
 
-function FilterMenu({ lang, onLang }: { lang: Lang; onLang: (l: Lang) => void }) {
+function FilterMenu({ lang, onLang, type, onType }: { lang: Lang; onLang: (l: Lang) => void; type: string; onType: (t: string) => void }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -125,19 +123,36 @@ function FilterMenu({ lang, onLang }: { lang: Lang; onLang: (l: Lang) => void })
     document.addEventListener('keydown', esc)
     return () => { document.removeEventListener('mousedown', off); document.removeEventListener('keydown', esc) }
   }, [open])
-  const active = lang !== 'any'
+  const [typeOpen, setTypeOpen] = useState(false)
+  const count = (lang !== 'any' ? 1 : 0) + (type !== 'any' ? 1 : 0)
+  const active = count > 0
   return (
     <div className="rv-fl" ref={ref}>
       <button className={'rv-sb rv-fb' + (open ? ' open' : '') + (active ? ' act' : '')} aria-label="Filters" title="Filters" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(!open)}>
-        <Icon n="sliders" size={18} />{active && <em>1</em>}
+        <Icon n="sliders" size={18} />{active && <em>{count}</em>}
       </button>
       {open && (
         <div className="rv-menu rv-fp" role="dialog" aria-label="Filters">
           <div className="rv-fh">Language</div>
-          <div className="rv-fo">
+          <div className="rv-radios" role="radiogroup" aria-label="Language">
             {LANGS.map((l) => (
-              <button key={l.id} role="radio" aria-checked={l.id === lang} className={l.id === lang ? 'on' : ''} onClick={() => onLang(l.id)}>{l.label}</button>
+              <button key={l.id} role="radio" aria-checked={l.id === lang} className={l.id === lang ? 'on' : ''} onClick={() => onLang(l.id)}><i />{l.label}</button>
             ))}
+          </div>
+          <div className="rv-fh rv-fh2">Agent type</div>
+          <div className="rv-dd">
+            <button className={'rv-ddb' + (typeOpen ? ' open' : '')} aria-haspopup="listbox" aria-expanded={typeOpen} onClick={() => setTypeOpen(!typeOpen)}>
+              {type === 'any' ? 'Any type' : type}<Icon n="chev" size={14} />
+            </button>
+            {typeOpen && (
+              <div className="rv-ddl" role="listbox">
+                {['any', ...TYPES].map((x) => (
+                  <button key={x} role="option" aria-selected={x === type} className={x === type ? 'on' : ''} onClick={() => { onType(x); setTypeOpen(false) }}>
+                    {x === 'any' ? 'Any type' : x}{x === type && <Icon n="check" size={14} />}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -176,6 +191,7 @@ export function RepositoryV2({ onNew, onRepo, onAsk, onStart, onToast }: { onNew
   const [paneOpen, setPaneOpen] = useState(true)
   const [allDepts, setAllDepts] = useState(false)
   const [lang, setLang] = useState<Lang>('any')
+  const [fType, setFType] = useState<string>('any')
   const DEPT_SHOWN = 4
   const [sel, setSel] = useState<Sel>({ kind: 'all' })
   const [q, setQ] = useState('')
@@ -210,7 +226,8 @@ export function RepositoryV2({ onNew, onRepo, onAsk, onStart, onToast }: { onNew
   const matchQ = (a: Agent) => query.split(/\s+/).every((t) => (a.name + ' ' + a.desc + ' ' + a.tasks + ' ' + a.dept + ' ' + a.owner).toLowerCase().includes(t))
   const base = useMemo(() => AGENTS.filter((a) => (query ? matchQ(a) : inSel(a))), [sel, query, pins])
   const langOk = (a: Agent) => lang === 'any' || (lang === 'ar' ? a.ar : !a.ar)
-  const pool = base.filter(langOk)
+  const typeOk = (a: Agent) => fType === 'any' || TYPE_OF[a.id] === fType
+  const pool = base.filter((a) => langOk(a) && typeOk(a))
   const accessOk = (a: Agent, k: typeof fAccess) => {
     const s = stateOf(a)
     return k === 'all' ? true : k === 'available' ? s === 'available' : k === 'locked' ? s === 'locked' || s === 'requested' : s === 'soon'
@@ -258,12 +275,6 @@ export function RepositoryV2({ onNew, onRepo, onAsk, onStart, onToast }: { onNew
               {allDepts ? 'Show less' : 'View all'}<Icon n="chev" size={14} />
             </button>
           )}
-          <div className="rv-gt">Agent type</div>
-          {TYPES.map((x) => (
-            <button key={x} className={'rv-i' + (isOn({ kind: 'type', t: x }) ? ' on' : '')} onClick={() => pick({ kind: 'type', t: x })}>
-              <Icon n={TYPE_ICON[x]} size={16} /><span>{x}</span><em>{AGENTS.filter((a) => TYPE_OF[a.id] === x).length}</em>
-            </button>
-          ))}
         </div>
       </aside>
 
@@ -301,7 +312,7 @@ export function RepositoryV2({ onNew, onRepo, onAsk, onStart, onToast }: { onNew
                 <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by task or agent name" />
                 {q && <button aria-label="Clear search" onClick={() => setQ('')}><Icon n="x" size={14} /></button>}
               </label>
-              <FilterMenu lang={lang} onLang={setLang} />
+              <FilterMenu lang={lang} onLang={setLang} type={fType} onType={setFType} />
             </div>
           </div>
 

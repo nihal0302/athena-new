@@ -138,7 +138,7 @@ export function AgentDrawer({
           )}
           <button className={'rp-act a-' + st} onClick={onAct} disabled={st === 'requested'}>
             {st === 'available' && <>Start chat<Icon n="right" size={14} /></>}
-            {st === 'locked' && <><Icon n="lock" size={14} />No access · Request</>}
+            {st === 'locked' && <>Get access</>}
             {st === 'requested' && <><Icon n="check" size={14} />Access requested</>}
             {st === 'soon' && <><Icon n="bell" size={14} />Notify me</>}
           </button>

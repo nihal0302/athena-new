@@ -2988,3 +2988,30 @@ ul.tech li::before{content:"";position:absolute;left:2px;top:.62em;width:4px;hei
 /* a little wider: the content now ends closer to the search and settings buttons */
 .rv-main{padding-right:136px}
 .rv.pane-closed .rv-main{padding-left:136px;padding-right:136px}
+
+/* Get access: primary white button, same as Start chat */
+.rp-act.a-locked{background:#fff;color:#2f245c;border:0}
+.rp-act.a-locked:hover{background:#ece8ff}
+.rv-fh2{margin-top:16px}
+
+/* filters panel: wider; language as one-line radios; agent type as a dropdown (scales to many options) */
+.rv-fp{min-width:460px;padding:16px 18px 18px}
+.rv-radios{display:flex;gap:22px;flex-wrap:nowrap}
+.rv-radios button{display:inline-flex;align-items:center;gap:9px;padding:4px 0;font-size:13px;color:rgba(255,255,255,.8);white-space:nowrap;transition:color .2s}
+.rv-radios button i{flex:none;position:relative;width:16px;height:16px;border-radius:50%;border:1.5px solid rgba(255,255,255,.45);transition:border-color .2s}
+.rv-radios button:hover{color:#fff}
+.rv-radios button.on{color:#fff}
+.rv-radios button.on i{border-color:#fff}
+.rv-radios button.on i::after{content:"";position:absolute;inset:3px;border-radius:50%;background:#fff}
+.rv-dd{position:relative}
+.rv-fp .rv-ddb{width:100%;height:40px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-radius:12px;font-size:13px;color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);transition:border-color .2s,background .2s}
+.rv-fp .rv-ddb:hover,.rv-fp .rv-ddb.open{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.12)}
+.rv-ddb svg{transition:transform .2s}
+.rv-ddb.open svg{transform:rotate(180deg)}
+.rv-ddl{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:5;max-height:220px;overflow-y:auto;padding:6px;border-radius:12px;background:rgba(14,18,30,.98);border:1px solid rgba(255,255,255,.16);box-shadow:0 14px 30px -10px rgba(0,0,0,.7);scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
+.rv-fp .rv-ddl button{width:100%;display:flex;align-items:center;justify-content:space-between;height:36px;padding:0 10px;border-radius:8px;font-size:13px;color:rgba(255,255,255,.85);text-align:left;background:none;transition:background .15s}
+.rv-fp .rv-ddl button:hover{background:rgba(255,255,255,.1);color:#fff}
+.rv-fp .rv-ddl button.on{color:#fff;font-weight:500;background:rgba(255,255,255,.07)}
+/* radios: no box, no background in any state (they were inheriting the menu-row styles) */
+.rv-fp .rv-radios button,.rv-fp .rv-radios button:hover,.rv-fp .rv-radios button.on{width:auto;height:auto;padding:4px 0;border-radius:0;background:none;justify-content:flex-start;font-weight:400;box-shadow:none}
+.rv-fp .rv-radios button.on{color:#fff}
